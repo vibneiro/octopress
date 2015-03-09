@@ -4,7 +4,7 @@
   <title><![CDATA[Ivan Voroshilin's Blog.]]></title>
   <link href="http://vibneiro.github.io/atom.xml" rel="self"/>
   <link href="http://vibneiro.github.io/"/>
-  <updated>2015-03-09T12:56:04+03:00</updated>
+  <updated>2015-03-09T12:58:03+03:00</updated>
   <id>http://vibneiro.github.io/</id>
   <author>
     <name><![CDATA[Ivan Voroshilin]]></name>
@@ -12,5 +12,1812 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Service Discovery Solutions in Distributed Systems]]></title>
+    <link href="http://vibneiro.github.io/blog/2015/03/04/review-of-service-discovery-solutions/"/>
+    <updated>2015-03-04T22:25:26+03:00</updated>
+    <id>http://vibneiro.github.io/blog/2015/03/04/review-of-service-discovery-solutions</id>
+    <content type="html"><![CDATA[<p>Today I participated in a conference in Moscow/Russia devoted to new technologies in the software world.
+For those who attended, thanks for your questions! I&rsquo;m attaching here the presentation:</p>
+
+<p>[slideshare id=45437768&amp;doc=servicedicsoveryindistributedsystems-150304130959-conversion-gate01&amp;w=650&amp;h=500]</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Toughest Backtracking Problems in Algorithmic Competitions]]></title>
+    <link href="http://vibneiro.github.io/blog/2015/02/05/toughest-backtracking-problems-in-algorithmic-competitions/"/>
+    <updated>2015-02-05T14:53:05+03:00</updated>
+    <id>http://vibneiro.github.io/blog/2015/02/05/toughest-backtracking-problems-in-algorithmic-competitions</id>
+    <content type="html"><![CDATA[<p><a href="https://ivoroshilin.files.wordpress.com/2015/02/backtrack.png"><img src="https://ivoroshilin.files.wordpress.com/2015/02/backtrack.png" alt="backtrack" /></a></p>
+
+<p><strong>TL;DR</strong></p>
+
+<p>In algorithmic competitions there are frequently problems that can be attacked with <a href="//en.wikipedia.org/wiki/Maze_generation_algorithm">recursive backtracking algorithms</a>) - a well-known approach to traverse <a href="//en.wikipedia.org/wiki/Depth-first_search">a search tree</a>). Usually, it is good smell, if there&rsquo;s a goal to analyze all existing combinations of a problem. And, of course, there needs to be the right strategy to meet time limits (e.g. prune it). Here, I&rsquo;ve decided to talk about a few very interesting backtracking problems I came across. I touch on a backtracking approach to develop in competitors, but bear in mind that, not trying to solve a problem by yourself, seeing the answer up front is a waste of time. Furthermore, this is an advanced level, if you haven&rsquo;t practiced a recursive backtracking or DFS, please spend some time on basic backtracking problems and come back.</p>
+
+<h4><strong>1. Chess Puzzler</strong></h4>
+
+<p><a href="https://ivoroshilin.files.wordpress.com/2015/02/chess.jpg"><img src="https://ivoroshilin.files.wordpress.com/2015/02/chess.jpg?w=300" alt="chess" /></a></p>
+
+<blockquote>
+
+> 
+> This is quite an interesting problem I&#8217;ve ever come across, solving it you realize some very important uses cases to consider like memory limits, recursion, combinatorics and optimization techniques. I&#8217;ve seen a chess problem in Skiena&#8217;s  algorithmic book some time ago, but as turned out, this one is very different.
+> 
+> 
+</blockquote>
+
+
+
+
+<blockquote>**Problem Statement:**</blockquote>
+
+
+
+
+<blockquote>
+
+> 
+> The problem is to find all distinct layouts of a set of normal chess pieces on a chess board with dimensions MxN where none of the pieces is in a position to take any of the others. Assume the color of the piece does not matter, and that there are no pawns among the pieces.
+> 
+> 
+</blockquote>
+
+
+
+
+<blockquote>Write a program which takes as input:</blockquote>
+
+
+
+
+<blockquote>•The dimensions of the board: M, N.</blockquote>
+
+
+
+
+<blockquote>•The number of pieces of each type (King, Queen, Bishop, Rook and Knight) to try and place on the board.</blockquote>
+
+
+
+
+<blockquote>
+
+> 
+> As output, the program should yield the number of distinct layouts for which all of the pieces can be placed on the board without threatening each other.
+> 
+> 
+</blockquote>
+
+
+<p><strong>Solution:</strong></p>
+
+<p>We represent each piece as: &ldquo;K&rdquo; - King &ldquo;N&rdquo; - Knight &ldquo;Q&rdquo; - Queen &ldquo;R&rdquo; - Rook &ldquo;B&rdquo; - Bishop M - Horizontal size of the board N - Vertical size of the board S - is a set of remaining pieces. For example: Input: 3×3 board containing 2 Kings and 1 Rook, that is S = [K,K,R]. Answer: 4 layouts.</p>
+
+<blockquote>[![layouts](https://ivoroshilin.files.wordpress.com/2015/02/layouts.png?w=300)](https://ivoroshilin.files.wordpress.com/2015/02/layouts.png)</blockquote>
+
+
+<p>Since we need to find all possible layouts of a chessboard, it can be solved with a recursive backtracking as follows. We take the next piece from S and calculate for it all possible freeSquares on the chess board. Next, by iterating in a loop over freeSquares for current piece, we try to put it in all possible freeSquares. Each loop-step is a potential solution (layout) calls itself recursively by trying to put the next piece for current chess board and so forth until there are no pieces left or freeSquares is empty. Once a piece is placed on the board, we update the set of the free squares by subtracting a set of squares threatened by this piece. In case the set of free squares is empty and there are still any remaining pieces not on the board, there&rsquo;s no solution to this combination and the recursive function backtracks to the upper level in the recursive tree trying the next loop-step. Thereby, we loop over all steps and stop traversing by pruning impossible configuration in advance - as simple as this. There could be some arithmetic optimization with a number of threatened squares for each piece type by taking into account all remaining pieces to be put on the board and number of free squares, calculated in one go. Since the time limit in this problem was 20 mins to solve, I ditched an optimization. Undoubtedly, my solution can be drastically improved by cutting the search tree even more, and hence I leave this to the reader. Moreover you might want to parallelize this recursive task.</p>
+
+<p>Finishing touch, namely what to do about duplicated pieces like 3 queens or 2 knights etc. Honestly, I spent a great deal of time on this while solving. The thing is that, duplicates are interchangeable in terms of different combinations on the chessboard. For instance, for a board of 1x2 length with free squares [x:1,y:1][x:1,y:2], 2 queens can be placed as [Q1][Q2] or [Q2][Q1] yielding 2 different combinations. A simple solution is to put at once all pieces of one type inside a loop-step. From combinatorics, we can enumerate all C(n, k) unique combinations (aka n choose k) in a single loop. Because we recurse, I created a <a href="https://github.com/vibneiro/Combinatorics/blob/master/Combinations.groovy">utility function</a> wrapped around with a standard java iterator which doesn&rsquo;t have to calculate all combinations up front, rather it traverses them lazily by calculating the next one on the fly. The reason for this was a memory taken on each level of the recursion stack to keep an array of all combinations. E.g. C(n, k) = C(1000,5) results into 8,250,291,250,200 elements. There were also some minor issues with Groovy not being able to correctly calculate a difference between 2 lists of coordinate-pairs. Thanks to guys on <a href="http://stackoverflow.com/">stackoverflow </a>who quickly replied with a <a href="http://stackoverflow.com/questions/27216832/groovy-language-how-to-get-difference-between-two-lists-of-pairs">workaround</a>. The full working code  is now available on <a href="https://github.com/vibneiro/ChessBoardSolver">GitHub</a>. If somebody of you have an idea to optimize it somehow, please comment one at the end of this post!</p>
+
+<h4><strong>2. To backtrack or not, that&rsquo;s the question: Meet &ldquo;Mine Sweeper Master&rdquo; from Google code jam 2014</strong></h4>
+
+<p><a href="https://ivoroshilin.files.wordpress.com/2015/02/minesweeper.png"><img src="https://ivoroshilin.files.wordpress.com/2015/02/minesweeper.png" alt="minesweeper" /></a></p>
+
+<p>A tricky and simple at the same time problem was posed last year on Google Code Jam in qualification round - a famous <a href="https://code.google.com/codejam/contest/2974486/dashboard#s=p2">Mine Sweeper master</a>. Yes, the one that comes with Windows operating system - I bet, most of you are aware of! It&rsquo;s well-known solving minesweeper is<strong> NP-complete.</strong> But conditions of the problem don&rsquo;t require you to do that (Please read a problem statement before proceeding).</p>
+
+<p>Solving it with a backtracking is the wrong way, as you are not required to analyze all configurations. The catch is that any correct result is a solution (read carefully a problem  statement)! And thus, you don&rsquo;t have to attack it with backtracking as this pattern is quite costly, aimed at getting all possible solutions. It is possible, but you won&rsquo;t pass the large set most likely. Hence, the simplest idea is to start at (0,0) - upper-left corner and fill an area of <code>N</code> cells  with non-mine space from left to right and top to bottom - line-by-line. Further, fill the rest with mines. Clicking the (0,0) cell should reveal if this is a good solution. If (0,0) is not a mine - we have won. If the square contains a 0, repeat this recursively for all the surrounding squares.</p>
+
+<p>There are also a number of important corner cases to consider for this approach:</p>
+
+<p><strong>Single non-mine</strong></p>
+
+<pre><code>If &lt;code&gt;N=1&lt;/code&gt;, any configuration is a correct solution.
+</code></pre>
+
+<p><strong>Single row or single column</strong></p>
+
+<pre><code>If &lt;code&gt;R=1&lt;/code&gt;, simply fill in the &lt;code&gt;N&lt;/code&gt; non-mines from left-to-right. If &lt;code&gt;C=1&lt;/code&gt;, fill &lt;code&gt;N&lt;/code&gt; rows with a (single) non-mine.
+</code></pre>
+
+<p><strong>Too few non-mines</strong></p>
+
+<pre><code>If &lt;code&gt;N&lt;/code&gt; is even, it must be &gt;= 4.
+
+
+
+
+If &lt;code&gt;N&lt;/code&gt; is odd, it must be &gt;= 9. Also, &lt;code&gt;R&lt;/code&gt; and &lt;code&gt;C&lt;/code&gt; must be &gt;= 3.
+
+
+
+
+Otherwise there's no solution.
+</code></pre>
+
+<p><strong>Can&rsquo;t fill first two rows</strong></p>
+
+<pre><code>If &lt;code&gt;N&lt;/code&gt; is even and you can't fill at least two rows with non-mines, then fill the first two rows with &lt;code&gt;N / 2&lt;/code&gt; non-mines.
+
+
+
+
+If &lt;code&gt;N&lt;/code&gt; is odd and you can't fill at least two rows with non-mines and a third row with 3 non-mines, then fill the first two rows with &lt;code&gt;(N - 3) / 2&lt;/code&gt; non-mines and the third row with 3 non-mines.
+</code></pre>
+
+<p><strong>Single non-mine in the last row</strong></p>
+
+<pre><code>If &lt;code&gt;N % C = 1&lt;/code&gt;, move the final non-mine from the last full row to the next row.
+</code></pre>
+
+<p>I was lazy to depict each one. As can be seen, there is bunch of special cases to consider to make this solution pass.</p>
+
+<h4><strong>3. Another Chess Board Puzzler: &ldquo;King&rdquo; from Google Code Jam 2008</strong></h4>
+
+<p>This is one of the toughest<a href="http://code.google.com/codejam/contest/32008/dashboard#s=p3"> problem</a>s from Google Code Jam. It differs in that <strong>no one solved it</strong> in global Code Jam rounds during the round in which it was posed. Algorithmic competitions is like sports, if you feel you can solve easier problems faster - go for it. Otherwise you&rsquo;re at risk of loosing the competition. Some day next time I will try to attack it too, and for now I say goodbye to  all of you.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Dockerizing Spray HTTP Server]]></title>
+    <link href="http://vibneiro.github.io/blog/2014/12/16/docker-creating-and-testing-httprest-server-on-top-of-akkaspray/"/>
+    <updated>2014-12-16T01:22:04+03:00</updated>
+    <id>http://vibneiro.github.io/blog/2014/12/16/docker-creating-and-testing-httprest-server-on-top-of-akkaspray</id>
+    <content type="html"><![CDATA[<p><a href="https://ivoroshilin.files.wordpress.com/2014/10/docker.png"><img src="https://ivoroshilin.files.wordpress.com/2014/10/docker.png" alt="docker" /></a><a href="https://ivoroshilin.files.wordpress.com/2014/12/spray.png"><img src="https://ivoroshilin.files.wordpress.com/2014/12/spray.png" alt="spray" /></a></p>
+
+<p>This is the continuation of the <a href="http://ivoroshilin.com/2014/10/30/docker-a-birds-eye-view/">previous article</a>. This series shows how simple it is to create a lightweight HTTP-server based on <a href="http://spray.io">Spray</a> framework, put it into a <a href="https://docs.docker.com">Docker</a>-image and run multiple instances on any single machine requiring no dependencies.</p>
+
+<h3>Implementing a lightweight RESTful HTTP Service</h3>
+
+<p>The whole project can be found on <a href="https://github.com/vibneiro/DockerSprayHttpServer">GitHub</a>. For impatient, git pull it and jump right to the next section. We&rsquo;re going to use Scala and Akka framework along with <a href="http://www.scala-sbt.org">SBT</a> build tool. From Spray framework we will use a <a href="http://spray.io/documentation/1.1-SNAPSHOT/spray-routing/">spray-routing</a> module which has a simple routing DSL for elegantly defining RESTful web services and it works on top of a <a href="http://spray.io/documentation/1.1-SNAPSHOT/spray-can/#spray-can">spray-can HTTP Server</a><em>.</em></p>
+
+<p>Ok, let&rsquo;s get started.</p>
+
+<p>[code language=&ldquo;scala&rdquo;]
+import akka.actor.{ActorSystem}
+import spray.routing.<em>
+import akka.util.Timeout
+import scala.concurrent.duration.</em>
+import scala.util.{Failure, Success}</p>
+
+<p>object HttpServer extends App with SimpleRoutingApp {</p>
+
+<p>  implicit val actorSystem = ActorSystem()
+  implicit val timeout = Timeout(1.second)
+  import actorSystem.dispatcher</p>
+
+<p>  startServer(interface = &ldquo;localhost&rdquo;, port = 8080) {</p>
+
+<pre><code>// GET /welcome --&gt; "Welcome!" response
+get {
+  path("welcome") {
+    complete {
+      &lt;html&gt;
+        &lt;h1&gt;"Welcome!&lt;/h1&gt;
+        &lt;p&gt;&lt;a href="http://vibneiro.github.io/terminate?method=post"&gt;Stop the server&lt;/a&gt;&lt;/p&gt;
+      &lt;/html&gt;
+    }
+  }
+} ~
+  // POST /terminate --&gt; "The server is stopping" response
+  (post | parameter('method ! "post")) {
+    path("terminate") {
+      complete {
+        actorSystem.scheduler.scheduleOnce(1.second)(actorSystem.shutdown())(actorSystem.dispatcher)
+        "The server is stopping"
+      }
+    }
+  }
+</code></pre>
+
+<p>  }
+    .onComplete {
+    case Success(b) =>
+      println(&ldquo;Successfully started&rdquo;)
+    case Failure(ex) =>
+      println(ex.getMessage)
+      actorSystem.shutdown()
+  }
+}
+[/code]</p>
+
+<p>The REST API is as follows:</p>
+
+<ul>
+<li><p>GET/welcome &ndash;> responds with a &ldquo;Welcome&rdquo; and Post-hyperlink.</p></li>
+<li><p>POST/terminate &ndash;> will stop the server.</p></li>
+</ul>
+
+
+<p>DSL describing this API is inside of a method <strong>startServer.  </strong>And that&rsquo;s it!</p>
+
+<p>I didn&rsquo;t want to show the full power of Spray because this article is solely about Docker.</p>
+
+<p>Let&rsquo;s run it and check:</p>
+
+<p>[code language=&ldquo;bash&rdquo;]
+curl <a href="http://localhost:8080/welcome">http://localhost:8080/welcome</a>
+[/code]</p>
+
+<h3>Dockerizing the server</h3>
+
+<p>Because the Docker Engine uses Linux-specific kernel features, I&rsquo;m going to use <a href="https://docs.docker.com/installation/mac/">lightweight virtual machine</a> to run it on OS X. If you too, just download it, install and run - easy peasy. Just make sure before dockerizing that you&rsquo;ve set the following 3 env variables for connecting your client to the VM:</p>
+
+<p>[code language=&ldquo;bash&rdquo;]
+export DOCKER_HOST=tcp://192.168.59.103:2376
+export DOCKER_CERT_PATH=/Users/ivan/.boot2docker/certs/boot2docker-vm
+export DOCKER_TLS_VERIFY=1
+[/code]</p>
+
+<p>The remaining stuff doesn&rsquo;t differ much.</p>
+
+<p>We use a <a href="https://registry.hub.docker.com/u/dockerfile/java/">trusted automated java build</a> (OpenJDK Java 7 JRE Dockerfile) as a base of our image.</p>
+
+<p>First, you will need to create a Dockerfile for the image in your project:</p>
+
+<pre><code># Our base image
+FROM dockerfile/java
+
+WORKDIR /
+
+USER daemon
+
+# Here the stuff that we're going to place into the image
+ADD target/scala-2.11/docker-spray-http-server-assembly-1.0.jar /app/server.jar
+
+# entry jar to be run in a container
+ENTRYPOINT [ "java", "-jar", "/app/server.jar" ]
+
+# HTTP port
+EXPOSE 8080
+</code></pre>
+
+<p>Build your project as a single jar file:</p>
+
+<p>[code language=&ldquo;bash&rdquo;]
+DockerSprayHttpServer$ sbt assembly
+[/code]</p>
+
+<p>And now navigate to the project&rsquo;s folder and run:</p>
+
+<p>[code language=&ldquo;bash&rdquo;]
+DockerSprayHttpServer$ docker build .
+[/code]</p>
+
+<p>This will send the newly created image to the Docker daemon.</p>
+
+<h3>Running multiple instances on a single machine</h3>
+
+<p>Run the following command to see available docker images :</p>
+
+<p>[code language=&ldquo;bash&rdquo;]
+DockerSprayHttpServer$ docker images
+[/code]</p>
+
+<p><a href="https://ivoroshilin.files.wordpress.com/2014/12/d181d0bdd0b8d0bcd0bed0ba-d18dd0bad180d0b0d0bdd0b0-2014-12-15-d0b2-23-48-52.png"><img src="https://ivoroshilin.files.wordpress.com/2014/12/d181d0bdd0b8d0bcd0bed0ba-d18dd0bad180d0b0d0bdd0b0-2014-12-15-d0b2-23-48-52.png" alt="Снимок экрана 2014-12-15 в 23.48.52" /></a></p>
+
+<p>a83cda03f529 is not in the repo yet - what we&rsquo;ve just created. We&rsquo;re going to run multiple instances from it.</p>
+
+<p>First run the 1-st instance:</p>
+
+<p>[code language=&ldquo;bash&rdquo;]
+DockerSprayHttpServer$ docker run -d -p 10001:8080 a83cda03f529
+[/code]</p>
+
+<p>Note, that we have mapped our 8080&ndash;>10001 port.</p>
+
+<p>Now, let&rsquo;s verify the container is running:</p>
+
+<p>[code language=&ldquo;bash&rdquo;]
+DockerSprayHttpServer$ docker ps
+[/code]</p>
+
+<p><a href="https://ivoroshilin.files.wordpress.com/2014/12/d181d0bdd0b8d0bcd0bed0ba-d18dd0bad180d0b0d0bdd0b0-2014-12-16-d0b2-0-58-12.png"><img src="https://ivoroshilin.files.wordpress.com/2014/12/d181d0bdd0b8d0bcd0bed0ba-d18dd0bad180d0b0d0bdd0b0-2014-12-16-d0b2-0-58-12.png" alt="Снимок экрана 2014-12-16 в 0.58.12" /></a></p>
+
+<p>We exposed port 8080 for the http-server. When run in Docker-container, it maps our port onto another. On top of this I am  on OS X. Do you remember we set at the beginning 3 env vars? One of them is DOCKER_HOST.</p>
+
+<p>You can actually check this IP as follows:</p>
+
+<p>[code language=&ldquo;bash&rdquo;]
+DockerSprayHttpServer$ boot2docker ip
+[/code]</p>
+
+<p>We need to use this IP address (for OS X, as we are not on Linux).</p>
+
+<p>Let&rsquo;s test it:</p>
+
+<p>[code language=&ldquo;bash&rdquo;]
+DockerSprayHttpServer$ curl $(boot2docker ip):10001/welcome
+[/code]</p>
+
+<p>Great!</p>
+
+<p>You can run as many containers as you want! They are completely isolated. For Scala developers, by they way, I&rsquo;ve found a<a href="https://github.com/marcuslonnberg/sbt-docker"> nice contribution</a>, you can dockerize your artifacts right from SBT.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Docker: A Bird's-eye View]]></title>
+    <link href="http://vibneiro.github.io/blog/2014/10/30/docker-a-birds-eye-view/"/>
+    <updated>2014-10-30T23:37:44+03:00</updated>
+    <id>http://vibneiro.github.io/blog/2014/10/30/docker-a-birds-eye-view</id>
+    <content type="html"><![CDATA[<h3>Introduction</h3>
+
+<p>Docker is a new container technology that primarily allows to run multiple applications on the same old server and operating system. It also makes it easy to package and ship applications. Let&rsquo;s analyze why Docker can become a replacement of virtual machines and why it is better (or not). Though, undoubtedly it has easy-to-use deployment stuff.</p>
+
+<p><a href="https://ivoroshilin.files.wordpress.com/2014/10/docker.png"><img src="https://ivoroshilin.files.wordpress.com/2014/10/docker.png" alt="docker" /></a></p>
+
+<h3>The gist</h3>
+
+<p>VM hypervisors emulate virtual hardware and guzzle system resources heavily - each VM has its separated operating system. Conversely, Docker containers use a single shared operating system. Basically, each container has only its application and other dependencies. It is very lightweight as we don&rsquo;t set up a separate operating system for each container. You can run much more applications (containers) in a single physical instance of hardware unlike VM with Docker. Docker is extremely rapidly getting popular, because It&rsquo;s light, simple and you can save a great deal of money on hardware and electricity.</p>
+
+<p>There are 2 major parts of operating system (Linux) that ensure the proper work of Docker.</p>
+
+<h3>LXC</h3>
+
+<p>Docker is built on top of LXC and allows to divide up operating system&rsquo;s Kernel. It means that with Docker it is possible to use only Linux and share a single operating system for all containers. I&rsquo;ve heard, by the way, that Windows platform has recently adapted Docker too.</p>
+
+<p>The LXC technology (<a href="http://lxc.sourceforge.net/">LinuX Containers</a>), which Docker is based from, relies on <a href="http://en.wikipedia.org/wiki/Security-Enhanced_Linux">SELinux</a> and its <a href="http://en.wikipedia.org/wiki/Cgroups">cgroups</a> to keep everyone in their own sandbox. You can restrict hardware resources: CPU, memory, disk. It can also manage the networking and mounts of filesystem for you as well. In other words you can run multiple isolated Linux containers on one host. Linux Containers serve as a lightweight alternative to VMs as they don’t require the hypervisors. Unlike VMs, LXC don’t require the hypervisor - this is not VM, but an ordinary host.</p>
+
+<p>Assume, you have a container image of 1 GB. If you want to use virtualization, you will need 1 GB multiplied by a number of VMs required. With LXC you just share 1GB. Having 1 thousand containers requires just a little over 1GB of space for the containers OS, assuming they are all running the same OS image. Furthermore, LXCs have have better performance compared to VMs.</p>
+
+<h3>AuFS</h3>
+
+<p>Another technology used in Docker is <a href="http://en.wikipedia.org/wiki/Aufs">AuFS</a> -  advanced multi layered unification filesystem. Docker can save images for you and they can be represented as incremental updates to the baseline snapshots. You may have a base snapshot of e.g. Linux, make minor changes to it, save a new snapshot as a diff. AuFS allows incrementally merge all these snapshot updates into a single layered snapshot. That is the idea.</p>
+
+<h3>When to use Docker</h3>
+
+<p>If you need a full isolation of resources, a virtual machine is the way to go. However, if you need to run hundreds of isolated processes on an average host, then Docker is a good fit. There are some use cases when Docker is a win. I can see it as a good tool for development where you run tons of containers on a single machine, doing some interesting stuff in parallel with different deployments from a single Docker image. E.g. you can run a large number of development environments on the same host. For example, Dev, QA, Performance environments on old hardware also. Have a look at <a href="http://www.fig.sh">Fig</a> project which is intended for these purposes and works along with Docker. It has a straightforward tutorial and super easy commands.</p>
+
+<h3>Conclusion</h3>
+
+<p>Docker is another technique for performing the same tasks as in Virtual Machines but with the restriction of a shared OS Linux. It  is not quite mature however. There might be potential exploits to crash operating system bringing down all of the processes at once. This is the main drawback of Containers, whereas VMs ensure complete isolation. Besides that many companies use one in Production you might want to wait, but you can definitely start playing around with it on your dev continuous integration process.</p>
+
+<h3>References</h3>
+
+<p><a href="https://www.docker.com">Docker</a></p>
+
+<p><a href="http://blog.docker.com/2013/08/containers-docker-how-secure-are-they/">Containers and Docker: How secure are they </a></p>
+
+<p><a href="http://blog.dotcloud.com/under-the-hood-linux-kernels-on-dotcloud-part">PaaS under the hood</a></p>
+
+<p><a href="http://www.fig.sh">FIG</a></p>
+
+<p><a href="http://blog.docker.com/2014/08/getting-started-with-orchestration-using-fig/">Getting started with Docker Orcherstration using FIG</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[The Flip Side of Rule Engines on Example of Drools and Some Valuable Tips]]></title>
+    <link href="http://vibneiro.github.io/blog/2014/10/12/the-flip-side-of-rule-engines-and-some-tips-on-when-not-use-ones/"/>
+    <updated>2014-10-12T02:21:19+04:00</updated>
+    <id>http://vibneiro.github.io/blog/2014/10/12/the-flip-side-of-rule-engines-and-some-tips-on-when-not-use-ones</id>
+    <content type="html"><![CDATA[<p>Hey there! This post is devoted to business rule engines and solely written based on my research and experience with Open-Source <a href="http://www.drools.org">Drools</a> engine that has been used in Production for more than 1 year in mission-critical systems. Undoubtedly, this engine is great for many features. But, I want to explain you what you should think of before using it or when not to use it all. Because it is very important step, once you adapted it in your project, it will be quite costly to remove one later.  I am going to be quick on the theory here, pointing you at issues and important things. If you don&rsquo;t understand something, feel free to ask me but first please refer to the official documentation. I&rsquo;ll try to underline the major issue I&rsquo;ve come across, surely there are many more.</p>
+
+<p>A rule engine is not a magical box that does something new . It is intended to be a tool that provides a higher level of abstraction so you can focus less on reinventing the wheel.</p>
+
+<p>On one of our projects we had a critical system with thousands of small &ldquo;if then else if&hellip;&rdquo; requirements from business that were initially developed as a sequence of checks on java. Gradually, we realized how this clutter turned into a very difficult mess to maintain. Hence we made a decision to apply some open source rule engine framework. After some high-level research Drools framework became our choice, primarily because it is free and open source. No one had experience on the team with commercial rule engines, however.</p>
+
+<p>Ok, let&rsquo;s get to it!</p>
+
+<p><img src="https://ivoroshilin.files.wordpress.com/2014/10/rule-engine-inkscape.png" alt="rule-engine-inkscape" /></p>
+
+<h3><strong>The order of rules execution</strong></h3>
+
+<p>Rule-engines are a good fit if you don&rsquo;t know the order in which rules are executed, e.g. the order doesn&#8217;t matter. Frequently, in order to understand this, you have to decompose your logic in such a way that you have separated simple flat rules not depending on each other.  In a nutshell, Rule engine is like a black box that have inputs and outputs. This is a necessary but not sufficient condition. Besides, when rules change objects data, that are used in other rules, it greatly increases complexity. Hence you always should be vigilant on the order of execution of different rules.</p>
+
+<p>Otherwise, if the order is determinate, frequently it would be better-off using BPM-engines or something else.</p>
+
+<h3><strong>Clear domain model with stable public API</strong></h3>
+
+<p>Rule-engines are not a fit if your system doesn&rsquo;t have a <strong>clear domain model.</strong> Most non-mature systems don&rsquo;t have one. It&rsquo;s evolution, sometimes requiring to understand with time. Even clear requirements not always so clear in practice. Why am I saying this? Well,  because a good rule of thumb it that:</p>
+
+<blockquote>&#8220;Rules should be working with only the Domain Model of your system with clear public API around it. If they don&#8217;t, your rules ultimately will turn into unmanageable mess. Period!&#8221;</blockquote>
+
+
+<p>It seems to be natural, but many developers don&rsquo;t realize it. Imagine, what happens if you rules start using internal code or other API that is not a part of domain logic.  With such a disgusting approach, the rules will be aware of more then they need to, like internal implementations/behaviors  and other dependencies =<strong> tightly coupled code</strong>. It&rsquo;s just like in OOP or SOA principles but in terms of rules. Tightly coupled code/rules is very difficult to change. Needless to say, if this code is not encapsulated. Eventually, you will have to modify your code triggering broken rules very often, when business requirements change.</p>
+
+<h3>Indepotence or exactly once</h3>
+
+<p>All rules must run multiple times without errors yielding the same result. It&rsquo;s like writing a bash-script and also considered a good rule of thumb. Otherwise you may encounter lots of misbehaving weird things.</p>
+
+<h3><strong>Forget Debugging tools, %100 coverage with tests is needed</strong></h3>
+
+<p>Rule-engines are difficult to refactor, you would have to analyze them and/or keep the whole graph in mind if there are dependencies. In terms of Drools it is impossible to trace rules line-by-line. Drools-rules are declarative and don&rsquo;t have a mechanism to debug them. Therefore, you should ideally cover 100% of your rules with JUnit-tests. I can give you a hint to use Spock-framework on top of Groovy as a Behavioural-Driven Development stuff, where each rule is simply covered with a test. Tests usually come directly from business specs. Each rule should contain only 1 simple thing as minimal as possible.</p>
+
+<h3>Cost of change</h3>
+
+<p>No one has any idea if there are conflicting rules when a new one is added or existing one is changed.  A complete regression test must be done when rules are changed. The Memory is sometimes a big issue too. And you can do very little to reduce the consumption - you use 3-rd party framework.</p>
+
+<h3><strong>Some rules need to be triggered twice or more</strong></h3>
+
+<p>Somebody of you can claim that Drools has a feature of rule-invalidation of Facts, but this again turns into unobvious, tangled mess getting in the way to quickly understand why rules yielded such a result. It&rsquo;s up to you, but you never know whether you will have to flush/invalidate rules in the long run.</p>
+
+<h3>Rete Algorithm vs your Domain API and traversals</h3>
+
+<p>The majority of modern rule engines including Drools work upon so called <a href="http://en.wikipedia.org/wiki/Rete_algorithm">Rete Algorithm</a>. Make sure that your codebase, which your rules call, can be built by a Rete algorithm in the working memory. If it&rsquo;s not, tree traversal of your codebase within rules on such a model will be a big performance issue!  Bear in mind, if you have internal traversal logic inside your public domain API (e.g. some of your methods do traversal for you) happening on LHS (Left hand side operation) clause , it is very bad for Drools&#8217; performance as latter has its own <strong>flexible querying model directly</strong> related to Rete-tree. Drools itself should be able to build the tree for you based on your API and efficiently traverse it.</p>
+
+<h3>Performance and external systems</h3>
+
+<p>What if you are required to save a set of operations to a database and each operation must be checked via rule engine. And the next operation depends on the result of the previous one. This imposes performance problems. All operation could be validated and afterwards saved in 1 go. Think it through in advance. I know there are Rule Groups in Drools, but my point - it&rsquo;s very complicated.</p>
+
+<h3>Rules Centralization</h3>
+
+<p>The same business rules may apply across different services, leading to redundancy and governance challenges. It imposes a burden upon us to keep the content of those rules in synch over time.  Thus, it is usually recommended to move them to a new dedicated rule service. The downside is that such a service becomes an additional architectural dependency for other services. The responsibility to build and maintain centralized rule service can introduce various headaches. When we need to change currently active rules or introduce new ones we need to ensure that these changes to the existing rule architecture do not have negative or unforeseen impacts, the worst of which can be a cascading effect that causes exceptions that compound across multiple rules (and multiple services), which should be thoroughly tested.</p>
+
+<p>And please! Make sure that your services know nothing about rules but only talk to the service via a clear contract.</p>
+
+<h3>Conclusion</h3>
+
+<p>This write-up only scratched the surface of issues coming from my experience. To be honest with you, I would say &ldquo;No&rdquo; to applying rule engine frameworks in my future projects to a large number of systems. Initially it seems to be pretty easy, but eventually you realize, that third-party rule engines are more of a pain that benefit, especially when it comes to interdependencies and a domain model. Project maintenance becomes very costly due to this.  It&rsquo;s not as simple as coding a bunch of <code>if </code>statements. The rules engine gives you the tools to handle rule relationships, but you still have to be able to imagine all of that in your mind.</p>
+
+<p>The most important thing, it is quite difficult to use a rule engine effectively and correctly. A team should have solid knowledge of how to use it and understanding with implementation of business model should be mature. Rule engines work well if there is a really flat independent logic among rules/facts. Each framework restricts you to use their specific model. It&rsquo;s not worth it!</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Project Euler: A List of Interesting Problems]]></title>
+    <link href="http://vibneiro.github.io/blog/2014/09/15/project-euler-a-list-of-interesting-problems/"/>
+    <updated>2014-09-15T10:17:39+04:00</updated>
+    <id>http://vibneiro.github.io/blog/2014/09/15/project-euler-a-list-of-interesting-problems</id>
+    <content type="html"><![CDATA[<p><a href="https://ivoroshilin.files.wordpress.com/2014/09/euler.jpg"><img src="http://ivoroshilin.files.wordpress.com/2014/09/euler.jpg" alt="Euler" /></a></p>
+
+<p>If you are not aware a website called <a href="http://projecteuler.net/">Project Euler</a> has hundreds of algorithmic problems. Despite that most of them are related to math it&rsquo;s a good resource to warm up/train your brain in coding. You can use any programming language that you want and track progress.</p>
+
+<p>Here&rsquo;s a list of interesting Euler&rsquo;s problems in terms of diversity from my point of view with the aim to improve not only math but also programming skils (No/ Problem Titile):</p>
+
+<p>11 - Largest product in a grid
+12 - Highly divisible triangular number
+15 - Lattice paths
+24 - Lexicographic permutations
+54 - Poker hands
+59 - XOR decryption
+62 - Cubic permutations
+67 - Maximum path sum II
+68 - Magic 5-gon ring
+78 - Coin partitions
+79 - Passcode derivation
+81 - Path sum: two ways
+86 - Cuboid route
+94 - Almost equilateral triangles
+96 - Sudoku
+100 - Arranged probability
+107 - Minimal network
+109 - Darts
+114 - Counting block combinations I
+115 - Counting block combinations II
+116 - Red, green or blue tiles
+117 - Red, green, and blue tiles
+145 - How many reversible numbers are there below one-billion?
+148 - Exploring Pascal&rsquo;s triangle
+150 - Searching a triangular array for a sub-triangle having minimum-sum
+154 - Exploring Pascal&rsquo;s pyramid
+165 - Intersections
+166 - Criss Cross
+181 - Investigating in how many ways objects of two different colours can be grouped
+182 - RSA encryption
+186 - Connectedness of a network
+194 - Coloured Configurations
+208 - Robot Walks
+209 - Circular Logic
+232 - The Race
+267 - Billionaire
+275 - Balanced Sculptures
+280 - Ant and seeds</p>
+
+<p>Note that it is highly recommended to solve all Euler&rsquo;s problems one by one because solving a previous problem has a clue to the next ones.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Command and Query Responsibility Segregation and Event Sourcing: What You Should Think About in Advance]]></title>
+    <link href="http://vibneiro.github.io/blog/2014/08/14/command-and-query-responsibility-segregation-and-event-sourcing-what-you-should-think-about-in-advance/"/>
+    <updated>2014-08-14T22:35:09+04:00</updated>
+    <id>http://vibneiro.github.io/blog/2014/08/14/command-and-query-responsibility-segregation-and-event-sourcing-what-you-should-think-about-in-advance</id>
+    <content type="html"><![CDATA[<p>After quite a while this article has finally come out! I started to write it about 6 months ago but because of many factors in my life I procrastinated. This text is mainly devoted to those who want to see major pros and cons of this model. You won&rsquo;t find here the nuts and bolts however. For this, move to the reference section where listed really cool URLs for the start. Further the pattern will be named as CQRS/ES for simplicity.</p>
+
+<h1>2 main goals of the pattern</h1>
+
+<p>Some developers consider that this pattern is solely used for scalability reasons forgetting that one greatly reduces data model complexity.</p>
+
+<h1>Events and snapshots - no removal but always append</h1>
+
+<p>it is well known that append-only architectures distribute more easily than updating architectures because there are far fewer locks to deal with. Append-only operations require no locks on a database-side which increases both performance and scalability.</p>
+
+<h1>CQRS + Event Model</h1>
+
+<p>One of the largest issues when using Event Sourcing is that you cannot ask the system a query such as “Give me all users whose first names are ‘Greg’”. This is due to not having a representation of current state.</p>
+
+<p>With Event Sourcing <strong>the event model</strong> is also the persistence model <strong>on the Write side</strong>. This drastically lowers costs of development as <strong>no conversion between the models is needed</strong>.</p>
+
+<h1>Synchronizing write and read sides</h1>
+
+<p><strong>The choice of integration model</strong> though is very important as translation and synchronization between models <strong>can be become a very expensive undertaking</strong>. The model that is best suited is the introduction of events<strong>, events are a well known integration pattern</strong> and offer the best mechanism for model synchronization.</p>
+
+<p>CQRS suggests using 2 different databases: one optimized for reading (denormalized) and another for writing. It is a very tempting way to designing systems. The only big problem with this solution is that you need somehow to sync up your 2 data storages.</p>
+
+<p>You must definitely have a mechanism to recreate a read-side from the write-side. You might need to do this if the read side data store got out of synchronization for some reason, or because you needed to modify the structure of the read-side data store to support a new query. Remember that the CQRS pattern does not mandate that you use different stores on the read side and write side. You could decide to use a single relational store with a schema in third normal form and a set of denormalized views over that schema. However, replaying events is a very convenient mechanism for resynchronizing the read-side data store with the write-side data store.</p>
+
+<h1>Storage technology replaceability</h1>
+
+<p>CQRS/ES makes it easy to change your technologies. For example, you could start with a file-based event store for prototyping and development, and later switch to a Windows Azure table-based store for production.</p>
+
+<h1>Relational vs NoSQL solutions and the cost of maintenance - think twice</h1>
+
+<p>Let&rsquo;s mention major issues in case of using a relational database as a technology for this model.</p>
+
+<h2><strong>Pitfall 1: Limit in number of columns per table</strong></h2>
+
+<p>Read-side is always kept in a denormalized form for performance reasons and usually requires a huge number of columns. If you have e.g. Oracle 11g database and hit a maximum number of 1000 columns per table you won&rsquo;t be able to add more columns.</p>
+
+<h2><strong>Pitfall 2: Adding new columns</strong></h2>
+
+<p>In many cases in order to add new data to the domain model you must release a bunch of applications/services along with changing a schema of a database on the read-side, especially when a column is not empty but already has some data. Here, I prefer a NoSQL databases such as MongoDB with relaxed schema that doesn&rsquo;t require to change one (data are kept in JSON documents) thus<strong> you won&rsquo;t have to change the schema of a database at all! </strong>CQRS/ES patterns with NoSQL db might have a simple Event Storage for the write-side with a blob-column in which data are represented as history and read-side as a schema-less NoSQL db.</p>
+
+<h1>Eventual consistency - think twice</h1>
+
+<p>While not required, it is common to use messaging between the write and read sides. This means that the system will be in an inconsistent state from time to time. This pattern is not a fit for e.g. financial transactions where a strong consistency is required between 2 sides. However, in majority of cases strong consistency can be used only on the write-side whereas the read-side is used for querying and reporting.</p>
+
+<h1>Simple vs costly</h1>
+
+<p>Events are simple objects that describe what has happened in the system. By simply saving events, you are avoiding the complications associated with saving complex domain objects to a relational store; namely, the object-relational impedance mismatch.</p>
+
+<p>The event based model may be slightly more costly due to the need of definition of events but this cost is relatively low and it also offers a smaller Impedance Mismatch to bridge which helps to make up for the cost. The event based model also offers all of the benefits discussed in “Events” that also help to reduce the overall initial cost of the creation of the events. That said the CQRS and Event Sourcing model is actually less expensive in most cases. That said the CQRS and Event Sourcing model is actually<strong> less expensive in most cases.</strong></p>
+
+<h1>Flexibility</h1>
+
+<p>As long as you have a stream of events, you can project it to any form, even a conventional SQL database. For instance, my favorite approach is to project event streams into JSON documents stored in a cloud storage.</p>
+
+<p>Also a great benefit of the separate read layer is that it will not suffer from an <strong>impedance mismatch -</strong> It is connected directly to the data model, this can make queries much easier to optimize. On the write side you no longer need to worry about how your locks impact queries, and on the read side your database can be read-only.</p>
+
+<h1>Performance</h1>
+
+<p>Write-side:</p>
+
+<p>Because events are immutable, you can use an append-only operation when you save them. Events are also simple, standalone objects. Both these factors can lead to better performance and scalability for the system than approaches that use complex relational storage models. On top of this events reduce network volumes unlike full snapshots in case of a pure CQRS model.</p>
+
+<p>Read-Side:</p>
+
+<p>A normalized database schema can fail to provide adequate response times because of the excessive table JOIN operations. Despite advances in relational database technology, a JOIN operation is still very expensive compared to a single-table read.</p>
+
+<h1>Scalability</h1>
+
+<p>Command: In most systems, especially web systems, the Command side generally processes a very small number of transactions as a percentage of the whole. Scalability therefore is not always important.</p>
+
+<p>Query: In most systems, especially web systems, the Query side generally processes a very large number of transactions as a percentage of the whole (often times 2 or more orders of magnitude). Scalability is most often needed for the query side.</p>
+
+<h1>Distributed development teams</h1>
+
+<p>The architecture can be viewed as three distinct decoupled areas. The first is the client; it consumes DTOs and produces Commands. The second is the domain; it consumes commands and produces events. The third is the Read Model; it consumes events and produces DTOs. The decoupled nature of these three areas can be extremely valuable in terms of team characteristics. Instead of working in vertical slices the team can be working on three concurrent vertical slices, the client, the domain, and the read model. This allows for a much better scaling of the number of developers working on a project as since they are isolated from each other they cause less conflict when making changes. It would be reasonable to nearly triple a team size without introducing a larger amount of conflict due to not needing to introduce more communication for the developers.</p>
+
+<h1><strong>Conclusion</strong></h1>
+
+<p>There is no one right way to implement CQRS. It is not recommended to use this model for critical projects of course if you have no experience with one. Note that It is not possible to create an optimal solution for searching, reporting, and processing transactions utilizing a single model. </p>
+
+<h1>References</h1>
+
+<p><a href="http://www.kenneth-truyers.net/2013/12/05/introduction-to-domain-driven-design-cqrs-and-event-sourcing/%C2%A0">Introduction to Domain Driven Design, CQRS and Event Sourcing</a></p>
+
+<p><a href="http://www.bennadel.com/blog/2438-command-query-responsibility-segregation-cqrs-makes-domain-models-practical.htm">Command-Query-Responsibility-Segregation (CQRS) Makes Domain Models Practical</a></p>
+
+<p><a href="http://codebetter.com/gregyoung/2010/02/13/cqrs-and-event-sourcing/">CQRS and Event Sourcing</a></p>
+
+<p><a href="http://cqrs.wordpress.com">CQRS - Did you mean CARS?</a></p>
+
+<p><a href="http://msdn.microsoft.com/en-us/library/jj591577.aspx">A CQRS and ES Deep Dive</a></p>
+
+<p><a href="http://www.udidahan.com/wp-content/uploads/Clarified_CQRS.pdf">Clarified CQRS</a></p>
+
+<p> </p>
+
+<p> </p>
+
+<p> </p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Distributed Transactions and Scalability Issues in Large-scale Distributed Systems]]></title>
+    <link href="http://vibneiro.github.io/blog/2014/03/18/distributed-transactions-and-scalability-issues-in-large-scale-distributed-systems/"/>
+    <updated>2014-03-18T18:08:58+04:00</updated>
+    <id>http://vibneiro.github.io/blog/2014/03/18/distributed-transactions-and-scalability-issues-in-large-scale-distributed-systems</id>
+    <content type="html"><![CDATA[<h2>Distributed transactions is the main evil of scalability</h2>
+
+<p>It is very hard to scale distributed transactions to an extremely high level, moreover they reduce throughput. Unlike a transaction on a local database, a distributed transaction involves altering data on multiple nodes. It can be a database + JMS broker or just a set of different databases. As an example let&rsquo;s recall a classical 2-phase commit (2PC later) - a type of <a href="http://en.wikipedia.org/wiki/Atomic_commit">atomic commitment protocol</a> in a back-end service with high volume of transactions. This protocol provides ACID-like properties for global transaction processing. I won&rsquo;t go into details how it works under the hood, I&rsquo;ll just tell you that C (Consistency) from ACID is the main evil of  scalability in distributed systems. It puts a great burden due to its complex coordination algorithm.  Overall throughput can drop up to a few times. Locks in all of the data sources are being held during 2PC. The longer duration locks create the risk of higher contention. The 2PC coordinator also represents a Single Point of Failure, which is unacceptable for critical systems.  For systems that have reasonably high volume of messages, or sensitive SLAs, it’s worth giving up strong consistency for throughput.</p>
+
+<h2>But how can I live without distributed transactions to achieve higher scalability?</h2>
+
+<p>Algorithms such as 2PC use <strong>&ldquo;Exactly Once&rdquo;</strong> technique whereas we will use <strong>&ldquo;At least Once&rdquo;</strong> technique. The difference is that a developer should take care of that in his application code to cope with it. Most queueing technologies provide acknowledgements that a message has been accepted (handling is a separate deal). Databases use local transactions. We can deal with downstream failures without coordination. Read on!</p>
+
+<h3>Idempotence and fault tolerance</h3>
+
+<p>From math, <a href="http://en.wikipedia.org/wiki/Idempotence">idempotence</a> is as simple as that:</p>
+
+<h2><a href="http://ivoroshilin.files.wordpress.com/2014/03/idempotence.png"><img src="http://ivoroshilin.files.wordpress.com/2014/03/idempotence.png" alt="idempotence" /></a></h2>
+
+<p>That is, the result stays the same, no matter how many times a function gets called on the same argument. In distributed world<em> Idempotence</em> implies that an operation can be invoked repeatedly without changing the result. Why do I need one? Because we should somehow resolve processing duplicate requests in case of a system failure. Let&rsquo;s make it clear by considering an example. A client-appliction sends a financial transaction to a server (there might be a cluster of them load-balanced or just one) and waits for acknowledgment. For some reason, at this particular time:</p>
+
+<ul>
+<li><p>A server goes down or</p></li>
+<li><p>Client goes down or</p></li>
+<li><p>Network failure happens</p></li>
+</ul>
+
+
+<p>In all of these 3 cases, a client-app didn&rsquo;t get an acknowledgment message (reply) from the server about a transaction status. Of course, the client then should retry this transaction. The server must ensure that this financial transaction is accomplished &ldquo;<strong>At least Once&rdquo;</strong>. Here comes to the rescue <em>idempotence</em>. The server must remember a state - that a transaction with this Id has already been processed including saved acknowledgement message in order to check that it exists and reply with its acknowledgement message in case it does. We don&rsquo;t have expensive distributed transactions anymore - <strong>&ldquo;At least Once&rdquo;</strong> is a more relaxed and scalable approach. That is, instead of locking resources everywhere, we can assume that messages will arrive at least once.</p>
+
+<h3>Optimistic locking</h3>
+
+<p>Even though this technique is quite old, one goes well with <em>idempotence. </em>If two people are trying to affect change to the same entity at the same time we don&rsquo;t lock database records, rather we use a concept of versioning and optionally uniqueness. The idea is to save a version of each entity record in the database but to make sure before saving it wasn&rsquo;t changed. A simple example is a self-service kiosk where people check-in before boarding at the airport. They can select a vacant seat from the seat map.<a href="http://en.wikipedia.org/wiki/Check-in">
+</a></p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2014/03/seatmap.jpg"><img src="http://ivoroshilin.files.wordpress.com/2014/03/seatmap.jpg" alt="seatmap" /></a></p>
+
+<p>Each seat has a version = 1. When multiple people make their choice in parallel before proceeding the system simply checks if a seat-version hasn&rsquo;t changed. If it has a user is notified that the seat already been taken while she was thinking. This is a very simple example where version either can be 1 or 2. A more difficult situation could be in order-management systems where an order might have many versions but that doesn&rsquo;t change the point how optimistic locking works.  The idea again yields great trade-off in terms of speed because we don&rsquo;t use locking-mechanism.</p>
+
+<h3>Local atomic transactions and unique constraints</h3>
+
+<p>Local atomic transactions are usually restricted to a single store. Local transactions are primarily needed to apply a set of operations atomically to a single resource (e.g. relational database) as well as ensure correct ordering of operations within a transaction. In some cases, we can do away with transactions, particularly if we don&rsquo;t care about the order of operations within a transaction. In that case we can process operations asynchronously leading to a better throughput again. Sometimes, a model requiring the order can be redesigned for  asynchronicity of operations.</p>
+
+<h3>Putting it all together</h3>
+
+<p>In order to achieve greater throughput a system should correspond to the following principles:</p>
+
+<ol>
+<li><p>You can retry the operation if there is a failure down the stream based on idempotence.</p></li>
+<li><p>Don&rsquo;t use transactions and use optimistic locking if possible - it&rsquo;s much cheaper.</p></li>
+<li><p>Local transactions based on a single phase commit for each resource are more scalable than distributed ones increasing overall application availability.</p></li>
+<li><p>Messages may be reordered.</p></li>
+</ol>
+
+
+<h2>Wrapping up</h2>
+
+<p>Such great systems as Google&rsquo;s Bigtable or Spanner don&rsquo;t support traditional ACID transactions because they have a heavy overhead on a highly distributed data storage model. I was lucky to use all above techniques in my applications too involving mission-critical financial transactions and must say that a few years ago not so many people knew about the techniques but now I can hear about them more and more often. Oh yeah, I almost forgot! I urge you to read <a href="http://queue.acm.org/detail.cfm?id=2187821">this great article</a> written by Pat Helland that has even more use-cases. I bumped at it during my research to know more. And remember, you can live without distributed transactions if you implement idempotence and downstream failures correctly.</p>
+
+<h2>References</h2>
+
+<p>1. <a href="http://www.enterpriseintegrationpatterns.com/docs/IEEE_Software_Design_2PC.pdf">Your Coffee Shop Doesn’t Use Two-Phase Commit</a> by Gregor Hohpe.</p>
+
+<p>2. <a href="http://queue.acm.org/detail.cfm?id=2187821">Idempotence Is Not a Medical Condition</a> by Pat Helland.</p>
+
+<p>3. <a href="http://www.addsimplicity.com/adding_simplicity_an_engi/2006/12/2pc_or_not_2pc_.html">2PC or not 2PC, Wherefore Art Thou XA?</a> by Dan Pritchett.</p>
+
+<p>4. <a href="http://www-db.cs.wisc.edu/cidr/cidr2007/papers/cidr07p15.pdf">Life beyond Distributed Transactions: an Apostate’s Opinion</a> by Pat Helland.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Service Discovery in Distributed Systems]]></title>
+    <link href="http://vibneiro.github.io/blog/2014/02/17/service-discovery-in-distributed-systems/"/>
+    <updated>2014-02-17T15:28:01+04:00</updated>
+    <id>http://vibneiro.github.io/blog/2014/02/17/service-discovery-in-distributed-systems</id>
+    <content type="html"><![CDATA[<p>After quite a while I&rsquo;ve decided to continue writing my blog. There are always lots of ideas to share with you but as usual a lack of time.</p>
+
+<h1><strong>Introduction</strong></h1>
+
+<p>Service Discovery is an architectural pattern and a key component of most distributed systems and service oriented architectures.</p>
+
+<p> In simple terms it is a central gateway for all client applications that want to use other services. A client application doesn&rsquo;t have to know where a particular service is located (usually IP:port), moreover a service can be moved/redeployed to arbitrary boxes for any reasons. There&rsquo;s no need to change connection details, update configs or whatever - Service Discovery will take care of that. You as a client-app just need to ask it to get access to other services. The pattern yields a good benefit especially when there are hundreds of client applications and/or dozens of services.</p>
+
+<p>Most of the work in this article was made relying on trials and errors as well some research. I urge you to read also a great survey from Jason Wilder&rsquo;s blog on <a href="http://jasonwilder.com/blog/2014/02/04/service-discovery-in-the-cloud/">Open Source Service Discovery</a> frameworks.</p>
+
+<p>In this particular section I won&rsquo;t mention CAP-properties as they can vary depending on implementation. But CAP is important. If you want to know more about it I recommend moving to <a href="http://ivoroshilin.com/2012/12/13/brewers-cap-theorem-explained-base-versus-acid/">this article</a> devoted to the CAP-theorem.</p>
+
+<h2>High level components</h2>
+
+<p>Service Discovery is the process of finding a suitable Service and its location for a given task that asked a service consumer.  Let&rsquo;s break down Service Discovery into 3 main components:</p>
+
+<p><strong>Service Requestor</strong></p>
+
+<p>Any consuming application that want to use some service,  that is a client application or a consumer, user, etc.</p>
+
+<p><strong>Service Provider</strong></p>
+
+<p>In the most basic scenario there is a Service Provider that finds this service and talks to Service Requestor.</p>
+
+<p><strong>Service Registry</strong></p>
+
+<p>Service Registry stores information about all services. It can be either static or dynamic. This can be IP:port, access rights and so forth.</p>
+
+<p>This model comes directly from SOA but can be adapted to your needs. Conversation among 3 above entities might differ depending on implementation. As a quick example of such segregation refer to <a href="http://en.wikipedia.org/wiki/Web_Services_Discovery">Web Service Discovery</a>.</p>
+
+<h2>Discovery options</h2>
+
+<h3>1. Static service registry</h3>
+
+<p>This one is a very basic and easy option. A big drawback - it is static. Every time a service moves to another box, static repo should be updated manually. We won&rsquo;t go further here as it is quite obvious and have little benefit for flexibility.</p>
+
+<h3>2. Announcement</h3>
+
+<p>This pattern implies that as soon as a service is up, it registers itself in the <strong>Service Registry - </strong>sometimes such a notification is called<strong> Announcement. </strong>This simple approach greatly simplifies maintenance of service registry. It&rsquo;s worth mentioning  also that in distributed world we always care about <strong>No Single Point Of Failure</strong> principle<strong> </strong>where we have at least 2 redundant nodes for a service. Service Registry is usually implemented as a separate  independent component to be self-sufficient. Just for simplicity the registry can be a simple replicated memCached, ehCache or another storage, not necessarily cache.</p>
+
+<h3>A few words about ZooKeeper as a solution for Service Discovery.</h3>
+
+<p>A counterexample is ZooKeeper that does&rsquo;t follow <strong>Shared Nothing architectural </strong>pattern. Service Registry is coupled with the Service Provider. In ZooKeeper&rsquo;s world coordination-nodes in ensemble are NOT independent of each other because they share Service Registry and there&rsquo;s a write-contention due to the order of messages. The last word leads to ZooKeeper&rsquo;s poor write-scalability due to its synchronous replication among nodes. But in terms of requirements most applications involved into configuration management including Service Discovery don&rsquo;t require frequent writes but rather reads not blocking overall scalability.</p>
+
+<p>Let&rsquo;s pick up where we left off -  announcement.</p>
+
+<p>The process of announcement is depicted below:</p>
+
+<h3></h3>
+
+<h3><a href="http://ivoroshilin.files.wordpress.com/2014/02/announcement_pb.png"><img src="http://ivoroshilin.files.wordpress.com/2014/02/announcement_pb.png" alt="Announcement_pb" /></a></h3>
+
+<h3></h3>
+
+<h3></h3>
+
+<h3></h3>
+
+<h3>3. Multicasting</h3>
+
+<p>Using IGMP-protocol, a Service provider subscribes to a particular group, all services send a multicast message to this group. The downside of this approach is that IGMP is optional for IPv4 and not every hardware supports it.</p>
+
+<h3>Health checking</h3>
+
+<p>Once a service is registered in Service Registry a Service Provider needs to know if it&rsquo;s alive and healthy (that is, 100% of service is available).</p>
+
+<p><strong>Option 1 - on reconnect:</strong> As soon as a Service Requestor understands that there&rsquo;s no connection to the service it worked with, it reverts back to the Service Provider to get a new one. Each time a Service Requestor accesses Service Provider, one does health-checking (let&rsquo;s say it is almost the same as heartbeats plus probably some other stuff) to make sure that the service is alive, maintaining the Service Registry and returning response to the client containing information about a healthy service.</p>
+
+<p><strong>Option 2 - heartbeating:</strong> Service Provider receives heartbeats within equal time-slices from registered services. Once heartbeat is lost, the Service Provider removes corresponding record from the Service Registry. This is a good option to get a more real-time information though it is more difficult to implement. This way works ZooKeeper and other distributed systems.</p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2014/02/service-down_pn.png"><img src="http://ivoroshilin.files.wordpress.com/2014/02/service-down_pn.png" alt="Service Down_pn" /></a></p>
+
+<p>In both options if some service goes down clients get back to Service Provider. What strategy to use is up to the developer but option 1 is more complex but a better one in most scenarios.</p>
+
+<h3>Load Balancing</h3>
+
+<p>Load balancing can be easily implemented inside Service Provider as one becomes a central gateway of access for all Service Requestors to other services. For the sake of simplicity a very simple variation is round-robin. I won&rsquo;t go into details as it is a different topic and you can find on the internet.</p>
+
+<h3>Authentication</h3>
+
+<p>Again as with load balancing you might want to apply tokens with expiration or cryptographic keys.</p>
+
+<h2>Cooperation of all components</h2>
+
+<p>On a very high level the communication of components can happend as on the following picture:</p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2014/02/service-request_pb.png"><img src="http://ivoroshilin.files.wordpress.com/2014/02/service-request_pb.png" alt="Service Request_pb" /></a></p>
+
+<h3>Summary</h3>
+
+<p>We have defined what a Service Discovery is, broke it down into 3 components and described a few basic approaches.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[HighLoad Conference 2013]]></title>
+    <link href="http://vibneiro.github.io/blog/2013/10/29/highload-conference-2013/"/>
+    <updated>2013-10-29T21:24:32+04:00</updated>
+    <id>http://vibneiro.github.io/blog/2013/10/29/highload-conference-2013</id>
+    <content type="html"><![CDATA[<p>Today I was lucky to have attended the annual developers conference <a href="http://www.highload.ru">HighLoad++</a> 2013. This is the 7-th time. Some conference sessions are translated into English and available here: <a href="http://www.highload.co/freeonline/">http://www.highload.co/freeonline/</a></p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2013/10/pa293662.jpg"><img src="http://ivoroshilin.files.wordpress.com/2013/10/pa293662.jpg?w=300" alt="OLYMPUS DIGITAL CAMERA" /></a></p>
+
+<p>Listeners heard many buzzwords like horizontal scalability, replication, sharding and NoSql. Despite that I missed the first day of the conference what I really liked was not just new trends in technology but invaluable speakers&#8217; experience  on real projects with pros and cons, especially:</p>
+
+<ol>
+<li> <strong>&ldquo;MySql versus something else&rdquo;</strong> by <strong>Mark Callaghan [FaceBook]</strong> on storage efficiency, framework for analysis and benchmarking and database algorithms: <a href="https://www.facebook.com/MySQLatFacebook">https://www.facebook.com/MySQLatFacebook</a></li>
+</ol>
+
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2013/10/pa293677.jpg"><img src="http://ivoroshilin.files.wordpress.com/2013/10/pa293677.jpg" alt="PA293677" /></a></p>
+
+<ol>
+<li><p><strong>&ldquo;Cassandra vs In-Memory Data Grid in eCommerce&rdquo;</strong> by <strong>Alexander Soloviev  [Grid Dynamics]</strong> was very informative on deep analysis and benchmarking against different cases and their pros and cons.</p></li>
+<li><p><strong>&ldquo;Query Optimizer in MariaDB: now w/o indices&#8221; </strong>by <strong>Sergey Golubchik [Monty Program Ab]</strong></p></li>
+</ol>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[MinHash Algorithm or How to Quickly Find Similarities Among 2 Documents]]></title>
+    <link href="http://vibneiro.github.io/blog/2013/10/07/minhash-algorithm-or-how-to-quickly-find-similarities-among-2-documents/"/>
+    <updated>2013-10-07T02:57:48+04:00</updated>
+    <id>http://vibneiro.github.io/blog/2013/10/07/minhash-algorithm-or-how-to-quickly-find-similarities-among-2-documents</id>
+    <content type="html"><![CDATA[<p>MinHash is a technique from <a href="http://en.wikipedia.org/wiki/Locality_sensitive_hashing">Locality Sensitive Hashing</a> allowing to find similarities among 2 sets. This is a  buzzword frequently met in Data Mining  and Data Science fields of CS. What surprising is that this method was invented in 1997 and used in <a href="http://en.wikipedia.org/wiki/AltaVista">AltaVista</a> web-search engine back in the 90s to find similarities among web-documents and it also can be used to:</p>
+
+<ul>
+<li><p>Find duplicates</p></li>
+<li><p>Near duplicate image detection</p></li>
+<li><p>Near neighbor search</p></li>
+</ul>
+
+
+<p>Basically the algorithm can be applied to anything that can be presented by numbers.</p>
+
+<p>Let&rsquo;s start with a bit of math from theory of probability and statistics.</p>
+
+<p>Define a formula of two sets <em>A</em> and <em>B:</em></p>
+
+<p><img src="http://upload.wikimedia.org/math/1/8/6/186c7f4e83da32e889d606140fae25a0.png" alt=" J(A,B) = |A \cap B|\over|A \cup B|." /></p>
+
+<p>This is so-called  a <a href="http://en.wikipedia.org/wiki/Jaccard_index">Jaccard coefficient</a>.</p>
+
+<p>Where: J ∈ [0..1]</p>
+
+<p>j = 0 - if <em><em><em>A</em> ∩ </em>B = 0, that is 2 sets are disjoint meaning there are no similarities</em></p>
+
+<p><em>j = 1 - if __A</em> ∩ <em>B</em> = A = <em>B, that is 2 sets are identical.</em>
+__</p>
+
+<p>A, B are more similar when their <strong>Jaccard coefficient</strong> is closer to 1.</p>
+
+<p>This simple formula is cumbersome if the sets are quite large, e.g. 2 web-documents of more than 1MB in size. Ouch, that&rsquo;s too much. 1MB of text-data is <strong>1,048,576 characters </strong>provided that 1 ASCII char = 8 bits (of course for unicode charset it is greater).</p>
+
+<p>Now that we understand a bit of theory let&rsquo;s try to apply hashing to Jaccard coefficient. Everywhere I hear hashing it always leads to randomized algorithms.</p>
+
+<p>Ok, let&rsquo;s move on. The main idea is that similar objects hash to the same bucket. This follows from the fact that <strong>probability of collision higher for similar objects</strong>.</p>
+
+<p>Here we give an example for 2 sets A and B but the algorithm can be applied to any number of sets.</p>
+
+<ol>
+<li><p>Essentially, we need to construct a set of independent hash functions &lt;h1,h2,h3,&hellip;hk> <strong>randomly</strong>.  <em>k</em> = O(1/ε2), ε > 0 such that the expected error of the estimate is at most ε. For example, 400 hashes would be required to estimate <em>J</em>(<em>A</em>,<em>B</em>) with an expected error less than or equal to .05. So, k can be varied to increase/decrease the likelihood of false negatives.</p></li>
+<li><p>Next we initialize for each set A and B the <img src="http://www.toao.com/equations/49e83e4884bd478aecc7fb7e0a7e9477.png" alt="" /> value to infinity.</p></li>
+<li><p>For each element s in both sets A and B we compute the element&rsquo;s hash:</p></li>
+</ol>
+
+
+<p><img src="http://www.toao.com/equations/8664800335406d60ca14c723421d994c.png" alt="" /> such as: If <img src="http://www.toao.com/equations/d3d634b0636790f7fd707ad50b85b0a5.png" alt="" /> then <img src="http://www.toao.com/equations/f08914f853c4fcd405dafd052d100c5a.png" alt="" />.</p>
+
+<p>Eventually we should have <img src="http://www.toao.com/equations/49e83e4884bd478aecc7fb7e0a7e9477.png" alt="" /> for both sets A and B.</p>
+
+<ol>
+<li><p>If 2 sets A and B are similar then the probability P(  <img src="http://www.toao.com/equations/49e83e4884bd478aecc7fb7e0a7e9477.png" alt="" />A =  <img src="http://www.toao.com/equations/49e83e4884bd478aecc7fb7e0a7e9477.png" alt="" />B) = |<em>A</em> ∩ <em>B</em>| / |A U B|- is high and <strong>it</strong> <strong>is the actual Jaccard coefficient!</strong></p></li>
+<li><p>We calculated  <img src="http://www.toao.com/equations/49e83e4884bd478aecc7fb7e0a7e9477.png" alt="" /> statistics to estimate how similar are these 2 sets. General formula is: Similarity = identical <img src="http://www.toao.com/equations/49e83e4884bd478aecc7fb7e0a7e9477.png" alt="" />s / k</p></li>
+</ol>
+
+
+<p>In real world this requires considering more thoroughly different parameters, hash-functions etc. However, to demonstrate the algorithm I wrote a simple java code:</p>
+
+<p>[sourcecode language=&ldquo;java&rdquo;]
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;</p>
+
+<p>public class LSHMinHash<T> {</p>
+
+<pre><code>private final int hashes[];
+private final int numOfHashes;
+private final int numOfSets;
+private final Set&lt;T&gt; setA;
+private final Set&lt;T&gt; setB;
+private final Map&lt;T, boolean[]&gt; matrix;
+private final int[][] minHashes;
+
+public LSHMinHash(double e, Set&lt;T&gt; setA, Set&lt;T&gt; setB){
+    this.numOfHashes = (int)(1 / (e * e));
+    this.numOfSets = 2;
+    this.setA = setA;
+    this.setB = setB;
+    matrix = buildSetMatrix(setA, setB);
+    minHashes = initMinHashes(numOfSets, numOfHashes);
+    hashes = computeHashes(numOfHashes);
+}
+
+private Map&lt;T,boolean[]&gt; buildSetMatrix(Set&lt;T&gt; setA, Set&lt;T&gt; setB) {
+
+    Map&lt;T,boolean[]&gt; matrix = new HashMap&lt;T,boolean[]&gt;();
+
+    for(T element : setA){
+        matrix.put(element, new boolean[] { true, false } );
+    }
+
+    for(T element : setB){
+        if(matrix.containsKey(element)){
+            matrix.put(element, new boolean[] { true, true } );
+        }else if(!matrix.containsKey(element)){
+            matrix.put(element, new boolean[] { false, true } );
+        }
+    }
+
+    return matrix;
+}
+
+private int[][] initMinHashes(int numOfSets, int numOfHashes) {
+    int[][] minHashes = new int[numOfSets][numOfHashes];
+
+    for (int i = 0; i &lt; numOfSets; i++) {
+        for (int j = 0; j &lt; numOfHashes; j++) {
+            minHashes[i][j] = Integer.MAX_VALUE;
+        }
+    }
+    return minHashes;
+}
+
+private int[] computeHashes(int numOfHashes) {
+    int[] hashes = new int[numOfHashes];
+    Random r = new Random(31);
+
+    for (int i = 0; i &lt; numOfHashes; i++){
+        int a = (int)r.nextInt();
+        int b = (int)r.nextInt();
+        int c = (int)r.nextInt();
+        hashes[i] = (int)((a * (a * b * c &gt;&gt; 4) + a * a * b * c + c) &amp; 0xFFFFFFFF);
+    }
+    return hashes;
+}
+
+private void computeMinHashForSet(Set&lt;T&gt; set, int setIndex){
+    int hashIndex = 0;
+
+    for(T element : matrix.keySet()) {
+        for (int i = 0; i &lt; numOfHashes; i++) {
+            if(set.contains(element)) {
+                int hashValue = hashes[hashIndex];
+                if (hashValue &lt; minHashes[setIndex][hashIndex]) {
+                    minHashes[setIndex][hashIndex] = hashValue;
+                }
+            }
+        }
+        hashIndex++;
+    }
+}
+
+private double computeMinHash(int[][] minHashes, int numOfHashes) {
+    int identicalMinHashes = 0;
+    for (int i = 0; i &lt; numOfHashes; i++){
+        if (minHashes[0][i] == minHashes[1][i]) {
+            identicalMinHashes++;
+        }
+    }
+    return (1.0 * identicalMinHashes) / numOfHashes;
+}
+
+public double findSimilarities() {
+    computeMinHashForSet(setA, 0);
+    computeMinHashForSet(setB, 1);
+    return computeMinHash(minHashes, numOfHashes);
+}
+
+public static void main(String[] args){
+    Set&lt;String&gt; setA = new HashSet&lt;String&gt;();
+    setA.add("THIS");
+    setA.add("IS ");
+    setA.add("THE");
+    setA.add("CASE");
+
+    Set&lt;String&gt; setB = new HashSet&lt;String&gt;();
+    setB.add("THAT");
+    setB.add("IS ");
+    setB.add("THE");
+    setB.add("CASE");
+
+    double errorFactor = 0.001;
+
+    LSHMinHash&lt;String&gt; minHash = new LSHMinHash&lt;String&gt;(errorFactor, setA, setB);
+    System.out.println(minHash.findSimilarities());
+}
+</code></pre>
+
+<p>}
+[/sourcecode]</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Google Code Jam. Qualification Round 2013. Problem D - Treasure. Solved.]]></title>
+    <link href="http://vibneiro.github.io/blog/2013/09/11/google-code-jam-qualification-round-2013-problem-d-treasure/"/>
+    <updated>2013-09-11T18:34:59+04:00</updated>
+    <id>http://vibneiro.github.io/blog/2013/09/11/google-code-jam-qualification-round-2013-problem-d-treasure</id>
+    <content type="html"><![CDATA[<p><a href="http://ivoroshilin.files.wordpress.com/2013/09/1.jpg"><img src="http://ivoroshilin.files.wordpress.com/2013/09/1.jpg" alt="1" /></a></p>
+
+<p>This was <a href="https://code.google.com/codejam/contest/2270488/dashboard#s=p3&amp;a=3">the problem</a> I wasn&rsquo;t able to optimise with given time constraint in April.  Later I killed half a day to complete it thinking of different algorithms from the graph theory such as Eulerian path
+and Chinese postman problems. I was surprised at that time this problem was put into qualification round as it is really challenging. In order to solve one the graph problem should be refined and modeled properly. During modeling a graph I used to always map only one type of entity to vertices.  As a counter-example a <a href="http://en.wikipedia.org/wiki/Bipartite_graph">Bipartite graph</a> has vertices which are divided into two disjoint sets U and V such that every edge connects a vertex in U to one in V. The solution to this one has nothing to do with Bipartite graph attacking approaches except that there are 2 types of vertices.</p>
+
+<h2><strong>The solution</strong></h2>
+
+<p><strong>1. Check that the number of chests matches the number of corresponding key types</strong>. A simple arithmetic to count. Otherwise there is no solution as we don&rsquo;t have enough keys to open all chests.</p>
+
+<p><strong>2. All vertices in a graph G should be reachable from vertex v0.</strong></p>
+
+<p>Construct a directed graph G=(V,E), where K is a set of all keys and C is a set of all chests:</p>
+
+<ul>
+<li><p>V = {K} U {C} U {0}.</p></li>
+<li><p>{0} = v0 is a starting vertex corresponding to the root vertex. Outgoing edges from it are key(s) given us initially.</p></li>
+<li><p>E = {Set of all directed edges connecting K and C}. (i,j) ∈ E if either {i=chest, j=key} or {i=key, j=chest}</p></li>
+</ul>
+
+
+<p>In simple words we have a directed graph where each vertex is either a chest or a key, directed edges form a  connection in between. We need to check that there&rsquo;s a directed path between vertex v0 and every other vertex ∈ E, otherwise we cannot open all chests and solution is impossible. Note that we need to check directed paths to all key-vertices from v0. This is a standard <a href="http://en.wikipedia.org/wiki/Reachability">single-source reachability</a> and can be done applying a<a href="http://en.wikipedia.org/wiki/Depth-first_search"> Depth-First-Search</a> algorithm:</p>
+
+<p>[sourcecode language=&ldquo;java&rdquo;]
+void dfs(Graph g, int v) {
+marked[v] = true;
+for (int w : g.adj(v)) {
+if (!marked[w]) dfs(G, w);
+}
+ }
+[/sourcecode]</p>
+
+<p>Technically, if there are unmarked vertices, the problem is unsolvable. Time complexity is O(E+V). This check cuts lots of branches saving us time.</p>
+
+<p>Now let&rsquo;s demonstrate the above on a real example. Our treasure trove consists of four chests, and you began with exactly one key of type 1.</p>
+
+<p>See the table with input data:</p>
+
+<pre><code>Chest Number  |  Key Type To Open Chest  |  Key Types Inside
+--------------+--------------------------+------------------
+1             |  1                       |  None
+2             |  1                       |  1, 3
+3             |  2                       |  None
+4             |  3                       |  2
+</code></pre>
+
+<p>Let&rsquo;s draw a graph where v0 is a staring point of traversal (i.e. initial key of type = 1)</p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2013/09/graph.jpg"><img src="http://ivoroshilin.files.wordpress.com/2013/09/graph.jpg" alt="graph" /></a></p>
+
+<p>As depicted there are 2 solvable configurations - &lt;2,1,4,3> and &lt;2,4,3,1>. All paths from v0 to the keys are reachable. The proof of this condition can done by induction and left to the reader.</p>
+
+<p><strong>3. Find a &ldquo;lexicographically smallest&rdquo; solution.</strong> This last condition added real hardness to the problem. If there are multiple solutions then we find a &ldquo;lexicographically smallest&rdquo; way to open the boxes. Each vertex is always traversed from lowest to highest, this can be achieved by constructing a graph using adjacency lists that reflect numbers of keys and chests in increasing order and we subsequently iterate them applying a bit optimized Depth-First-Search. Minimal configuration starts from v0. If we have  >= 1 key initially given, we just have to traverse from all of them increasingly. On each step we always update a number of keys in possession. If we&rsquo;ve run out of keys then we cut the branch and backtrack, starting again where we left off with the next configuration. E.g. opening a chest No. 1 at the very first time will lead to the deadlock (actually this one is a trivial case as it is on step No 1). Such cases are not on critical path and we need backtrack only to the previous calling vertex.</p>
+
+<p><strong>Conclusion:</strong> There are not so many configurations unlike straightforward brute force. Many optimization problems like this one are met in algorithmic contests. Just algorithms and data structures are not sufficient. To pass given time constraint there should be the right strategy to cut unsolvable branches. That&rsquo;s it!</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[How Automatic Sharding Works or Consistent Hashing Under the Hood]]></title>
+    <link href="http://vibneiro.github.io/blog/2013/07/15/distributed-caching-under-consistent-hashing/"/>
+    <updated>2013-07-15T12:25:09+04:00</updated>
+    <id>http://vibneiro.github.io/blog/2013/07/15/distributed-caching-under-consistent-hashing</id>
+    <content type="html"><![CDATA[<h2>Preface</h2>
+
+<p>Here we&rsquo;re going to talk primarily about Consistent hashing. This technique involves such concepts as adaptive load balancing, routing, partitioning in distributed computing. There are many articles on the internet on this technique (refer to the list of references for some of them) but I haven&rsquo;t found information about how and where to keep the ring of hashes, thus I&rsquo;ve decided to describe some options with pros and cons. In order to make this post more clear for a wider audience I will first try to write a brief introduction of what this is all about and tell about <strong>the ring storage strategies</strong> at the end of this issue. So if you&rsquo;re already familiar with the algorithm you may want to skip over the main stuff and move on to the last chapter for pros and cons of descibed approaces.</p>
+
+<h3>Distributed cache and straightforward uniform load balancing</h3>
+
+<p>Key-value stores are extremely fast in single search-queries. A very popular one is a distributed hash table (DHT) kept in a fully decentralized manner, and thus particularly adapted to unstable networks where nodes can leave or join at any moment. Note that DHT is not suitable for range-queries albeit and I will probably write a separate post about special data structures responsible for that. Now let&rsquo;s consider a classic case - you have a cluster of cache-servers where you load-balance a huge data set uniformly. To be able to determine on which node a pair &lt;key, value> should be kept we use a simple hash-mapping:</p>
+
+<blockquote>Cache machine = hash(o) mod n where: n - number of machines in a cluster and o is an object to put/lookup.</blockquote>
+
+
+<p>What happens when a number of machines changes at runtime? You might add/remove a number of machines in a cluster for e.g. scalability reasons, a failure or whatever.  The change triggers moving almost all objects to new locations due to rehashing.  Each key-value pair will get reallocated completely across the cluster. You’ll end up moving a fraction<strong> n/(n+1)</strong> of your data to new machines. Indeed, this fact degrades all of the advantages of distributed hash tables. We need somehow to avoid this messy remapping. This is where consistent hashing comes in.</p>
+
+<h2>Consistent hashing</h2>
+
+<p>The main idea is to hash both data ids and cache-machines to a numeric range using the same hash-function. E.g. in Java a primitive type int has a number range of values between -231 to 231-1.  Assume the interval is [0,  231-1] for simplicity (java primitives cannot be unsigned). Now let&rsquo;s join starting and ending points together of this interval to create a ring so the values wrap around. We do not have 231 -1 available servers, the large size of the ring being merely intended to avoid collisions. As a hash function a good choise is either be e.g. MD5 or SHA-1 algorithm. As a machine&rsquo;s number we can take its IP-address and apply that hash function to it. By taking from the result the first 8 bytes we can map it to our ring [0,231-1].</p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2013/07/ring_range1.png"><img src="http://ivoroshilin.files.wordpress.com/2013/07/ring_range1.png" alt="ring_range" /></a></p>
+
+<p>Both the nodes and the keys are mapped to the same range on the ring. Ok, now we need to understand how to identify on this ring which data ids belong to which server&rsquo;s IP. It&rsquo;s really simple, we just move clockwise starting from zero (starting point on the ring) following the main rule of consistent hashing: If IP-n1 and IP-n2 are 2 adjacent nodes on the ring all data ids on the ring between them belong to IP-n1. That&rsquo;s it. <a href="http://ivoroshilin.files.wordpress.com/2013/07/ring_mapping1.png"><img src="http://ivoroshilin.files.wordpress.com/2013/07/ring_mapping1.png" alt="ring_mapping" /></a></p>
+
+<p>As depicted: { Id1, Id2, Id3} ∈ IP-3; {Id4} ∈ IP-1; ∅ ∈ IP-2.</p>
+
+<p><strong>Conclusion:</strong> Using consistent hashing we do not need to rehash the whole data set. Instead, the new server takes place at a position determined by the hash value on the ring, and part of the objects stored on its successor must be moved. The reorganization is local, as all the other nodes remain unaffected. if you add a machine to the cluster, only the data that needs to live on that machine is moved there; all the other data stays where it is. Because the hash function remains unaffected, the scheme maintains its consistency over the successive evolutions of the network configuration. Like naive hashing, consistent hashing spreads the distributed dictionary almost evenly across the cluster. One point to mention is what happens when a node goes down due to some disaster. In this case consistent hashing alone doesn&rsquo;t meet our requirements of reliability due to loss of data. Therefore there should definetely be replication and high availability which is feasible and out of scope of this introduction. You may want to find good references at the end of these article to find out more.</p>
+
+<h3>Problems with pure consistent hashing</h3>
+
+<p>In a nutshell, the basic consistent hashing has the following problems:</p>
+
+<ul>
+<li><p>There is a huge amount of data to be rehashed.</p></li>
+<li><p>A node picking a range of keys results in one node potentially carrying a larger keyspace than others, therefore still creating disbalance.</p></li>
+<li><p>Leaving/Joining a ring leads to disbalance of data.</p></li>
+<li><p>A more powerful machine needs to process more data than others.</p></li>
+<li><p>A fraction of data to be moved is less unpredictable and much higher.</p></li>
+</ul>
+
+
+<p><strong>Virtual nodes </strong>solve these issues.</p>
+
+<h2>Virtual nodes come to the rescue</h2>
+
+<p>Virtual nodes <strong>minimize changes</strong> <strong>to a node&rsquo;s assigned range</strong> by a number of smaller ranges to a single node. In other words, amount of data to be moved from one physical node to others is minimized. Let&rsquo;s split a real node into a number of virtual nodes. The idea is to build equally-sized subintervals (partitions) for each real server on the ring by dividing the hash-space into P evenly sized partitions, and assign P/N partitions per host. When a node joins/leaves all data from partitions of all real servers are uniformly get assigned to a new server and given back to remaining ones respectively. The number of virtual nodes is picked once during building of the ring  and never changes over the lifetime of the cluster. This ensures that each node picks equal size of data from the full data set, that is P/N and thus our data now are distributed more uniformly. This enforces that the number of virtual nodes must be much higher than the number of real ones.</p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2013/07/ring_hashing.png"><img src="http://ivoroshilin.files.wordpress.com/2013/07/ring_hashing.png" alt="ring_hashing" /></a></p>
+
+<p>Here&rsquo;s a pretty simple java-code of consistency ring&rsquo;s  with virtual nodes.</p>
+
+<p>[sourcecode language=&ldquo;java&rdquo;]
+public class Ring {</p>
+
+<pre><code>private SortedMap&lt;Long, T&gt; ring = new TreeMap&lt;Long, T&gt;();
+private HashMap&lt;String, T&gt; nodeMap = new HashMap&lt;String, T&gt;();
+private MD5Hash hash = new MD5Hash();
+private vNodeCount;
+
+public Ring(int vnodeCount, Collection pNodes) {
+
+    this.vnodeCount = vnodeCount;
+
+    for (T pNode : pNodes) {
+        addNode(ring, nodeMap, pNode, vnodeCount);
+    }
+}
+
+private void addNode(T pNode, int vnodeCount) {
+    for (int i = 0; i &lt; vnodeCount; i++) {
+        ring.put(hash.hash(pNode.toString() + i), pNode);
+    }
+}
+
+    public void removeNode(T node, int vnodeCount) {
+      for (int i = 0; i &lt; vnodeCount; i++) {
+        ring.remove(hash.hash(pNode.toString() + i));
+      }
+    }
+
+private T getNodeByObjectId(String objectId) {
+
+    long hashValue = hash.hash(objectId);
+
+    if (!ring.containsKey(hashValue)) {
+        SortedMap&lt;Long, T&gt; tailMap = ring.tailMap(hashValue);
+        hashValue = tailMap.isEmpty() ? ring.firstKey() : tailMap.firstKey();
+    }
+
+    return ring.get(hashValue);
+}
+
+private static class MD5Hash {
+    MessageDigest instance;
+
+    public MD5Hash() {
+        try {
+            instance = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+        }
+    }
+
+    long hash(String key) {
+        instance.reset();
+        instance.update(key.getBytes());
+        byte[] digest = instance.digest();
+
+        long h = 0;
+        for (int i = 0; i &lt; 4; i++) {
+            h &lt;&lt;= 8;
+            h |= ((int) digest[i]) &amp; 0xFF;
+        }
+        return h;
+    }
+};
+</code></pre>
+
+<p>}
+[/sourcecode]</p>
+
+<h2>Strategies to keep a data structure of the ring and their pros and cons</h2>
+
+<p>There are a few options on where to keep ring&rsquo;s data structure:</p>
+
+<ul>
+<li><p><strong>Central point of coordination:</strong> A dedicated machine keeps a ring and works as a <strong>central load-balancer</strong> which routes request to appropriate nodes.</p></li>
+<li><p>Pros: Very simple implementation. This would be a good fit for not a dynamic system having small number of nodes and/or data.</p></li>
+<li><p>Cons: A big drawback of this approach is scalability and reliability. Stable distributed systems don&rsquo;t have a <strong>single poing of failure.</strong></p></li>
+<li><p><strong><strong>No central point of coordination - full duplication:</strong> </strong>Each node keeps a full copy of the ring. Applicable for stable networks. This option is used e.g. in Amazon Dynamo.</p></li>
+<li><p>Pros: Queries are routed in one hop directly to the appropriate cache-server.</p></li>
+<li><p>Cons: Join/Leave of a server from the ring  requires notification/amendment of all cache-servers in the ring.</p></li>
+<li><p><strong>No central point of coordination - partial duplication: </strong>Each node keeps a partial copy of the ring. This option is direct implementation of CHORD algorithm. In terms of DHT each cache-machine has its predessesor and successor and when receiving a query one checks if it has the key or not. If there&rsquo;s no such a key on that machine, a mapping function is used to determine which of its neighbors (successor and predessesor) has the least distance to that key. Then it forwards the query to its neighbor thas has the least distance. The process continues until a current cache-machine finds the key and sends it back.</p></li>
+<li><p>Pros: For highly dynamic changes the previous option is not a fit due to heavy overhead of gossiping among nodes. Thus this option is the choice in this case.</p></li>
+<li><p>Cons: No direct routing of messages. The complexity of routing a message to the destination node in a ring is O(lg N).</p></li>
+</ul>
+
+
+<h3>Current trends in consistent hashing</h3>
+
+<p>There is a huge boom nowadays of new products that implement this technique. Some of them are: Dynamo, Riak, Cassandra, MemCached, Voldemort, CouchDB, Oracle Coherence, Trackerless Bit-Torrent networks, Web-caching frameworks, Content distribution networks.</p>
+
+<h2>References</h2>
+
+<ul>
+<li><p><a href="http://java.dzone.com/articles/simple-magic-consistent">The Simple Magic of Consistent Hashing</a></p></li>
+<li><p><a href="http://michaelnielsen.org/blog/consistent-hashing/">Consistent hashing</a></p></li>
+<li><p><a href="https://weblogs.java.net/blog/tomwhite/archive/2007/11/consistent_hash.html">Consistent hashing by Tom White</a></p></li>
+<li><p><a href="http://techspot.zzzeek.org/2012/07/07/the-absolutely-simplest-consistent-hashing-example">The Absolutely Simplest Consistent Hashing Example</a></p></li>
+<li><p><a href="http://cloudfundoo.wordpress.com/2012/05/28/distributed-hash-tables-and-consistent-hashing/">Distributed Hash Tables and Consistent Hashing</a></p></li>
+<li><p><a href="http://www.acunu.com/2/post/2012/07/virtual-nodes-strategies.html">Virtual Nodes strategies</a> <a href="http://www.tomkleinpeter.com/2008/03/17/programmers-toolbox-part-3-consistent-hashing/">Programmer&rsquo;s toolbox</a></p></li>
+<li><p><a href="http://www.tomkleinpeter.com/2008/03/17/programmers-toolbox-part-3-consistent-hashing/">Programmer&rsquo;s toolbox: consistent hashing</a></p></li>
+<li><p><a href="http://offthelip.org/?p=149">Distributed Hash Tables</a></p></li>
+<li><p><a href="http://www.lastfm.ru/user/RJ/journal/2007/04/10/rz_libketama_-_a_consistent_hashing_algo_for_memcache_clients">libketama - a consistent hashing algo for memcache clients</a></p></li>
+<li><p><a href="http://www.sarmady.com/siamak/papers/dht-soft-300807.pdf">A Peer-to-Peer Dictionary Using Chord DHT</a></p></li>
+<li><p><a href="http://www.read.seas.harvard.edu/~kohler/class/cs239-w08/decandia07dynamo.pdf">Dynamo: Amazon’s Highly Available Key-value Store</a></p></li>
+<li><p><a href="http://greg.brim.net/page/building_a_consistent_hashing_ring.html">Building a Consistent Hashing Ring</a></p></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Annual Conference Java One 2013]]></title>
+    <link href="http://vibneiro.github.io/blog/2013/04/23/java-one-2013/"/>
+    <updated>2013-04-23T18:57:31+04:00</updated>
+    <id>http://vibneiro.github.io/blog/2013/04/23/java-one-2013</id>
+    <content type="html"><![CDATA[<p><a href="http://ivoroshilin.files.wordpress.com/2013/04/javaone2013.jpg"><img src="http://ivoroshilin.files.wordpress.com/2013/04/javaone2013.jpg" alt="javaone2013" /></a></p>
+
+<p>Java One 2013, Moscow</p>
+
+<p>Today is the first day of annual conference &ldquo;Java One 2013&rdquo; At Crocus Expo, Moscow Russia. Sponsors are as follows: Deutsche bank, Luxoft, odnoklassniki.ru and several other companies.</p>
+
+<p>Traditionally the conference lasts for 2 days with 94 sessions and 65 speakers around the world. Some of them are from the previous year. On the whole the venue and organizations is better this year and the plan has really interesting sessions on modern buzzwords nowadays like Scala, Cloud space and distributed caches.</p>
+
+<p><a href="http://www.oracle.com/javaone/ru-en/index.html">http://www.oracle.com/javaone/ru-en/index.html</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Google Code Jam 2013 - Qualification Round Finished]]></title>
+    <link href="http://vibneiro.github.io/blog/2013/04/14/google-code-jam-2013-qualification-round-i-have-posted-my-solutions/"/>
+    <updated>2013-04-14T13:09:16+04:00</updated>
+    <id>http://vibneiro.github.io/blog/2013/04/14/google-code-jam-2013-qualification-round-i-have-posted-my-solutions</id>
+    <content type="html"><![CDATA[<p>As many of you know, it&rsquo;s been 10 hours since qualification round finished at Google code jam contest: <a href="http://code.google.com/codejam/">http://code.google.com/codejam/</a></p>
+
+<p>Appx. <strong>21000</strong> participants took part around the world with 25h time available for the round.</p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2013/04/codejam_pic.jpg"><img src="http://ivoroshilin.files.wordpress.com/2013/04/codejam_pic.jpg" alt="codejam_pic" /></a></p>
+
+<p>Here are my solutions to 3 problems given out of 4:</p>
+
+<p><a href="https://github.com/vibneiro/googleJam2013">https://github.com/vibneiro/googleJam2013</a></p>
+
+<p>So, here&rsquo;s the analysis:</p>
+
+<h2>1. Problem A: Tic-Tac-Toe-Tomek</h2>
+
+<p>Works on small and large sets. Just a simple algorithm to implement. The point is to comply with all the conditions. The goal is to find a winner. If there&rsquo;s no winner, it should be draw, otherwise if we have empty cells the game is not completed.</p>
+
+<p>[sourcecode language=&ldquo;java&rdquo;]
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.util.Scanner;</p>
+
+<p>/<em>*
+  @Author: Ivan Voroshilin
+  @Date: April 13 2013
+  Problem A
+  Small and large inputs
+ </em>/
+public class TicTacToeTomek {</p>
+
+<pre><code>private final static char XPLAYER = 'X';
+private final static char OPLAYER = 'O';
+private final static char T = 'T';
+private final static char EMPTY = '.';
+
+private final static String X_WON = "X won";
+private final static String O_WON = "O won";
+private final static String DRAW = "Draw";
+private final static String NOT_COMPLETED = "Game has not completed";
+
+private void solve(Scanner sc, PrintWriter pw) {
+
+    char[][] array = { sc.next().toCharArray(), sc.next().toCharArray(), sc.next().toCharArray(), sc.next().toCharArray() };
+
+    int xXCount = 0;
+    int yXCount = 0;
+    int xOCount = 0;
+    int yOCount = 0;
+
+    int dForwardXCount = 0;
+    int dBackwardXCount = 0;
+    int dForwardOCount = 0;
+    int dBackwardOCount = 0;
+    boolean hasEmptyCells = false;
+    boolean hasWinner = false;
+
+    for(int x = 0; x &lt; array.length; x++) { // 4
+
+        for(int y = 0; y &lt; array.length; y++) { // 4
+
+            //x-X
+            if(array[x][y] == XPLAYER || array[x][y] == T) {
+                xXCount++;
+            }
+
+            //y-X
+            if(array[y][x] == XPLAYER || array[x][y] == T) {
+                yXCount++;
+            }
+
+            //x-O
+            if(array[x][y] == OPLAYER || array[x][y] == T) {
+                xOCount++;
+            }
+
+            //y-O
+            if(array[y][x] == OPLAYER || array[x][y] == T) {
+                yOCount++;
+            }
+
+            if(array[x][y] == EMPTY) {
+                hasEmptyCells = true;
+            }
+        }
+
+        if(!hasWinner &amp;&amp; (xXCount == array.length || yXCount == array.length)) {
+            System.out.println(X_WON);
+            pw.println(X_WON);
+            hasWinner = true;
+        }
+
+        if(!hasWinner &amp;&amp; (xOCount == array.length || yOCount == array.length)) {
+            System.out.println(O_WON);
+            pw.println(O_WON);
+            hasWinner = true;
+        }
+
+        xXCount = yXCount = xOCount = yOCount = 0;
+
+        if(array[x][x] == XPLAYER || array[x][x] == T) {
+            dForwardXCount++;
+        }
+
+        if(array[(array.length - 1 - x)][x] == XPLAYER || array[(array.length - 1 - x)][x] == T) {
+            dBackwardXCount++;
+        }
+
+        if(array[x][x] == OPLAYER || array[x][x] == T) {
+            dForwardOCount++;
+        }
+
+        if(array[(array.length - 1 - x)][x] == OPLAYER || array[(array.length - 1 - x)][x] == T) {
+            dBackwardOCount++;
+        }
+
+    }
+
+    if(!hasWinner &amp;&amp; (dForwardXCount == array.length || dBackwardXCount == array.length)) {
+        System.out.println(X_WON);
+        pw.println(X_WON);
+        hasWinner = true;
+    } else
+    if(!hasWinner &amp;&amp; (dForwardOCount == array.length || dBackwardOCount == array.length)) {
+        System.out.println(O_WON);
+        pw.println(O_WON);
+        hasWinner = true;
+    }
+
+    if(!hasWinner) {
+        if(hasEmptyCells) {
+            System.out.println(NOT_COMPLETED);
+            pw.println(NOT_COMPLETED);
+        } else {
+            System.out.println(DRAW);
+            pw.println(DRAW);
+        }
+    }
+
+}
+
+public static void main(String[] args) throws Exception {
+
+    Scanner sc = new Scanner(new FileReader("A-large.in.txt"));
+    PrintWriter pw = new PrintWriter(new FileWriter("output.txt"));
+
+    int caseCnt = sc.nextInt();
+    sc.nextLine();
+    for (int caseNum = 0; caseNum &lt; caseCnt; caseNum++) {
+        System.out.println("Processing test case " + (caseNum + 1));
+        pw.print("Case #" + (caseNum + 1) + ": ");
+        new TicTacToeTomek().solve(sc, pw);
+
+    }
+
+    pw.flush();
+    pw.close();
+    sc.close();
+}
+</code></pre>
+
+<p>}</p>
+
+<p>[/sourcecode]</p>
+
+<h2>3. Problem C: Fair and Square</h2>
+
+<h3>Small Data Sets</h3>
+
+<p>On small data sets it is a piece of cake - a classical algorithmic task which took me about 10 mins to write the code:</p>
+
+<p>[sourcecode language=&ldquo;java&rdquo;]
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.util.Scanner;</p>
+
+<p>/<em>*
+ @Author: Ivan Voroshilin
+ @Date: April 13 2013
+ Problem C
+ Small inputs
+ </em>/
+public class FairNSquare {</p>
+
+<pre><code>private boolean isPalindrome(long num) {
+    long reversed = 0;
+    long n = num;
+
+    while (n &gt; 0) {
+        reversed = reversed * 10 + n % 10;
+        n /= 10;
+    }
+
+    return num == reversed;
+}
+
+private void solve(Scanner sc, PrintWriter pw) {
+
+    sc.nextLong();
+
+    long a = sc.nextLong();
+    long b = sc.nextLong();
+
+    System.out.println(a);
+    System.out.println(b);
+
+    long number = a;
+    long count = 0;
+
+    while(number &lt;= b) {
+        if(isPalindrome(number)) {
+            double d = Math.sqrt(number);
+            if((d % 1) == 0 &amp;&amp; isPalindrome((long)d)) {
+                count++;
+            }
+        }
+        number++;
+    }
+
+    pw.println(count);
+}
+
+public static void main(String[] args) throws Exception {
+
+    Scanner sc = new Scanner(new FileReader("C-small-attempt0.in.txt"));
+    PrintWriter pw = new PrintWriter(new FileWriter("output.txt"));
+
+    int caseCnt = sc.nextInt();
+    sc.nextLine();
+    for (int caseNum = 0; caseNum &lt; caseCnt; caseNum++) {
+        System.out.println("Processing test case " + (caseNum + 1));
+        pw.print("Case #" + (caseNum + 1) + ": ");
+        new FairNSquare().solve(sc, pw);
+    }
+
+    pw.flush();
+    pw.close();
+    sc.close();
+}
+</code></pre>
+
+<p>}
+[/sourcecode]</p>
+
+<h3>Large Data Sets</h3>
+
+<p>I tried to come up with a solution on large data sets, wrote the code which works using standard Bisection method based on a binary search but struggled to optimize time complexity of square root on BigInteger and palindrome checking on large ranges, I vaguely remember from Euler&rsquo;s project there were some mathematical proofs regarding number 11 and palindromic numbers. There might be some very important facts which would allow to optimize for better performance however I decided not to waste time on it and moved to another problem.</p>
+
+<p>Ok, here&rsquo;s my solution which as been said didn&rsquo;t pass time requirement.</p>
+
+<p>[sourcecode language=&ldquo;java&rdquo;]
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.math.BigInteger;
+import java.util.Scanner;</p>
+
+<p>/<em>*
+ @Author: Ivan Voroshilin
+ @Date: April 13 2013
+ Problem C
+ Large inputs
+ Comment: Poor time complexity
+ </em>/
+public class FairNSquareLarge {</p>
+
+<pre><code>private static boolean isPalindrome(BigInteger num) {
+    BigInteger reversed = BigInteger.ZERO;
+    BigInteger n = num;
+
+    while (n.compareTo(BigInteger.ZERO) &gt; 0) {
+        reversed = reversed.multiply(BigInteger.valueOf(10)).add(n.mod(BigInteger.valueOf(10)));
+        n = n.divide(BigInteger.valueOf(10));
+    }
+
+    return num.compareTo(reversed) == 0;
+}
+
+private static BigInteger sqrt(BigInteger n) {
+    BigInteger a = BigInteger.ONE;
+    BigInteger b = new BigInteger(n.shiftRight(5).add(new BigInteger("8")).toString());
+    while(b.compareTo(a) &gt;= 0) {
+        BigInteger mid = new BigInteger(a.add(b).shiftRight(1).toString());
+        if(mid.multiply(mid).compareTo(n) &gt; 0) b = mid.subtract(BigInteger.ONE);
+        else a = mid.add(BigInteger.ONE);
+    }
+    return a.subtract(BigInteger.ONE);
+}
+
+private void solve(Scanner sc, PrintWriter pw) {
+
+    BigInteger a = sc.nextBigInteger();
+    BigInteger b = sc.nextBigInteger();
+
+    BigInteger number = a;
+    long count = 0;
+
+    while(number.compareTo(b) &lt;= 0) {
+        if(isPalindrome(number)) {
+
+            BigInteger d = sqrt(number);
+
+            if(d.multiply(d).compareTo(number) == 0 &amp;&amp; isPalindrome(d)) {
+                count++;
+            }
+        }
+        number = number.add(BigInteger.ONE);
+        System.out.println(number.toString());
+    }
+
+    pw.println(count);
+}
+
+public static void main(String[] args) throws Exception {
+
+    Scanner sc = new Scanner(new FileReader("C-large-1.in.txt"));
+    PrintWriter pw = new PrintWriter(new FileWriter("output.txt"));
+
+    int caseCnt = sc.nextInt();
+    sc.nextLine();
+    for (int caseNum = 0; caseNum &lt; caseCnt; caseNum++) {
+        System.out.println("Processing test case " + (caseNum + 1));
+        pw.print("Case #" + (caseNum + 1) + ": ");
+        new FairNSquareLarge().solve(sc, pw);
+    }
+
+    pw.flush();
+    pw.close();
+    sc.close();
+}
+</code></pre>
+
+<p>}
+[/sourcecode]</p>
+
+<h2>4. Problem D: Treasure</h2>
+
+<h3>Small Data Sets</h3>
+
+<p>I first did a straightforward BFS with checking for deadlocks and then realized from conditions that there might be several paths to open all chests and the goal is to select minimal path from all sorted lexicographically. Sure, we could make a simple systematic backtracking using all permutations of paths which has a terrible complexity O(n!) and doesn&rsquo;t meet time requirements even on small sets, e.g. N=20 chests where we have 20! distinct permutations (ouch!).</p>
+
+<p>I had time pressure (1h until the end of round) and nixed that idea to proceed but this problem is really challenging. Sorry!</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[What You Should Know About Locality of Reference]]></title>
+    <link href="http://vibneiro.github.io/blog/2013/02/06/know-your-locality-of-reference-some-techniques-for-keeping-data-in-the-cpu-cache/"/>
+    <updated>2013-02-06T17:18:51+04:00</updated>
+    <id>http://vibneiro.github.io/blog/2013/02/06/know-your-locality-of-reference-some-techniques-for-keeping-data-in-the-cpu-cache</id>
+    <content type="html"><![CDATA[<h2><a href="http://ivoroshilin.com/2013/02/06/know-your-locality-of-reference-some-techniques-for-keeping-data-in-the-cpu-cache/"> </a></h2>
+
+<h2><strong>Introduction</strong></h2>
+
+<p>In the previous post we briefly described what might stand beyond asymptotic analysis of algorithms and data structures when it comes to empirical measurements of performance. In this post I continue talking about latter considering more closely the impact of memory hierarchies of modern computer architectures. A few basic data structures are taken for comparison of locality utilization with short explanations. Further, we&rsquo;re going to touch on effective utilization of CPU-cache by showing some techniques to improve performance.  All benchmarks are done on JVM HotSpot 6. Due to different algorithms of GC and memory allocation, the techniques might not / partly work on other platforms, but the idea to improve locality should work on the majority of modern CPU-architectures. I advice that every software developer should read <a href="http://t.co/nTxQAgzB">this excellent article</a> (especially &ldquo;sections 3 and 6) to better understand CPU-caches and memory and then come back to this post.</p>
+
+<h2><strong>Memory hierarchies and difference in speed</strong></h2>
+
+<p>There&rsquo;s a huge gap between the speed of CPUs and the latency of DRAM-memory. CPU&rsquo;s cache-memory is roughly 100 times faster than main memory which in turn 10k times faster than secondary storage. Thus, the processor will have to wait more than 100 cycles every time the memory is needed to deliver data. This problem is solved by sticking smaller, faster memory chips in between the processor and the main memory. These chips are called CPU-caches. Techniques in which cache is heavily utilized during the execution of a program can dramatically impact the performance of algorithms. Caches improve performance when memory accesses exhibit locality.</p>
+
+<h2>**Locality of reference</h2>
+
+<p>**</p>
+
+<p>Hierarchical memory is a hardware optimization that takes the benefits of spatial and temporal locality and can be used on several levels of the memory hierarchy. <a href="http://en.wikipedia.org/wiki/Locality_of_reference">Locality</a> describes the same value or related <a href="http://www.wikipedia.org/wiki/Computer_storage">storage</a> locations being frequently accessed from memory. There are two basic types of locality:</p>
+
+<ul>
+<li><p>Temporal locality refers to the reuse of specific data and/or resources within relatively small time durations. Access latency can be avoided by reusing the data fetched previously. With poor temporal locality, data that could have been reused is lost from a working area and must be fetched again. Loops over the same small amount of data result in excellent temporal locality.</p></li>
+<li><p>Spatial locality refers to the use of data elements within relatively close storage locations. The concept that likelihood of referencing a resource is higher if a resource near it was just referenced. With this type of locality, access latency can be amortized by retrieving multiple data items in a single fetch cycle and using good spatial locality to ensure that all the data fetched is useful. If the data is not useful, because of poor spatial locality, then more fetch cycles will be required to process the same data. A simple array is a good candidate for this type of locality.</p></li>
+</ul>
+
+
+<p>When high speed is needed it is very important to understand what data structures exhibit better locality of CPU-caches and how to improve one. Good locality is a good speed of data access affecting both throughput and latency. For CPU-caches the most common replacement policy is to fetch blocks from slower memory (DRAM) into fast memory (SRAM) 1 cache-line at a time when block of memory is touched by a program which doesn&rsquo;t reside in the cache, a kind of LRU that might differ not significantly from pure LRU-policy. Note that how the program-level locality is mapped onto memory-level depends on the compiler&rsquo;s layout of objects and on the allocator&rsquo;s placement of those objects in memory in the operating system. Most compilers layout data in consecutive areas of memory. Normally, compilers preserve the order of variables which helps to achieve a good locality on a program-level. The conventional wisdom is that programs spend 90% of their time executing 10% of the code.  By placing the most common instructions and data in the fast-but-small storage, while leaving the rest in the slow-but-large storage, we can lower the average memory-access time of a program significantly.  Next, we consider locality effects on classic algorithms and data structures with techniques.</p>
+
+<h2><strong>Arrays, linked lists and locality</strong></h2>
+
+<p>Now let&rsquo;s consider a simple analysis by example exhibiting poor locality of reference.</p>
+
+<p>I run the benchmark on an Intel Core 2 Duo CPU 3GHz using:</p>
+
+<ul>
+<li><p>JDK: 1.6.0_27</p></li>
+<li><p>JVM-params: -Xms512m -Xmx512m -XX:CompileThreshold=1 -XX:newRatio=128                                      -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode</p></li>
+</ul>
+
+
+<p>The benchmark was taken 100 times in a row to calculate average values. I performed a simple test by appending a single element in a loop N times to the end of a LinkedList and then did the same for an ArrayList. Mind you, the complexity of the operation on both collections is equal O(1).</p>
+
+<p><img src="http://ivoroshilin.files.wordpress.com/2013/02/graph.png" alt="graph" /></p>
+
+<p>As can be seen on the graph ArrayList is a winner.  In this benchmark I tried to do the same test with preallocated array for the first test and by default for the second one. Of course, for non-preallocated ArrayList total time grew higher, but nevertheless one has beaten LinkedList with the above figures.</p>
+
+<p>The thing is that <em>a dynamic array</em> allocates all elements contiguously in memory usually in a single continuous block of memory whereas a linked list contains its elements fragmentally. That is, nodes of a linked list can be scattered in arbitrary areas of memory. As have been said in the beginning caches of modern processors don&rsquo;t like random access to memory. Therefore, sequential access in arrays is faster than on linked lists on many machines, because they have a very good <a href="http://en.wikipedia.org/wiki/Locality_of_reference">locality of reference</a> and thus make good use of data caching.</p>
+
+<p>Recall that LinkedList will have to do additionally a memory allocation on each insertion of a new element. But, wait, access to elements in the memory takes longer than from CPU-cache. You can check this using a bit different test by iterating these two data structures from left to right with the exact parameters as above and see. Again, the iteration time is slower in LinkedList due to locality of reference. The ArrayList<code> </code>elements are closer together, so there are fewer <a href="https://secure.wikimedia.org/wikipedia/en/wiki/CPU_cache">cache misses</a> indeed. Even when the linked list does not include any cache-misses at all, the traversal will be slower. This is because visiting each item incurs the cost of two dereference operations instead of the single one that the array list needs, taking double the amount of time. Cache-misses are major selling point of the array backed up structures. Linked structures are potentially a cache miss on each node making the O(n) iteration actually significantly slower. The append (insert at end) time for ArrayList is <em>amortized</em> O(1), meaning that it&rsquo;s O(1) on average when doing a long series of appends. Any one of them may be O(n), but that one doubles the capacity so the next <em>n</em> of them can use pre-allocated space.  Of course, periodically the ArrayList&rsquo;s backing array may need to be resized (which won&rsquo;t be the case if it was chosen with a large enough initial capacity), but since the array grows exponentially the amortized cost will be low, and is bounded by O(lg n) complexity.</p>
+
+<p>Further optimizations:</p>
+
+<ul>
+<li><p><a href="http://en.wikipedia.org/wiki/Unrolled_linked_list">Unrolled LinkedList</a> - it can dramatically increase <a href="http://en.wikipedia.org/wiki/CPU_cache">cache</a> performance, while decreasing the memory.</p></li>
+<li><p><a href="http://java.dzone.com/articles/false-sharing">False sharing</a> - cache-optimization for arrays in SMP CPU-architecture - another technique used in multithreading.</p></li>
+</ul>
+
+
+<p><strong>The bottom line: </strong>Arrays are superior at exploiting CPU-cache in a sequential access unlike linked data structures. Thanks to spatial locality! The problem of linked lists is when the node is accessed, the whole cache line is fetched from main memory, yet it is mostly not used.</p>
+
+<h3>Large array and better cache utilization</h3>
+
+<p>Large Arrays in Hot Spot JVM are placed in contiguous memory as many other memory allocators try to do. However, all their elements might not fit into cache. An alternative is to split the array up into smaller ones so that each one fits into CPU-cache. The size of such a small array depends on many factors. I&rsquo;ll try to explain how to tune array-sizes in later posts.</p>
+
+<h2>**Hash tables</h2>
+
+<p>**</p>
+
+<p>Hash tables exhibit poor locality of reference, because they cause access patterns that jump around, this can trigger <a href="http://en.wikipedia.org/wiki/CPU_cache">microprocessor cache</a> misses that cause long delays. Randomization causes bad locality. Compact data structures such as arrays searched with <a href="http://en.wikipedia.org/wiki/Linear_search">linear search</a> may be faster in some cases. An interesting article <a href="http://www.siam.org/meetings/alenex05/papers/13gheileman.pdf">&ldquo;How caching affects hashing&rdquo;</a> reveals the fact that the number of collisions a hash table produces, may lead to superior performance. In this paper three basic approaches were analyzed: linear probing, linear double hashing and exponential double hashing. All three make up so called <strong>Open addressing</strong> or <strong>closed hashing</strong> method of collision resolution. Open addressing can lead to more concise tables yielding a better cache performance than classing bucketing. But as the load factor starts to get high its performance might downgrade. The experimental analysis provided that, assuming a nearly uniform distribution, linear probing outperforms double hashing due to the fact that the percentage of the cache hits per probe is higher in the case of linear probing provided that its data set is not very large. However, If data doesn&rsquo;t fit into memory, linear probing may work slower. A great minus of this type of implementation is that the operation of deletion in open addressing is very expensive because of its O(n) worst time complexity on the array.</p>
+
+<p>If a hash table tends to have many collisions, we can apply &ldquo;Unrolled linked list&rdquo; described above. Ideally each linked list&rsquo;s element should occupy one cache line on the appropriate cache level.  A great minus is that the size of a cache line is CPU-architecture-bound.</p>
+
+<h2><strong>Binary Search Trees</strong></h2>
+
+<p>Here I consider classic unbalanced Binary Searh trees (aka BST), Red-Black trees, AVL-trees and Splay-trees (aka The splay tree of Sleator and Tarjan) in terms of locality. Each tree should be applied in a different situation. All of these are linked data structures made up of nodes. Each node have 3 pointers: parent, left child and right child. Locality in trees is a tendency to look for the same element multiple times. Note that a set of operations exhibits no locality if every element is equally likely to be accessed at each point. Therefore, we&rsquo;re going to consider here only those cases where elements are accessed multiple times.</p>
+
+<h3>Splay-trees</h3>
+
+<p><a href="http://en.wikipedia.org/wiki/Splay_tree">Splay-trees</a> are the most intriguing due to the fact that they simply have the ability to optimize themselves for better locality of reference. The tree performs rotations of nodes to the root every time an access is made. Also note that they are not balanced trees as BST. Despite the fact that a worst case bound on the Splay-operation is O(n) for n nodes the amortized time for a set of operations is quite efficient (O(lg n)) which is compensated by these rotations and locality. Here we are talking about &ldquo;top-down splay-tree&rdquo; variation. Splay trees are the winner of locality among these ones when insertions happen quite frequently in sorted order and later accesses are sequential. Frequently used nodes are located near the root. In almost all other cases, because of the high cost of maintaining self-adjustment. Random insertion is the worst among all 4 data structures due to splay-overhear. On the contrary, the AVL-tree outperforms a Splay-trees when the search-key distribution is uniform and very frequent.</p>
+
+<h3>AVL-trees</h3>
+
+<p>If insertions happen quite frequently in sorted order the locality of <a href="http://en.wikipedia.org/wiki/AVL_tree">AVL-trees</a> is quite good provided that later accesses are more random. In other cases it may carry out far more comparisons than other trees which deteriorates its performance and therefore may stand behind others. The search performance of the AVL-tree is almost always better than that of Splay-trees.</p>
+
+<h3>Red-Black trees</h3>
+
+<p>If input is randomly ordered but sequential traversal happen frequently then <a href="http://en.wikipedia.org/wiki/Red%E2%80%93black_tree">red-black trees</a> should be used. Random insertions perform better over AVL-trees. However, for pathological inputs AVL-operations work faster than in Red-Black tree due to the stricter rule of rebalancing.</p>
+
+<h3>Unbalanced BSTs</h3>
+
+<p>When randomly ordered input can be relied upon it is best to use this basic kind of <a href="http://en.wikipedia.org/wiki/Binary_search_tree">binary search trees</a> over others. It requires the least extra overhead unlike the other tree-structures.</p>
+
+<p><strong>The bottom line:  </strong>Input set and distribution of data both matter. In addition to locality, sometimes other factors are much more important for performance.</p>
+
+<p>For random input set: BST - is the fastest among 4 remaining ones, then goes Red-Black tree, then goes the AVL-tree and the slowest one is a Splay-tree.</p>
+
+<p>Splay trees take much of the CPU-time mostly on rotations where they lose in speed. There are some optimizations towards fewer splay-operations for certain cases, but they are not discussed in this blog. Unbalanced BSTs are simpler in implementation and have lighter operations and only best work against random data.</p>
+
+<p>For pathological input set the picture is the opposite - from fastest to slowest: Splay-tree due to high locality, AVL-tree, Red-Black tree, BST - is extremely slow as it is unbalanced.</p>
+
+<p>As this series is devoted solely to locality and some facts mentioned are not directly related to it, in later series I&rsquo;ll try to give some empirical benchmarks on overall performance of these structures to make the picture more clear.</p>
+
+<h2><strong>Conclusion</strong></h2>
+
+<p>it is worth noting that <em>hidden constants</em> caused by locality of reference might differ depending on computer architecture and implementation. Multiple operations on data structures with non-sequential access to elements cause poor performance. Asymptotic comparison of cache-friendly data structures with others is meaningless because in reality the result can be quite the contrary. Defragmented location of related elements in memory causes CPU cache-losses which can drastically degrade overall performance. Especially It is sensible on large data volumes where low latency is at premium. Mind you, algorithm with good locality is not sufficient for better performance. A number of operations, their cost including CPU-time do matter too.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Asymptotic Complexity: Beware of Hidden Constants]]></title>
+    <link href="http://vibneiro.github.io/blog/2013/01/11/when-asymptotic-analysis-of-complexity-doesnt-work/"/>
+    <updated>2013-01-11T15:24:57+04:00</updated>
+    <id>http://vibneiro.github.io/blog/2013/01/11/when-asymptotic-analysis-of-complexity-doesnt-work</id>
+    <content type="html"><![CDATA[<h3><strong>Asymptotic complexity and invisible constant factor</strong></h3>
+
+<p>Today I&rsquo;m going to explain what stands behind asymptotic complexity of algorithms when it comes to measurement of performance on modern computer hardware. Let&rsquo;s recall that asymptotic analysis is based on idealized sequential RAM-model. Complexity shows how good an algorithm scales as N grows from mathematical point of view. Two or more algorithms with different complexity solving the same task DOES NOT mean one will work slower or faster. Computer architecture is more complex than <a href="http://en.wikipedia.org/wiki/Random-access_machine">RAM-model</a>. There are different memory hierarchies, branching strategies, prefetching techniques, pipelining and other hardware factors which are not taken into account in this model. Constant-factors hidden in Big-Oh notation are not fixed, but variable in fact. Popular books on algorithms not always explain clearly this fact. While Big-Oh has many theoretically useful insights, it cannot actually predict performance. Read on, to find out why.</p>
+
+<p><strong>1. Constant hidden even in simple arithmetic operations is not a constant at all:</strong></p>
+
+<p>In terms of sequential Random Access Model and computer hardware we now try to add two numbers without a calculator using our brain: 1+2, 2+10, 34+55. A piece of cake! OK, so far so good. Try again, now: 34523+119987. Feel the difference? It takes you much longer to calculate the latter. This analogy shows the difference in complexity. In the RAM model adding 2 numbers <strong>is always a constant-time</strong>, but in real computer hardware it&rsquo;s not like that as constant-factor is variable. On top of this, some instructions are slower than others. Take addition and division as an example. They are both O(1) but with different constant factors.</p>
+
+<p><strong>2. Some algorithms require more instructions than others</strong></p>
+
+<p>For instance, certain algorithms may make fewer instructions per one pass (e.g. copy, exchange, shift, whatever). This also partly makes up a hidden constant. Due to this fact they tend to work faster in some cases.</p>
+
+<p><strong>3. Computer memory hierarchy gets in the way of analysis</strong></p>
+
+<p>Computer memory in the analysis of complexity is treated as a linear array with uniform access times. In the analysis A superior algorithm is the one that executes fewer instructions. In reality the assumption that every memory access has equal cost is not valid.</p>
+
+<h2><strong>Conclusion</strong></h2>
+
+<p>I didn&rsquo;t mention compilers that make optimizations. All of these factors form a hidden constant in the big-Oh which spoils the analysis. Asymptotic analysis is built upon mathematical model which is machine-independent and thus fragile. Hidden constants might impact algorithm&rsquo;s scalability very heavily. Due to this fact performance benchmarks may yield the opposite results. On some data an algorithm might be much slower then one with better complexity. The most vicious enemy is memory-hierarchy in modern CPUs. Yes, Big-Oh still matters, but you should handle it with care. In the next post I&rsquo;ll try to show this on real examples.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Brewer's CAP Theorem Explained: BASE Versus ACID]]></title>
+    <link href="http://vibneiro.github.io/blog/2012/12/13/brewers-cap-theorem-explained-base-versus-acid/"/>
+    <updated>2012-12-13T17:21:22+04:00</updated>
+    <id>http://vibneiro.github.io/blog/2012/12/13/brewers-cap-theorem-explained-base-versus-acid</id>
+    <content type="html"><![CDATA[<p>The goal of this article is to give more clarity to the theorem and show pros and cons of ACID and BASE models that might stand in the way of implementing distributed systems.</p>
+
+<h2>What is CAP about?</h2>
+
+<p>The<em> (CAP) theorem</em> (<strong>C</strong>onsistency, <strong>A</strong>vailability and <strong>P</strong>artitioning tolerance) was given by Eric Brewer, a professor at the University of California, Berkeley and one of the founders of Google, in 2001 in the keynote of Principles of Distributed Computing.</p>
+
+<p>The theorem states:</p>
+
+<blockquote>_**Though its desirable to have Consistency, High-Availability and Partition-tolerance in every system, unfortunately no system can achieve all three at the same time**._</blockquote>
+
+
+<p>In other words a system can have at most two of three desirable properties at the same time <strong>in presence of errors</strong>.</p>
+
+<p>Let&rsquo;s first give definitions to these 3 terms:</p>
+
+<p><strong>Consistency: </strong>A service that is <em>consistent</em> should follow the rule of ordering for updates that spread across all replicas in a cluster - &ldquo;what you write is what you read&rdquo;, regardless of location.<em> </em>For example,  Client A writes 1 then 2 to location X, Client B cannot read 2 followed by 1.  This rule has another name <strong>&ldquo;Strong consistency&rdquo;.</strong><strong>
+</strong></p>
+
+<p><strong>Availability: </strong>A service should be available. There should be a guarantee that every request receives a response about whether it was successful or failed. If the system is not available it can be still consistent. However, <em>consistency</em> and <em>availability </em>cannot be achieved at the same time. This means that one has two choices on what to leave. <em>Relaxing consistency</em> will allow the system to remain highly available under the partitioning conditions (see next definition) and <em>strong consistency</em> means that under certain conditions the system will not be available.</p>
+
+<p><strong>Partition tolerance: </strong>The system continues to operate despite arbitrary message loss or failure of part of the system. A simple example, when we have a cluster of N replicated nodes and for some reason a network is unavailable among some number of  nodes (e.g. a network cable got chopped). This leads to inability to synchronize data. Thus, only some part of the system doesn&rsquo;t work, the other one does. If you have a partition in your network, you lose either <em>consistency</em> (because you allow updates to both sides of the partition) or you lose <em>availability</em> (because you detect the error and shut down the system until the error condition is resolved).</p>
+
+<p>There are lots of articles about this theorem these days around but not many of them reveal real meaning behind this, neither<strong> </strong><em>CAP theorem</em> talks about the normal operation of a distributed system when there are no errors. A simple meaning of this theorem is <strong>&ldquo;It is impossible for a protocol to guarantee both consistency and availability in a partition prone distributed system&rdquo;. </strong>This was mentioned above in examples.</p>
+
+<p>Most of the NoSQL database system architectures favour one factor over the other:</p>
+
+<ul>
+<li><p><a href="http://en.wikipedia.org/wiki/BigTable">BigTable</a>, used by Google App engine, and <a href="http://hadoop.apache.org/hbase/">HBase</a>, which runs over Hadoop, claim to be strongly <em>consistent</em> within a data-center and <em>highly available</em> meaning there&rsquo;s an eventual consistency between data-centers. Updates are propagated to all replicas <em>asynchronously</em>.</p></li>
+<li><p><a href="http://research.google.com/archive/spanner.html">Google Spanner</a>, a new globally-distributed, and synchronously-replicated database - the successor to BigTable. Updates are propagated to all replicas <em>synchronously</em>. Google Spanner supports<em> strong consistenc_y even in the the presence of wide-area replication unlike BigTable which can only support </em>eventual-consistent_ (see below for definitions) replication across data-centers.</p></li>
+<li><p><a href="http://www.allthingsdistributed.com/2007/10/amazons_dynamo.html">Amazon’s Dynamo</a>, <a href="http://www.royans.net/arch/category/cassandra/">Cassandra</a> and<a href="http://wiki.basho.com/"> Riak</a> instead sacrifice <em>consistency</em> in favor of availability and partition tolerance. They achieve a weaker form of consistency known as <em>eventual consistency</em> – updates are propagated to all replicas asynchronously, without guarantees on the order of updates across replicas and when they will be applied.</p></li>
+<li><p><a href="http://www.oracle.com/technetwork/products/nosqldb/overview/index.html">Oracle NoSQL</a> allows to choose a consistency policy which might affect performance depending on a level selected.</p></li>
+<li><p><a href="http://cassandra.apache.org/">Apache Cassandra</a> is similar to BigTable, but it has a <em>tunable consistency model</em>.</p></li>
+</ul>
+
+
+<h2>ACID property</h2>
+
+<p>Let&rsquo;s recall in brief what<em> <a href="http://en.wikipedia.org/wiki/ACID">ACID</a></em> (<strong>A</strong>tomicity, <strong>C</strong>onsistency, <strong>I</strong>solation and <strong>D</strong>urability) means in  traditional RDBMS community before moving to the next topic.</p>
+
+<p>ACID transactions provide 4 properties which must be guaranteed:</p>
+
+<p><strong>Atomicity:</strong> All of the operations in the transaction will complete, or none will. If one part of the transaction fails, the entire transaction fails.</p>
+
+<p><strong>Consistency:</strong> The database will be in a consistent state when the transaction begins and ends. This property ensures that any transaction will bring the database from one valid state to another. In high availability environment this rule must be satisfied for all nodes in a cluster.</p>
+
+<p><strong>Isolation:</strong> The transaction will behave as if it is the only operation being performed upon the database. Each transaction has to execute in total isolation from the rest.</p>
+
+<p><strong>Durability:</strong> Upon completion of the transaction, the operation will not be reversed.</p>
+
+<p>ACID is guaranteed by <a href="http://en.wikipedia.org/wiki/Two-phase_commit_protocol"><em>A Two-phase</em> commit</a> - a distributed algorithm that ensures this across multiple database instances when performing transaction.</p>
+
+<h2>Eventual consistency (BASE) != Strong consistency</h2>
+
+<p><em>Eventual consistency </em>(normally asynchronous transactions) is a form of a weaker consistency which allows to improve speed and availability, because <em>ACID</em> provides <em>strong consistency </em>(synchronous transactions) for partitioned databases and thus gets in the way of availability. A transaction that involves N nodes in a cluster that uses <em>2-phase commit</em> also reduces the<em> availability.</em> The term e_ventual consistency or as it is called <strong>BASE </strong>(<strong>B</strong>asically <strong>A</strong>vailable, <strong>S</strong>oft state, <strong>E</strong>ventual consistency)<em> is the opposite of <strong>ACID</strong> (<strong>A</strong>tomicity, <strong>C</strong>onsistency, <strong>I</strong>solation and <strong>D</strong>urability). Where <strong>ACID</strong> is pessimistic and requires consistency at the end of every operation, <strong>BASE</strong> is optimistic and accepts that the database consistency will be in a state of flux. </em>The e_ventual consistency <em><em>is simply an acknowledgement that there is an unbounded delay in propagating a change made on one machine to all the other copies which might lead to stale data. For instance, a distributed system maintains copies of shared data on multiple machines in a cluster to ensure high availability. When data gets updated in a cluster there might be some interval of time during which some of the copies will be updated, but others won&rsquo;t. </em>Eventually</em> the changes will be propagated to all remaining machines. That&rsquo;s why it is named <em>eventual consistency</em>.  <em>BASE</em> trades consistency for availability and doesn&rsquo;t give any ordering guarantees at all.  Eventual consistency has nothing to do with a single node systems since there’s no need for propagation. If the database system only supports eventual consistency, then the application will need to handle the possibility of reading stale (inconsistent) data. There are different techniques how it can be achieved as well as other forms of weak consistency and out of scope of this article.  Eventual consistency is only one form from the list of <a href="http://en.wikipedia.org/wiki/Consistency_model">consistency-models</a> which are out of scope of this article.</p>
+
+<h2>NRW notation (Read-Your-Writes)</h2>
+
+<p><em>NRW (Node, Read, Write)</em>  allows to analyse and tune how a distributed database will trade off consistency, read / write performance.</p>
+
+<ul>
+<li><p>N = the number of nodes that keep copies of a record distributed to.</p></li>
+<li><p>W = the number of nodes that must successfully acknowledge a write to be successfully committed.</p></li>
+<li><p>R = the number of nodes that must send back the same value of a unit of data for it to be accepted as read by the system.</p></li>
+</ul>
+
+
+<p>The majority of NoSQL databases use N>W>1 - more than one write must complete, but not all nodes need to be updated immediately.</p>
+
+<p>When:</p>
+
+<ul>
+<li><p>W &lt; N - high write availability</p></li>
+<li><p>R &lt; N - high read availability</p></li>
+<li><p>W+R > N - is a strong consistency, read/write are fully overlapped</p></li>
+<li><p>W+R &lt;= N - is an eventual consistency, meaning that there is no overlap in the read and write set;</p></li>
+</ul>
+
+
+<p>You can  set these parameters and see what you will get <a href="http://pbs.cs.berkeley.edu/#demo">online</a>.Thus, varying the parameters we can tune a wide variety of scenarios with different properties of availability, consistency, reliability, and speed.</p>
+
+<h2>Conclusion</h2>
+
+<p>A <em>strongly consistent</em> system gives up <em>availability</em> upon a certain kind of failure, and<em> eventually-consistent</em> system gives up consistency upon a certain kind of failure which improves <em>availability</em>. The bottom line: It is impossible to guarantee consistency while providing high availability and network partition tolerance. This makes ACID databases less powerful for highly distributed environments and led to the emergence of alternate data stores that are target to high availability and high performance. The eventual consistency is one of approaches to achieve this.</p>
+]]></content>
+  </entry>
   
 </feed>

@@ -1,0 +1,422 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>How Automatic Sharding Works or Consistent Hashing Under the Hood - Ivan Voroshilin&#8217;s Blog.</title>
+  <meta name="author" content="Ivan Voroshilin">
+
+  
+  <meta name="description" content="Preface Here we&rsquo;re going to talk primarily about Consistent hashing. This technique involves such concepts as adaptive load balancing, routing &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://vibneiro.github.io/blog/2013/07/15/distributed-caching-under-consistent-hashing/">
+  <link href="/octopress/favicon.png" rel="icon">
+  <link href="/octopress/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/octopress/atom.xml" rel="alternate" title="Ivan Voroshilin's Blog." type="application/atom+xml">
+  <script src="/octopress/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/octopress/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/octopress/">Ivan Voroshilin&#8217;s Blog.</a></h1>
+  
+    <h2>Algorithmic contests, distributed systems and software architecture</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/octopress/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="vibneiro.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/octopress/">Blog</a></li>
+  <li><a href="/octopress/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">How Automatic Sharding Works or Consistent Hashing Under the Hood</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2013-07-15T12:25:09+04:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>15</span><span class='date-suffix'>th</span>, <span class='date-year'>2013</span></span> <span class='time'>12:25 pm</span></time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h2>Preface</h2>
+
+<p>Here we&rsquo;re going to talk primarily about Consistent hashing. This technique involves such concepts as adaptive load balancing, routing, partitioning in distributed computing. There are many articles on the internet on this technique (refer to the list of references for some of them) but I haven&rsquo;t found information about how and where to keep the ring of hashes, thus I&rsquo;ve decided to describe some options with pros and cons. In order to make this post more clear for a wider audience I will first try to write a brief introduction of what this is all about and tell about <strong>the ring storage strategies</strong> at the end of this issue. So if you&rsquo;re already familiar with the algorithm you may want to skip over the main stuff and move on to the last chapter for pros and cons of descibed approaces.</p>
+
+<h3>Distributed cache and straightforward uniform load balancing</h3>
+
+<p>Key-value stores are extremely fast in single search-queries. A very popular one is a distributed hash table (DHT) kept in a fully decentralized manner, and thus particularly adapted to unstable networks where nodes can leave or join at any moment. Note that DHT is not suitable for range-queries albeit and I will probably write a separate post about special data structures responsible for that. Now let&rsquo;s consider a classic case - you have a cluster of cache-servers where you load-balance a huge data set uniformly. To be able to determine on which node a pair &lt;key, value> should be kept we use a simple hash-mapping:</p>
+
+<blockquote>Cache machine = hash(o) mod n where: n - number of machines in a cluster and o is an object to put/lookup.</blockquote>
+
+
+<p>What happens when a number of machines changes at runtime? You might add/remove a number of machines in a cluster for e.g. scalability reasons, a failure or whatever.  The change triggers moving almost all objects to new locations due to rehashing.  Each key-value pair will get reallocated completely across the cluster. You’ll end up moving a fraction<strong> n/(n+1)</strong> of your data to new machines. Indeed, this fact degrades all of the advantages of distributed hash tables. We need somehow to avoid this messy remapping. This is where consistent hashing comes in.</p>
+
+<h2>Consistent hashing</h2>
+
+<p>The main idea is to hash both data ids and cache-machines to a numeric range using the same hash-function. E.g. in Java a primitive type int has a number range of values between -231 to 231-1.  Assume the interval is [0,  231-1] for simplicity (java primitives cannot be unsigned). Now let&rsquo;s join starting and ending points together of this interval to create a ring so the values wrap around. We do not have 231 -1 available servers, the large size of the ring being merely intended to avoid collisions. As a hash function a good choise is either be e.g. MD5 or SHA-1 algorithm. As a machine&rsquo;s number we can take its IP-address and apply that hash function to it. By taking from the result the first 8 bytes we can map it to our ring [0,231-1].</p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2013/07/ring_range1.png"><img src="http://ivoroshilin.files.wordpress.com/2013/07/ring_range1.png" alt="ring_range" /></a></p>
+
+<p>Both the nodes and the keys are mapped to the same range on the ring. Ok, now we need to understand how to identify on this ring which data ids belong to which server&rsquo;s IP. It&rsquo;s really simple, we just move clockwise starting from zero (starting point on the ring) following the main rule of consistent hashing: If IP-n1 and IP-n2 are 2 adjacent nodes on the ring all data ids on the ring between them belong to IP-n1. That&rsquo;s it. <a href="http://ivoroshilin.files.wordpress.com/2013/07/ring_mapping1.png"><img src="http://ivoroshilin.files.wordpress.com/2013/07/ring_mapping1.png" alt="ring_mapping" /></a></p>
+
+<p>As depicted: { Id1, Id2, Id3} ∈ IP-3; {Id4} ∈ IP-1; ∅ ∈ IP-2.</p>
+
+<p><strong>Conclusion:</strong> Using consistent hashing we do not need to rehash the whole data set. Instead, the new server takes place at a position determined by the hash value on the ring, and part of the objects stored on its successor must be moved. The reorganization is local, as all the other nodes remain unaffected. if you add a machine to the cluster, only the data that needs to live on that machine is moved there; all the other data stays where it is. Because the hash function remains unaffected, the scheme maintains its consistency over the successive evolutions of the network configuration. Like naive hashing, consistent hashing spreads the distributed dictionary almost evenly across the cluster. One point to mention is what happens when a node goes down due to some disaster. In this case consistent hashing alone doesn&rsquo;t meet our requirements of reliability due to loss of data. Therefore there should definetely be replication and high availability which is feasible and out of scope of this introduction. You may want to find good references at the end of these article to find out more.</p>
+
+<h3>Problems with pure consistent hashing</h3>
+
+<p>In a nutshell, the basic consistent hashing has the following problems:</p>
+
+<ul>
+<li><p>There is a huge amount of data to be rehashed.</p></li>
+<li><p>A node picking a range of keys results in one node potentially carrying a larger keyspace than others, therefore still creating disbalance.</p></li>
+<li><p>Leaving/Joining a ring leads to disbalance of data.</p></li>
+<li><p>A more powerful machine needs to process more data than others.</p></li>
+<li><p>A fraction of data to be moved is less unpredictable and much higher.</p></li>
+</ul>
+
+
+<p><strong>Virtual nodes </strong>solve these issues.</p>
+
+<h2>Virtual nodes come to the rescue</h2>
+
+<p>Virtual nodes <strong>minimize changes</strong> <strong>to a node&rsquo;s assigned range</strong> by a number of smaller ranges to a single node. In other words, amount of data to be moved from one physical node to others is minimized. Let&rsquo;s split a real node into a number of virtual nodes. The idea is to build equally-sized subintervals (partitions) for each real server on the ring by dividing the hash-space into P evenly sized partitions, and assign P/N partitions per host. When a node joins/leaves all data from partitions of all real servers are uniformly get assigned to a new server and given back to remaining ones respectively. The number of virtual nodes is picked once during building of the ring  and never changes over the lifetime of the cluster. This ensures that each node picks equal size of data from the full data set, that is P/N and thus our data now are distributed more uniformly. This enforces that the number of virtual nodes must be much higher than the number of real ones.</p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2013/07/ring_hashing.png"><img src="http://ivoroshilin.files.wordpress.com/2013/07/ring_hashing.png" alt="ring_hashing" /></a></p>
+
+<p>Here&rsquo;s a pretty simple java-code of consistency ring&rsquo;s  with virtual nodes.</p>
+
+<p>[sourcecode language=&ldquo;java&rdquo;]
+public class Ring {</p>
+
+<pre><code>private SortedMap&lt;Long, T&gt; ring = new TreeMap&lt;Long, T&gt;();
+private HashMap&lt;String, T&gt; nodeMap = new HashMap&lt;String, T&gt;();
+private MD5Hash hash = new MD5Hash();
+private vNodeCount;
+
+public Ring(int vnodeCount, Collection pNodes) {
+
+    this.vnodeCount = vnodeCount;
+
+    for (T pNode : pNodes) {
+        addNode(ring, nodeMap, pNode, vnodeCount);
+    }
+}
+
+private void addNode(T pNode, int vnodeCount) {
+    for (int i = 0; i &lt; vnodeCount; i++) {
+        ring.put(hash.hash(pNode.toString() + i), pNode);
+    }
+}
+
+    public void removeNode(T node, int vnodeCount) {
+      for (int i = 0; i &lt; vnodeCount; i++) {
+        ring.remove(hash.hash(pNode.toString() + i));
+      }
+    }
+
+private T getNodeByObjectId(String objectId) {
+
+    long hashValue = hash.hash(objectId);
+
+    if (!ring.containsKey(hashValue)) {
+        SortedMap&lt;Long, T&gt; tailMap = ring.tailMap(hashValue);
+        hashValue = tailMap.isEmpty() ? ring.firstKey() : tailMap.firstKey();
+    }
+
+    return ring.get(hashValue);
+}
+
+private static class MD5Hash {
+    MessageDigest instance;
+
+    public MD5Hash() {
+        try {
+            instance = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+        }
+    }
+
+    long hash(String key) {
+        instance.reset();
+        instance.update(key.getBytes());
+        byte[] digest = instance.digest();
+
+        long h = 0;
+        for (int i = 0; i &lt; 4; i++) {
+            h &lt;&lt;= 8;
+            h |= ((int) digest[i]) &amp; 0xFF;
+        }
+        return h;
+    }
+};
+</code></pre>
+
+<p>}
+[/sourcecode]</p>
+
+<h2>Strategies to keep a data structure of the ring and their pros and cons</h2>
+
+<p>There are a few options on where to keep ring&rsquo;s data structure:</p>
+
+<ul>
+<li><p><strong>Central point of coordination:</strong> A dedicated machine keeps a ring and works as a <strong>central load-balancer</strong> which routes request to appropriate nodes.</p></li>
+<li><p>Pros: Very simple implementation. This would be a good fit for not a dynamic system having small number of nodes and/or data.</p></li>
+<li><p>Cons: A big drawback of this approach is scalability and reliability. Stable distributed systems don&rsquo;t have a <strong>single poing of failure.</strong></p></li>
+<li><p><strong><strong>No central point of coordination - full duplication:</strong> </strong>Each node keeps a full copy of the ring. Applicable for stable networks. This option is used e.g. in Amazon Dynamo.</p></li>
+<li><p>Pros: Queries are routed in one hop directly to the appropriate cache-server.</p></li>
+<li><p>Cons: Join/Leave of a server from the ring  requires notification/amendment of all cache-servers in the ring.</p></li>
+<li><p><strong>No central point of coordination - partial duplication: </strong>Each node keeps a partial copy of the ring. This option is direct implementation of CHORD algorithm. In terms of DHT each cache-machine has its predessesor and successor and when receiving a query one checks if it has the key or not. If there&rsquo;s no such a key on that machine, a mapping function is used to determine which of its neighbors (successor and predessesor) has the least distance to that key. Then it forwards the query to its neighbor thas has the least distance. The process continues until a current cache-machine finds the key and sends it back.</p></li>
+<li><p>Pros: For highly dynamic changes the previous option is not a fit due to heavy overhead of gossiping among nodes. Thus this option is the choice in this case.</p></li>
+<li><p>Cons: No direct routing of messages. The complexity of routing a message to the destination node in a ring is O(lg N).</p></li>
+</ul>
+
+
+<h3>Current trends in consistent hashing</h3>
+
+<p>There is a huge boom nowadays of new products that implement this technique. Some of them are: Dynamo, Riak, Cassandra, MemCached, Voldemort, CouchDB, Oracle Coherence, Trackerless Bit-Torrent networks, Web-caching frameworks, Content distribution networks.</p>
+
+<h2>References</h2>
+
+<ul>
+<li><p><a href="http://java.dzone.com/articles/simple-magic-consistent">The Simple Magic of Consistent Hashing</a></p></li>
+<li><p><a href="http://michaelnielsen.org/blog/consistent-hashing/">Consistent hashing</a></p></li>
+<li><p><a href="https://weblogs.java.net/blog/tomwhite/archive/2007/11/consistent_hash.html">Consistent hashing by Tom White</a></p></li>
+<li><p><a href="http://techspot.zzzeek.org/2012/07/07/the-absolutely-simplest-consistent-hashing-example">The Absolutely Simplest Consistent Hashing Example</a></p></li>
+<li><p><a href="http://cloudfundoo.wordpress.com/2012/05/28/distributed-hash-tables-and-consistent-hashing/">Distributed Hash Tables and Consistent Hashing</a></p></li>
+<li><p><a href="http://www.acunu.com/2/post/2012/07/virtual-nodes-strategies.html">Virtual Nodes strategies</a> <a href="http://www.tomkleinpeter.com/2008/03/17/programmers-toolbox-part-3-consistent-hashing/">Programmer&rsquo;s toolbox</a></p></li>
+<li><p><a href="http://www.tomkleinpeter.com/2008/03/17/programmers-toolbox-part-3-consistent-hashing/">Programmer&rsquo;s toolbox: consistent hashing</a></p></li>
+<li><p><a href="http://offthelip.org/?p=149">Distributed Hash Tables</a></p></li>
+<li><p><a href="http://www.lastfm.ru/user/RJ/journal/2007/04/10/rz_libketama_-_a_consistent_hashing_algo_for_memcache_clients">libketama - a consistent hashing algo for memcache clients</a></p></li>
+<li><p><a href="http://www.sarmady.com/siamak/papers/dht-soft-300807.pdf">A Peer-to-Peer Dictionary Using Chord DHT</a></p></li>
+<li><p><a href="http://www.read.seas.harvard.edu/~kohler/class/cs239-w08/decandia07dynamo.pdf">Dynamo: Amazon’s Highly Available Key-value Store</a></p></li>
+<li><p><a href="http://greg.brim.net/page/building_a_consistent_hashing_ring.html">Building a Consistent Hashing Ring</a></p></li>
+</ul>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">vibneiro</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2013-07-15T12:25:09+04:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>15</span><span class='date-suffix'>th</span>, <span class='date-year'>2013</span></span> <span class='time'>12:25 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/octopress/blog/categories/algorithms/'>algorithms</a>, <a class='category' href='/octopress/blog/categories/scalability/'>scalability</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://vibneiro.github.io/blog/2013/07/15/distributed-caching-under-consistent-hashing/" data-via="vibneiro" data-counturl="http://vibneiro.github.io/blog/2013/07/15/distributed-caching-under-consistent-hashing/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/octopress/blog/2013/04/23/java-one-2013/" title="Previous Post: Annual conference Java One 2013">&laquo; Annual conference Java One 2013</a>
+      
+      
+        <a class="basic-alignment right" href="/octopress/blog/2013/09/11/google-code-jam-qualification-round-2013-problem-d-treasure/" title="Next Post: Google Code Jam. Qualification Round 2013. Problem D - Treasure. Solved.">Google Code Jam. Qualification Round 2013. Problem D - Treasure. Solved. &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/octopress/blog/2015/03/04/review-of-service-discovery-solutions/">Service Discovery Solutions in Distributed Systems</a>
+      </li>
+    
+      <li class="post">
+        <a href="/octopress/blog/2015/02/05/toughest-backtracking-problems-in-algorithmic-competitions/">Toughest Backtracking Problems in Algorithmic Competitions</a>
+      </li>
+    
+      <li class="post">
+        <a href="/octopress/blog/2014/12/16/docker-creating-and-testing-httprest-server-on-top-of-akkaspray/">Dockerizing Spray HTTP Server</a>
+      </li>
+    
+      <li class="post">
+        <a href="/octopress/blog/2014/10/30/docker-a-birds-eye-view/">Docker: A Bird&#8217;s-eye View</a>
+      </li>
+    
+      <li class="post">
+        <a href="/octopress/blog/2014/10/12/the-flip-side-of-rule-engines-and-some-tips-on-when-not-use-ones/">The Flip Side of Rule Engines on Example of Drools and Some Valuable Tips</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  
+  <a href="https://github.com/vibneiro">@vibneiro</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'vibneiro',
+            count: 10,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/octopress/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/vibneiro?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Ivan Voroshilin -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'vibneiro';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://vibneiro.github.io/blog/2013/07/15/distributed-caching-under-consistent-hashing/';
+        var disqus_url = 'http://vibneiro.github.io/blog/2013/07/15/distributed-caching-under-consistent-hashing/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

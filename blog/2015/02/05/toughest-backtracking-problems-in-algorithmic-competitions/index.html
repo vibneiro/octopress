@@ -1,0 +1,394 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Toughest Backtracking Problems in Algorithmic Competitions - Ivan Voroshilin&#8217;s Blog.</title>
+  <meta name="author" content="Ivan Voroshilin">
+
+  
+  <meta name="description" content="TL;DR In algorithmic competitions there are frequently problems that can be attacked with recursive backtracking algorithms) - a well-known approach &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://vibneiro.github.io/blog/2015/02/05/toughest-backtracking-problems-in-algorithmic-competitions/">
+  <link href="/octopress/favicon.png" rel="icon">
+  <link href="/octopress/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/octopress/atom.xml" rel="alternate" title="Ivan Voroshilin's Blog." type="application/atom+xml">
+  <script src="/octopress/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/octopress/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/octopress/">Ivan Voroshilin&#8217;s Blog.</a></h1>
+  
+    <h2>Algorithmic contests, distributed systems and software architecture</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/octopress/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="vibneiro.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/octopress/">Blog</a></li>
+  <li><a href="/octopress/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Toughest Backtracking Problems in Algorithmic Competitions</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-02-05T14:53:05+03:00'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>5</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>2:53 pm</span></time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p><a href="https://ivoroshilin.files.wordpress.com/2015/02/backtrack.png"><img src="https://ivoroshilin.files.wordpress.com/2015/02/backtrack.png" alt="backtrack" /></a></p>
+
+<p><strong>TL;DR</strong></p>
+
+<p>In algorithmic competitions there are frequently problems that can be attacked with <a href="//en.wikipedia.org/wiki/Maze_generation_algorithm">recursive backtracking algorithms</a>) - a well-known approach to traverse <a href="//en.wikipedia.org/wiki/Depth-first_search">a search tree</a>). Usually, it is good smell, if there&rsquo;s a goal to analyze all existing combinations of a problem. And, of course, there needs to be the right strategy to meet time limits (e.g. prune it). Here, I&rsquo;ve decided to talk about a few very interesting backtracking problems I came across. I touch on a backtracking approach to develop in competitors, but bear in mind that, not trying to solve a problem by yourself, seeing the answer up front is a waste of time. Furthermore, this is an advanced level, if you haven&rsquo;t practiced a recursive backtracking or DFS, please spend some time on basic backtracking problems and come back.</p>
+
+<h4><strong>1. Chess Puzzler</strong></h4>
+
+<p><a href="https://ivoroshilin.files.wordpress.com/2015/02/chess.jpg"><img src="https://ivoroshilin.files.wordpress.com/2015/02/chess.jpg?w=300" alt="chess" /></a></p>
+
+<blockquote>
+
+> 
+> This is quite an interesting problem I&#8217;ve ever come across, solving it you realize some very important uses cases to consider like memory limits, recursion, combinatorics and optimization techniques. I&#8217;ve seen a chess problem in Skiena&#8217;s  algorithmic book some time ago, but as turned out, this one is very different.
+> 
+> 
+</blockquote>
+
+
+
+
+<blockquote>**Problem Statement:**</blockquote>
+
+
+
+
+<blockquote>
+
+> 
+> The problem is to find all distinct layouts of a set of normal chess pieces on a chess board with dimensions MxN where none of the pieces is in a position to take any of the others. Assume the color of the piece does not matter, and that there are no pawns among the pieces.
+> 
+> 
+</blockquote>
+
+
+
+
+<blockquote>Write a program which takes as input:</blockquote>
+
+
+
+
+<blockquote>•The dimensions of the board: M, N.</blockquote>
+
+
+
+
+<blockquote>•The number of pieces of each type (King, Queen, Bishop, Rook and Knight) to try and place on the board.</blockquote>
+
+
+
+
+<blockquote>
+
+> 
+> As output, the program should yield the number of distinct layouts for which all of the pieces can be placed on the board without threatening each other.
+> 
+> 
+</blockquote>
+
+
+<p><strong>Solution:</strong></p>
+
+<p>We represent each piece as: &ldquo;K&rdquo; - King &ldquo;N&rdquo; - Knight &ldquo;Q&rdquo; - Queen &ldquo;R&rdquo; - Rook &ldquo;B&rdquo; - Bishop M - Horizontal size of the board N - Vertical size of the board S - is a set of remaining pieces. For example: Input: 3×3 board containing 2 Kings and 1 Rook, that is S = [K,K,R]. Answer: 4 layouts.</p>
+
+<blockquote>[![layouts](https://ivoroshilin.files.wordpress.com/2015/02/layouts.png?w=300)](https://ivoroshilin.files.wordpress.com/2015/02/layouts.png)</blockquote>
+
+
+<p>Since we need to find all possible layouts of a chessboard, it can be solved with a recursive backtracking as follows. We take the next piece from S and calculate for it all possible freeSquares on the chess board. Next, by iterating in a loop over freeSquares for current piece, we try to put it in all possible freeSquares. Each loop-step is a potential solution (layout) calls itself recursively by trying to put the next piece for current chess board and so forth until there are no pieces left or freeSquares is empty. Once a piece is placed on the board, we update the set of the free squares by subtracting a set of squares threatened by this piece. In case the set of free squares is empty and there are still any remaining pieces not on the board, there&rsquo;s no solution to this combination and the recursive function backtracks to the upper level in the recursive tree trying the next loop-step. Thereby, we loop over all steps and stop traversing by pruning impossible configuration in advance - as simple as this. There could be some arithmetic optimization with a number of threatened squares for each piece type by taking into account all remaining pieces to be put on the board and number of free squares, calculated in one go. Since the time limit in this problem was 20 mins to solve, I ditched an optimization. Undoubtedly, my solution can be drastically improved by cutting the search tree even more, and hence I leave this to the reader. Moreover you might want to parallelize this recursive task.</p>
+
+<p>Finishing touch, namely what to do about duplicated pieces like 3 queens or 2 knights etc. Honestly, I spent a great deal of time on this while solving. The thing is that, duplicates are interchangeable in terms of different combinations on the chessboard. For instance, for a board of 1x2 length with free squares [x:1,y:1][x:1,y:2], 2 queens can be placed as [Q1][Q2] or [Q2][Q1] yielding 2 different combinations. A simple solution is to put at once all pieces of one type inside a loop-step. From combinatorics, we can enumerate all C(n, k) unique combinations (aka n choose k) in a single loop. Because we recurse, I created a <a href="https://github.com/vibneiro/Combinatorics/blob/master/Combinations.groovy">utility function</a> wrapped around with a standard java iterator which doesn&rsquo;t have to calculate all combinations up front, rather it traverses them lazily by calculating the next one on the fly. The reason for this was a memory taken on each level of the recursion stack to keep an array of all combinations. E.g. C(n, k) = C(1000,5) results into 8,250,291,250,200 elements. There were also some minor issues with Groovy not being able to correctly calculate a difference between 2 lists of coordinate-pairs. Thanks to guys on <a href="http://stackoverflow.com/">stackoverflow </a>who quickly replied with a <a href="http://stackoverflow.com/questions/27216832/groovy-language-how-to-get-difference-between-two-lists-of-pairs">workaround</a>. The full working code  is now available on <a href="https://github.com/vibneiro/ChessBoardSolver">GitHub</a>. If somebody of you have an idea to optimize it somehow, please comment one at the end of this post!</p>
+
+<h4><strong>2. To backtrack or not, that&rsquo;s the question: Meet &ldquo;Mine Sweeper Master&rdquo; from Google code jam 2014</strong></h4>
+
+<p><a href="https://ivoroshilin.files.wordpress.com/2015/02/minesweeper.png"><img src="https://ivoroshilin.files.wordpress.com/2015/02/minesweeper.png" alt="minesweeper" /></a></p>
+
+<p>A tricky and simple at the same time problem was posed last year on Google Code Jam in qualification round - a famous <a href="https://code.google.com/codejam/contest/2974486/dashboard#s=p2">Mine Sweeper master</a>. Yes, the one that comes with Windows operating system - I bet, most of you are aware of! It&rsquo;s well-known solving minesweeper is<strong> NP-complete.</strong> But conditions of the problem don&rsquo;t require you to do that (Please read a problem statement before proceeding).</p>
+
+<p>Solving it with a backtracking is the wrong way, as you are not required to analyze all configurations. The catch is that any correct result is a solution (read carefully a problem  statement)! And thus, you don&rsquo;t have to attack it with backtracking as this pattern is quite costly, aimed at getting all possible solutions. It is possible, but you won&rsquo;t pass the large set most likely. Hence, the simplest idea is to start at (0,0) - upper-left corner and fill an area of <code>N</code> cells  with non-mine space from left to right and top to bottom - line-by-line. Further, fill the rest with mines. Clicking the (0,0) cell should reveal if this is a good solution. If (0,0) is not a mine - we have won. If the square contains a 0, repeat this recursively for all the surrounding squares.</p>
+
+<p>There are also a number of important corner cases to consider for this approach:</p>
+
+<p><strong>Single non-mine</strong></p>
+
+<pre><code>If &lt;code&gt;N=1&lt;/code&gt;, any configuration is a correct solution.
+</code></pre>
+
+<p><strong>Single row or single column</strong></p>
+
+<pre><code>If &lt;code&gt;R=1&lt;/code&gt;, simply fill in the &lt;code&gt;N&lt;/code&gt; non-mines from left-to-right. If &lt;code&gt;C=1&lt;/code&gt;, fill &lt;code&gt;N&lt;/code&gt; rows with a (single) non-mine.
+</code></pre>
+
+<p><strong>Too few non-mines</strong></p>
+
+<pre><code>If &lt;code&gt;N&lt;/code&gt; is even, it must be &gt;= 4.
+
+
+
+
+If &lt;code&gt;N&lt;/code&gt; is odd, it must be &gt;= 9. Also, &lt;code&gt;R&lt;/code&gt; and &lt;code&gt;C&lt;/code&gt; must be &gt;= 3.
+
+
+
+
+Otherwise there's no solution.
+</code></pre>
+
+<p><strong>Can&rsquo;t fill first two rows</strong></p>
+
+<pre><code>If &lt;code&gt;N&lt;/code&gt; is even and you can't fill at least two rows with non-mines, then fill the first two rows with &lt;code&gt;N / 2&lt;/code&gt; non-mines.
+
+
+
+
+If &lt;code&gt;N&lt;/code&gt; is odd and you can't fill at least two rows with non-mines and a third row with 3 non-mines, then fill the first two rows with &lt;code&gt;(N - 3) / 2&lt;/code&gt; non-mines and the third row with 3 non-mines.
+</code></pre>
+
+<p><strong>Single non-mine in the last row</strong></p>
+
+<pre><code>If &lt;code&gt;N % C = 1&lt;/code&gt;, move the final non-mine from the last full row to the next row.
+</code></pre>
+
+<p>I was lazy to depict each one. As can be seen, there is bunch of special cases to consider to make this solution pass.</p>
+
+<h4><strong>3. Another Chess Board Puzzler: &ldquo;King&rdquo; from Google Code Jam 2008</strong></h4>
+
+<p>This is one of the toughest<a href="http://code.google.com/codejam/contest/32008/dashboard#s=p3"> problem</a>s from Google Code Jam. It differs in that <strong>no one solved it</strong> in global Code Jam rounds during the round in which it was posed. Algorithmic competitions is like sports, if you feel you can solve easier problems faster - go for it. Otherwise you&rsquo;re at risk of loosing the competition. Some day next time I will try to attack it too, and for now I say goodbye to  all of you.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">vibneiro</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2015-02-05T14:53:05+03:00'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>5</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>2:53 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/octopress/blog/categories/algorithms/'>algorithms</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://vibneiro.github.io/blog/2015/02/05/toughest-backtracking-problems-in-algorithmic-competitions/" data-via="vibneiro" data-counturl="http://vibneiro.github.io/blog/2015/02/05/toughest-backtracking-problems-in-algorithmic-competitions/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/octopress/blog/2014/12/16/docker-creating-and-testing-httprest-server-on-top-of-akkaspray/" title="Previous Post: Dockerizing Spray HTTP Server">&laquo; Dockerizing Spray HTTP Server</a>
+      
+      
+        <a class="basic-alignment right" href="/octopress/blog/2015/03/04/review-of-service-discovery-solutions/" title="Next Post: Service Discovery Solutions In Distributed Systems">Service Discovery Solutions In Distributed Systems &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/octopress/blog/2015/03/04/review-of-service-discovery-solutions/">Service Discovery Solutions in Distributed Systems</a>
+      </li>
+    
+      <li class="post">
+        <a href="/octopress/blog/2015/02/05/toughest-backtracking-problems-in-algorithmic-competitions/">Toughest Backtracking Problems in Algorithmic Competitions</a>
+      </li>
+    
+      <li class="post">
+        <a href="/octopress/blog/2014/12/16/docker-creating-and-testing-httprest-server-on-top-of-akkaspray/">Dockerizing Spray HTTP Server</a>
+      </li>
+    
+      <li class="post">
+        <a href="/octopress/blog/2014/10/30/docker-a-birds-eye-view/">Docker: A Bird&#8217;s-eye View</a>
+      </li>
+    
+      <li class="post">
+        <a href="/octopress/blog/2014/10/12/the-flip-side-of-rule-engines-and-some-tips-on-when-not-use-ones/">The Flip Side of Rule Engines on Example of Drools and Some Valuable Tips</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  
+  <a href="https://github.com/vibneiro">@vibneiro</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'vibneiro',
+            count: 10,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/octopress/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/vibneiro?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Ivan Voroshilin -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'vibneiro';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://vibneiro.github.io/blog/2015/02/05/toughest-backtracking-problems-in-algorithmic-competitions/';
+        var disqus_url = 'http://vibneiro.github.io/blog/2015/02/05/toughest-backtracking-problems-in-algorithmic-competitions/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Google Jam | Ivan Voroshilin's Blog.]]></title>
+  <link href="http://vibneiro.github.io/blog/categories/google-jam/atom.xml" rel="self"/>
+  <link href="http://vibneiro.github.io/"/>
+  <updated>2015-03-09T12:58:03+03:00</updated>
+  <id>http://vibneiro.github.io/</id>
+  <author>
+    <name><![CDATA[Ivan Voroshilin]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Google Code Jam. Qualification Round 2013. Problem D - Treasure. Solved.]]></title>
+    <link href="http://vibneiro.github.io/blog/2013/09/11/google-code-jam-qualification-round-2013-problem-d-treasure/"/>
+    <updated>2013-09-11T18:34:59+04:00</updated>
+    <id>http://vibneiro.github.io/blog/2013/09/11/google-code-jam-qualification-round-2013-problem-d-treasure</id>
+    <content type="html"><![CDATA[<p><a href="http://ivoroshilin.files.wordpress.com/2013/09/1.jpg"><img src="http://ivoroshilin.files.wordpress.com/2013/09/1.jpg" alt="1" /></a></p>
+
+<p>This was <a href="https://code.google.com/codejam/contest/2270488/dashboard#s=p3&amp;a=3">the problem</a> I wasn&rsquo;t able to optimise with given time constraint in April.  Later I killed half a day to complete it thinking of different algorithms from the graph theory such as Eulerian path
+and Chinese postman problems. I was surprised at that time this problem was put into qualification round as it is really challenging. In order to solve one the graph problem should be refined and modeled properly. During modeling a graph I used to always map only one type of entity to vertices.  As a counter-example a <a href="http://en.wikipedia.org/wiki/Bipartite_graph">Bipartite graph</a> has vertices which are divided into two disjoint sets U and V such that every edge connects a vertex in U to one in V. The solution to this one has nothing to do with Bipartite graph attacking approaches except that there are 2 types of vertices.</p>
+
+<h2><strong>The solution</strong></h2>
+
+<p><strong>1. Check that the number of chests matches the number of corresponding key types</strong>. A simple arithmetic to count. Otherwise there is no solution as we don&rsquo;t have enough keys to open all chests.</p>
+
+<p><strong>2. All vertices in a graph G should be reachable from vertex v0.</strong></p>
+
+<p>Construct a directed graph G=(V,E), where K is a set of all keys and C is a set of all chests:</p>
+
+<ul>
+<li><p>V = {K} U {C} U {0}.</p></li>
+<li><p>{0} = v0 is a starting vertex corresponding to the root vertex. Outgoing edges from it are key(s) given us initially.</p></li>
+<li><p>E = {Set of all directed edges connecting K and C}. (i,j) ∈ E if either {i=chest, j=key} or {i=key, j=chest}</p></li>
+</ul>
+
+
+<p>In simple words we have a directed graph where each vertex is either a chest or a key, directed edges form a  connection in between. We need to check that there&rsquo;s a directed path between vertex v0 and every other vertex ∈ E, otherwise we cannot open all chests and solution is impossible. Note that we need to check directed paths to all key-vertices from v0. This is a standard <a href="http://en.wikipedia.org/wiki/Reachability">single-source reachability</a> and can be done applying a<a href="http://en.wikipedia.org/wiki/Depth-first_search"> Depth-First-Search</a> algorithm:</p>
+
+<p>[sourcecode language=&ldquo;java&rdquo;]
+void dfs(Graph g, int v) {
+marked[v] = true;
+for (int w : g.adj(v)) {
+if (!marked[w]) dfs(G, w);
+}
+ }
+[/sourcecode]</p>
+
+<p>Technically, if there are unmarked vertices, the problem is unsolvable. Time complexity is O(E+V). This check cuts lots of branches saving us time.</p>
+
+<p>Now let&rsquo;s demonstrate the above on a real example. Our treasure trove consists of four chests, and you began with exactly one key of type 1.</p>
+
+<p>See the table with input data:</p>
+
+<pre><code>Chest Number  |  Key Type To Open Chest  |  Key Types Inside
+--------------+--------------------------+------------------
+1             |  1                       |  None
+2             |  1                       |  1, 3
+3             |  2                       |  None
+4             |  3                       |  2
+</code></pre>
+
+<p>Let&rsquo;s draw a graph where v0 is a staring point of traversal (i.e. initial key of type = 1)</p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2013/09/graph.jpg"><img src="http://ivoroshilin.files.wordpress.com/2013/09/graph.jpg" alt="graph" /></a></p>
+
+<p>As depicted there are 2 solvable configurations - &lt;2,1,4,3> and &lt;2,4,3,1>. All paths from v0 to the keys are reachable. The proof of this condition can done by induction and left to the reader.</p>
+
+<p><strong>3. Find a &ldquo;lexicographically smallest&rdquo; solution.</strong> This last condition added real hardness to the problem. If there are multiple solutions then we find a &ldquo;lexicographically smallest&rdquo; way to open the boxes. Each vertex is always traversed from lowest to highest, this can be achieved by constructing a graph using adjacency lists that reflect numbers of keys and chests in increasing order and we subsequently iterate them applying a bit optimized Depth-First-Search. Minimal configuration starts from v0. If we have  >= 1 key initially given, we just have to traverse from all of them increasingly. On each step we always update a number of keys in possession. If we&rsquo;ve run out of keys then we cut the branch and backtrack, starting again where we left off with the next configuration. E.g. opening a chest No. 1 at the very first time will lead to the deadlock (actually this one is a trivial case as it is on step No 1). Such cases are not on critical path and we need backtrack only to the previous calling vertex.</p>
+
+<p><strong>Conclusion:</strong> There are not so many configurations unlike straightforward brute force. Many optimization problems like this one are met in algorithmic contests. Just algorithms and data structures are not sufficient. To pass given time constraint there should be the right strategy to cut unsolvable branches. That&rsquo;s it!</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Google Code Jam 2013 - Qualification Round Finished]]></title>
+    <link href="http://vibneiro.github.io/blog/2013/04/14/google-code-jam-2013-qualification-round-i-have-posted-my-solutions/"/>
+    <updated>2013-04-14T13:09:16+04:00</updated>
+    <id>http://vibneiro.github.io/blog/2013/04/14/google-code-jam-2013-qualification-round-i-have-posted-my-solutions</id>
+    <content type="html"><![CDATA[<p>As many of you know, it&rsquo;s been 10 hours since qualification round finished at Google code jam contest: <a href="http://code.google.com/codejam/">http://code.google.com/codejam/</a></p>
+
+<p>Appx. <strong>21000</strong> participants took part around the world with 25h time available for the round.</p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2013/04/codejam_pic.jpg"><img src="http://ivoroshilin.files.wordpress.com/2013/04/codejam_pic.jpg" alt="codejam_pic" /></a></p>
+
+<p>Here are my solutions to 3 problems given out of 4:</p>
+
+<p><a href="https://github.com/vibneiro/googleJam2013">https://github.com/vibneiro/googleJam2013</a></p>
+
+<p>So, here&rsquo;s the analysis:</p>
+
+<h2>1. Problem A: Tic-Tac-Toe-Tomek</h2>
+
+<p>Works on small and large sets. Just a simple algorithm to implement. The point is to comply with all the conditions. The goal is to find a winner. If there&rsquo;s no winner, it should be draw, otherwise if we have empty cells the game is not completed.</p>
+
+<p>[sourcecode language=&ldquo;java&rdquo;]
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.util.Scanner;</p>
+
+<p>/<em>*
+  @Author: Ivan Voroshilin
+  @Date: April 13 2013
+  Problem A
+  Small and large inputs
+ </em>/
+public class TicTacToeTomek {</p>
+
+<pre><code>private final static char XPLAYER = 'X';
+private final static char OPLAYER = 'O';
+private final static char T = 'T';
+private final static char EMPTY = '.';
+
+private final static String X_WON = "X won";
+private final static String O_WON = "O won";
+private final static String DRAW = "Draw";
+private final static String NOT_COMPLETED = "Game has not completed";
+
+private void solve(Scanner sc, PrintWriter pw) {
+
+    char[][] array = { sc.next().toCharArray(), sc.next().toCharArray(), sc.next().toCharArray(), sc.next().toCharArray() };
+
+    int xXCount = 0;
+    int yXCount = 0;
+    int xOCount = 0;
+    int yOCount = 0;
+
+    int dForwardXCount = 0;
+    int dBackwardXCount = 0;
+    int dForwardOCount = 0;
+    int dBackwardOCount = 0;
+    boolean hasEmptyCells = false;
+    boolean hasWinner = false;
+
+    for(int x = 0; x &lt; array.length; x++) { // 4
+
+        for(int y = 0; y &lt; array.length; y++) { // 4
+
+            //x-X
+            if(array[x][y] == XPLAYER || array[x][y] == T) {
+                xXCount++;
+            }
+
+            //y-X
+            if(array[y][x] == XPLAYER || array[x][y] == T) {
+                yXCount++;
+            }
+
+            //x-O
+            if(array[x][y] == OPLAYER || array[x][y] == T) {
+                xOCount++;
+            }
+
+            //y-O
+            if(array[y][x] == OPLAYER || array[x][y] == T) {
+                yOCount++;
+            }
+
+            if(array[x][y] == EMPTY) {
+                hasEmptyCells = true;
+            }
+        }
+
+        if(!hasWinner &amp;&amp; (xXCount == array.length || yXCount == array.length)) {
+            System.out.println(X_WON);
+            pw.println(X_WON);
+            hasWinner = true;
+        }
+
+        if(!hasWinner &amp;&amp; (xOCount == array.length || yOCount == array.length)) {
+            System.out.println(O_WON);
+            pw.println(O_WON);
+            hasWinner = true;
+        }
+
+        xXCount = yXCount = xOCount = yOCount = 0;
+
+        if(array[x][x] == XPLAYER || array[x][x] == T) {
+            dForwardXCount++;
+        }
+
+        if(array[(array.length - 1 - x)][x] == XPLAYER || array[(array.length - 1 - x)][x] == T) {
+            dBackwardXCount++;
+        }
+
+        if(array[x][x] == OPLAYER || array[x][x] == T) {
+            dForwardOCount++;
+        }
+
+        if(array[(array.length - 1 - x)][x] == OPLAYER || array[(array.length - 1 - x)][x] == T) {
+            dBackwardOCount++;
+        }
+
+    }
+
+    if(!hasWinner &amp;&amp; (dForwardXCount == array.length || dBackwardXCount == array.length)) {
+        System.out.println(X_WON);
+        pw.println(X_WON);
+        hasWinner = true;
+    } else
+    if(!hasWinner &amp;&amp; (dForwardOCount == array.length || dBackwardOCount == array.length)) {
+        System.out.println(O_WON);
+        pw.println(O_WON);
+        hasWinner = true;
+    }
+
+    if(!hasWinner) {
+        if(hasEmptyCells) {
+            System.out.println(NOT_COMPLETED);
+            pw.println(NOT_COMPLETED);
+        } else {
+            System.out.println(DRAW);
+            pw.println(DRAW);
+        }
+    }
+
+}
+
+public static void main(String[] args) throws Exception {
+
+    Scanner sc = new Scanner(new FileReader("A-large.in.txt"));
+    PrintWriter pw = new PrintWriter(new FileWriter("output.txt"));
+
+    int caseCnt = sc.nextInt();
+    sc.nextLine();
+    for (int caseNum = 0; caseNum &lt; caseCnt; caseNum++) {
+        System.out.println("Processing test case " + (caseNum + 1));
+        pw.print("Case #" + (caseNum + 1) + ": ");
+        new TicTacToeTomek().solve(sc, pw);
+
+    }
+
+    pw.flush();
+    pw.close();
+    sc.close();
+}
+</code></pre>
+
+<p>}</p>
+
+<p>[/sourcecode]</p>
+
+<h2>3. Problem C: Fair and Square</h2>
+
+<h3>Small Data Sets</h3>
+
+<p>On small data sets it is a piece of cake - a classical algorithmic task which took me about 10 mins to write the code:</p>
+
+<p>[sourcecode language=&ldquo;java&rdquo;]
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.util.Scanner;</p>
+
+<p>/<em>*
+ @Author: Ivan Voroshilin
+ @Date: April 13 2013
+ Problem C
+ Small inputs
+ </em>/
+public class FairNSquare {</p>
+
+<pre><code>private boolean isPalindrome(long num) {
+    long reversed = 0;
+    long n = num;
+
+    while (n &gt; 0) {
+        reversed = reversed * 10 + n % 10;
+        n /= 10;
+    }
+
+    return num == reversed;
+}
+
+private void solve(Scanner sc, PrintWriter pw) {
+
+    sc.nextLong();
+
+    long a = sc.nextLong();
+    long b = sc.nextLong();
+
+    System.out.println(a);
+    System.out.println(b);
+
+    long number = a;
+    long count = 0;
+
+    while(number &lt;= b) {
+        if(isPalindrome(number)) {
+            double d = Math.sqrt(number);
+            if((d % 1) == 0 &amp;&amp; isPalindrome((long)d)) {
+                count++;
+            }
+        }
+        number++;
+    }
+
+    pw.println(count);
+}
+
+public static void main(String[] args) throws Exception {
+
+    Scanner sc = new Scanner(new FileReader("C-small-attempt0.in.txt"));
+    PrintWriter pw = new PrintWriter(new FileWriter("output.txt"));
+
+    int caseCnt = sc.nextInt();
+    sc.nextLine();
+    for (int caseNum = 0; caseNum &lt; caseCnt; caseNum++) {
+        System.out.println("Processing test case " + (caseNum + 1));
+        pw.print("Case #" + (caseNum + 1) + ": ");
+        new FairNSquare().solve(sc, pw);
+    }
+
+    pw.flush();
+    pw.close();
+    sc.close();
+}
+</code></pre>
+
+<p>}
+[/sourcecode]</p>
+
+<h3>Large Data Sets</h3>
+
+<p>I tried to come up with a solution on large data sets, wrote the code which works using standard Bisection method based on a binary search but struggled to optimize time complexity of square root on BigInteger and palindrome checking on large ranges, I vaguely remember from Euler&rsquo;s project there were some mathematical proofs regarding number 11 and palindromic numbers. There might be some very important facts which would allow to optimize for better performance however I decided not to waste time on it and moved to another problem.</p>
+
+<p>Ok, here&rsquo;s my solution which as been said didn&rsquo;t pass time requirement.</p>
+
+<p>[sourcecode language=&ldquo;java&rdquo;]
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.math.BigInteger;
+import java.util.Scanner;</p>
+
+<p>/<em>*
+ @Author: Ivan Voroshilin
+ @Date: April 13 2013
+ Problem C
+ Large inputs
+ Comment: Poor time complexity
+ </em>/
+public class FairNSquareLarge {</p>
+
+<pre><code>private static boolean isPalindrome(BigInteger num) {
+    BigInteger reversed = BigInteger.ZERO;
+    BigInteger n = num;
+
+    while (n.compareTo(BigInteger.ZERO) &gt; 0) {
+        reversed = reversed.multiply(BigInteger.valueOf(10)).add(n.mod(BigInteger.valueOf(10)));
+        n = n.divide(BigInteger.valueOf(10));
+    }
+
+    return num.compareTo(reversed) == 0;
+}
+
+private static BigInteger sqrt(BigInteger n) {
+    BigInteger a = BigInteger.ONE;
+    BigInteger b = new BigInteger(n.shiftRight(5).add(new BigInteger("8")).toString());
+    while(b.compareTo(a) &gt;= 0) {
+        BigInteger mid = new BigInteger(a.add(b).shiftRight(1).toString());
+        if(mid.multiply(mid).compareTo(n) &gt; 0) b = mid.subtract(BigInteger.ONE);
+        else a = mid.add(BigInteger.ONE);
+    }
+    return a.subtract(BigInteger.ONE);
+}
+
+private void solve(Scanner sc, PrintWriter pw) {
+
+    BigInteger a = sc.nextBigInteger();
+    BigInteger b = sc.nextBigInteger();
+
+    BigInteger number = a;
+    long count = 0;
+
+    while(number.compareTo(b) &lt;= 0) {
+        if(isPalindrome(number)) {
+
+            BigInteger d = sqrt(number);
+
+            if(d.multiply(d).compareTo(number) == 0 &amp;&amp; isPalindrome(d)) {
+                count++;
+            }
+        }
+        number = number.add(BigInteger.ONE);
+        System.out.println(number.toString());
+    }
+
+    pw.println(count);
+}
+
+public static void main(String[] args) throws Exception {
+
+    Scanner sc = new Scanner(new FileReader("C-large-1.in.txt"));
+    PrintWriter pw = new PrintWriter(new FileWriter("output.txt"));
+
+    int caseCnt = sc.nextInt();
+    sc.nextLine();
+    for (int caseNum = 0; caseNum &lt; caseCnt; caseNum++) {
+        System.out.println("Processing test case " + (caseNum + 1));
+        pw.print("Case #" + (caseNum + 1) + ": ");
+        new FairNSquareLarge().solve(sc, pw);
+    }
+
+    pw.flush();
+    pw.close();
+    sc.close();
+}
+</code></pre>
+
+<p>}
+[/sourcecode]</p>
+
+<h2>4. Problem D: Treasure</h2>
+
+<h3>Small Data Sets</h3>
+
+<p>I first did a straightforward BFS with checking for deadlocks and then realized from conditions that there might be several paths to open all chests and the goal is to select minimal path from all sorted lexicographically. Sure, we could make a simple systematic backtracking using all permutations of paths which has a terrible complexity O(n!) and doesn&rsquo;t meet time requirements even on small sets, e.g. N=20 chests where we have 20! distinct permutations (ouch!).</p>
+
+<p>I had time pressure (1h until the end of round) and nixed that idea to proceed but this problem is really challenging. Sorry!</p>
+]]></content>
+  </entry>
+  
+</feed>

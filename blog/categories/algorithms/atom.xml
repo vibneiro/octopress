@@ -1,0 +1,664 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Algorithms | Ivan Voroshilin's Blog.]]></title>
+  <link href="http://vibneiro.github.io/blog/categories/algorithms/atom.xml" rel="self"/>
+  <link href="http://vibneiro.github.io/"/>
+  <updated>2015-03-09T12:58:03+03:00</updated>
+  <id>http://vibneiro.github.io/</id>
+  <author>
+    <name><![CDATA[Ivan Voroshilin]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Toughest Backtracking Problems in Algorithmic Competitions]]></title>
+    <link href="http://vibneiro.github.io/blog/2015/02/05/toughest-backtracking-problems-in-algorithmic-competitions/"/>
+    <updated>2015-02-05T14:53:05+03:00</updated>
+    <id>http://vibneiro.github.io/blog/2015/02/05/toughest-backtracking-problems-in-algorithmic-competitions</id>
+    <content type="html"><![CDATA[<p><a href="https://ivoroshilin.files.wordpress.com/2015/02/backtrack.png"><img src="https://ivoroshilin.files.wordpress.com/2015/02/backtrack.png" alt="backtrack" /></a></p>
+
+<p><strong>TL;DR</strong></p>
+
+<p>In algorithmic competitions there are frequently problems that can be attacked with <a href="//en.wikipedia.org/wiki/Maze_generation_algorithm">recursive backtracking algorithms</a>) - a well-known approach to traverse <a href="//en.wikipedia.org/wiki/Depth-first_search">a search tree</a>). Usually, it is good smell, if there&rsquo;s a goal to analyze all existing combinations of a problem. And, of course, there needs to be the right strategy to meet time limits (e.g. prune it). Here, I&rsquo;ve decided to talk about a few very interesting backtracking problems I came across. I touch on a backtracking approach to develop in competitors, but bear in mind that, not trying to solve a problem by yourself, seeing the answer up front is a waste of time. Furthermore, this is an advanced level, if you haven&rsquo;t practiced a recursive backtracking or DFS, please spend some time on basic backtracking problems and come back.</p>
+
+<h4><strong>1. Chess Puzzler</strong></h4>
+
+<p><a href="https://ivoroshilin.files.wordpress.com/2015/02/chess.jpg"><img src="https://ivoroshilin.files.wordpress.com/2015/02/chess.jpg?w=300" alt="chess" /></a></p>
+
+<blockquote>
+
+> 
+> This is quite an interesting problem I&#8217;ve ever come across, solving it you realize some very important uses cases to consider like memory limits, recursion, combinatorics and optimization techniques. I&#8217;ve seen a chess problem in Skiena&#8217;s  algorithmic book some time ago, but as turned out, this one is very different.
+> 
+> 
+</blockquote>
+
+
+
+
+<blockquote>**Problem Statement:**</blockquote>
+
+
+
+
+<blockquote>
+
+> 
+> The problem is to find all distinct layouts of a set of normal chess pieces on a chess board with dimensions MxN where none of the pieces is in a position to take any of the others. Assume the color of the piece does not matter, and that there are no pawns among the pieces.
+> 
+> 
+</blockquote>
+
+
+
+
+<blockquote>Write a program which takes as input:</blockquote>
+
+
+
+
+<blockquote>•The dimensions of the board: M, N.</blockquote>
+
+
+
+
+<blockquote>•The number of pieces of each type (King, Queen, Bishop, Rook and Knight) to try and place on the board.</blockquote>
+
+
+
+
+<blockquote>
+
+> 
+> As output, the program should yield the number of distinct layouts for which all of the pieces can be placed on the board without threatening each other.
+> 
+> 
+</blockquote>
+
+
+<p><strong>Solution:</strong></p>
+
+<p>We represent each piece as: &ldquo;K&rdquo; - King &ldquo;N&rdquo; - Knight &ldquo;Q&rdquo; - Queen &ldquo;R&rdquo; - Rook &ldquo;B&rdquo; - Bishop M - Horizontal size of the board N - Vertical size of the board S - is a set of remaining pieces. For example: Input: 3×3 board containing 2 Kings and 1 Rook, that is S = [K,K,R]. Answer: 4 layouts.</p>
+
+<blockquote>[![layouts](https://ivoroshilin.files.wordpress.com/2015/02/layouts.png?w=300)](https://ivoroshilin.files.wordpress.com/2015/02/layouts.png)</blockquote>
+
+
+<p>Since we need to find all possible layouts of a chessboard, it can be solved with a recursive backtracking as follows. We take the next piece from S and calculate for it all possible freeSquares on the chess board. Next, by iterating in a loop over freeSquares for current piece, we try to put it in all possible freeSquares. Each loop-step is a potential solution (layout) calls itself recursively by trying to put the next piece for current chess board and so forth until there are no pieces left or freeSquares is empty. Once a piece is placed on the board, we update the set of the free squares by subtracting a set of squares threatened by this piece. In case the set of free squares is empty and there are still any remaining pieces not on the board, there&rsquo;s no solution to this combination and the recursive function backtracks to the upper level in the recursive tree trying the next loop-step. Thereby, we loop over all steps and stop traversing by pruning impossible configuration in advance - as simple as this. There could be some arithmetic optimization with a number of threatened squares for each piece type by taking into account all remaining pieces to be put on the board and number of free squares, calculated in one go. Since the time limit in this problem was 20 mins to solve, I ditched an optimization. Undoubtedly, my solution can be drastically improved by cutting the search tree even more, and hence I leave this to the reader. Moreover you might want to parallelize this recursive task.</p>
+
+<p>Finishing touch, namely what to do about duplicated pieces like 3 queens or 2 knights etc. Honestly, I spent a great deal of time on this while solving. The thing is that, duplicates are interchangeable in terms of different combinations on the chessboard. For instance, for a board of 1x2 length with free squares [x:1,y:1][x:1,y:2], 2 queens can be placed as [Q1][Q2] or [Q2][Q1] yielding 2 different combinations. A simple solution is to put at once all pieces of one type inside a loop-step. From combinatorics, we can enumerate all C(n, k) unique combinations (aka n choose k) in a single loop. Because we recurse, I created a <a href="https://github.com/vibneiro/Combinatorics/blob/master/Combinations.groovy">utility function</a> wrapped around with a standard java iterator which doesn&rsquo;t have to calculate all combinations up front, rather it traverses them lazily by calculating the next one on the fly. The reason for this was a memory taken on each level of the recursion stack to keep an array of all combinations. E.g. C(n, k) = C(1000,5) results into 8,250,291,250,200 elements. There were also some minor issues with Groovy not being able to correctly calculate a difference between 2 lists of coordinate-pairs. Thanks to guys on <a href="http://stackoverflow.com/">stackoverflow </a>who quickly replied with a <a href="http://stackoverflow.com/questions/27216832/groovy-language-how-to-get-difference-between-two-lists-of-pairs">workaround</a>. The full working code  is now available on <a href="https://github.com/vibneiro/ChessBoardSolver">GitHub</a>. If somebody of you have an idea to optimize it somehow, please comment one at the end of this post!</p>
+
+<h4><strong>2. To backtrack or not, that&rsquo;s the question: Meet &ldquo;Mine Sweeper Master&rdquo; from Google code jam 2014</strong></h4>
+
+<p><a href="https://ivoroshilin.files.wordpress.com/2015/02/minesweeper.png"><img src="https://ivoroshilin.files.wordpress.com/2015/02/minesweeper.png" alt="minesweeper" /></a></p>
+
+<p>A tricky and simple at the same time problem was posed last year on Google Code Jam in qualification round - a famous <a href="https://code.google.com/codejam/contest/2974486/dashboard#s=p2">Mine Sweeper master</a>. Yes, the one that comes with Windows operating system - I bet, most of you are aware of! It&rsquo;s well-known solving minesweeper is<strong> NP-complete.</strong> But conditions of the problem don&rsquo;t require you to do that (Please read a problem statement before proceeding).</p>
+
+<p>Solving it with a backtracking is the wrong way, as you are not required to analyze all configurations. The catch is that any correct result is a solution (read carefully a problem  statement)! And thus, you don&rsquo;t have to attack it with backtracking as this pattern is quite costly, aimed at getting all possible solutions. It is possible, but you won&rsquo;t pass the large set most likely. Hence, the simplest idea is to start at (0,0) - upper-left corner and fill an area of <code>N</code> cells  with non-mine space from left to right and top to bottom - line-by-line. Further, fill the rest with mines. Clicking the (0,0) cell should reveal if this is a good solution. If (0,0) is not a mine - we have won. If the square contains a 0, repeat this recursively for all the surrounding squares.</p>
+
+<p>There are also a number of important corner cases to consider for this approach:</p>
+
+<p><strong>Single non-mine</strong></p>
+
+<pre><code>If &lt;code&gt;N=1&lt;/code&gt;, any configuration is a correct solution.
+</code></pre>
+
+<p><strong>Single row or single column</strong></p>
+
+<pre><code>If &lt;code&gt;R=1&lt;/code&gt;, simply fill in the &lt;code&gt;N&lt;/code&gt; non-mines from left-to-right. If &lt;code&gt;C=1&lt;/code&gt;, fill &lt;code&gt;N&lt;/code&gt; rows with a (single) non-mine.
+</code></pre>
+
+<p><strong>Too few non-mines</strong></p>
+
+<pre><code>If &lt;code&gt;N&lt;/code&gt; is even, it must be &gt;= 4.
+
+
+
+
+If &lt;code&gt;N&lt;/code&gt; is odd, it must be &gt;= 9. Also, &lt;code&gt;R&lt;/code&gt; and &lt;code&gt;C&lt;/code&gt; must be &gt;= 3.
+
+
+
+
+Otherwise there's no solution.
+</code></pre>
+
+<p><strong>Can&rsquo;t fill first two rows</strong></p>
+
+<pre><code>If &lt;code&gt;N&lt;/code&gt; is even and you can't fill at least two rows with non-mines, then fill the first two rows with &lt;code&gt;N / 2&lt;/code&gt; non-mines.
+
+
+
+
+If &lt;code&gt;N&lt;/code&gt; is odd and you can't fill at least two rows with non-mines and a third row with 3 non-mines, then fill the first two rows with &lt;code&gt;(N - 3) / 2&lt;/code&gt; non-mines and the third row with 3 non-mines.
+</code></pre>
+
+<p><strong>Single non-mine in the last row</strong></p>
+
+<pre><code>If &lt;code&gt;N % C = 1&lt;/code&gt;, move the final non-mine from the last full row to the next row.
+</code></pre>
+
+<p>I was lazy to depict each one. As can be seen, there is bunch of special cases to consider to make this solution pass.</p>
+
+<h4><strong>3. Another Chess Board Puzzler: &ldquo;King&rdquo; from Google Code Jam 2008</strong></h4>
+
+<p>This is one of the toughest<a href="http://code.google.com/codejam/contest/32008/dashboard#s=p3"> problem</a>s from Google Code Jam. It differs in that <strong>no one solved it</strong> in global Code Jam rounds during the round in which it was posed. Algorithmic competitions is like sports, if you feel you can solve easier problems faster - go for it. Otherwise you&rsquo;re at risk of loosing the competition. Some day next time I will try to attack it too, and for now I say goodbye to  all of you.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Project Euler: A List of Interesting Problems]]></title>
+    <link href="http://vibneiro.github.io/blog/2014/09/15/project-euler-a-list-of-interesting-problems/"/>
+    <updated>2014-09-15T10:17:39+04:00</updated>
+    <id>http://vibneiro.github.io/blog/2014/09/15/project-euler-a-list-of-interesting-problems</id>
+    <content type="html"><![CDATA[<p><a href="https://ivoroshilin.files.wordpress.com/2014/09/euler.jpg"><img src="http://ivoroshilin.files.wordpress.com/2014/09/euler.jpg" alt="Euler" /></a></p>
+
+<p>If you are not aware a website called <a href="http://projecteuler.net/">Project Euler</a> has hundreds of algorithmic problems. Despite that most of them are related to math it&rsquo;s a good resource to warm up/train your brain in coding. You can use any programming language that you want and track progress.</p>
+
+<p>Here&rsquo;s a list of interesting Euler&rsquo;s problems in terms of diversity from my point of view with the aim to improve not only math but also programming skils (No/ Problem Titile):</p>
+
+<p>11 - Largest product in a grid
+12 - Highly divisible triangular number
+15 - Lattice paths
+24 - Lexicographic permutations
+54 - Poker hands
+59 - XOR decryption
+62 - Cubic permutations
+67 - Maximum path sum II
+68 - Magic 5-gon ring
+78 - Coin partitions
+79 - Passcode derivation
+81 - Path sum: two ways
+86 - Cuboid route
+94 - Almost equilateral triangles
+96 - Sudoku
+100 - Arranged probability
+107 - Minimal network
+109 - Darts
+114 - Counting block combinations I
+115 - Counting block combinations II
+116 - Red, green or blue tiles
+117 - Red, green, and blue tiles
+145 - How many reversible numbers are there below one-billion?
+148 - Exploring Pascal&rsquo;s triangle
+150 - Searching a triangular array for a sub-triangle having minimum-sum
+154 - Exploring Pascal&rsquo;s pyramid
+165 - Intersections
+166 - Criss Cross
+181 - Investigating in how many ways objects of two different colours can be grouped
+182 - RSA encryption
+186 - Connectedness of a network
+194 - Coloured Configurations
+208 - Robot Walks
+209 - Circular Logic
+232 - The Race
+267 - Billionaire
+275 - Balanced Sculptures
+280 - Ant and seeds</p>
+
+<p>Note that it is highly recommended to solve all Euler&rsquo;s problems one by one because solving a previous problem has a clue to the next ones.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[MinHash Algorithm or How to Quickly Find Similarities Among 2 Documents]]></title>
+    <link href="http://vibneiro.github.io/blog/2013/10/07/minhash-algorithm-or-how-to-quickly-find-similarities-among-2-documents/"/>
+    <updated>2013-10-07T02:57:48+04:00</updated>
+    <id>http://vibneiro.github.io/blog/2013/10/07/minhash-algorithm-or-how-to-quickly-find-similarities-among-2-documents</id>
+    <content type="html"><![CDATA[<p>MinHash is a technique from <a href="http://en.wikipedia.org/wiki/Locality_sensitive_hashing">Locality Sensitive Hashing</a> allowing to find similarities among 2 sets. This is a  buzzword frequently met in Data Mining  and Data Science fields of CS. What surprising is that this method was invented in 1997 and used in <a href="http://en.wikipedia.org/wiki/AltaVista">AltaVista</a> web-search engine back in the 90s to find similarities among web-documents and it also can be used to:</p>
+
+<ul>
+<li><p>Find duplicates</p></li>
+<li><p>Near duplicate image detection</p></li>
+<li><p>Near neighbor search</p></li>
+</ul>
+
+
+<p>Basically the algorithm can be applied to anything that can be presented by numbers.</p>
+
+<p>Let&rsquo;s start with a bit of math from theory of probability and statistics.</p>
+
+<p>Define a formula of two sets <em>A</em> and <em>B:</em></p>
+
+<p><img src="http://upload.wikimedia.org/math/1/8/6/186c7f4e83da32e889d606140fae25a0.png" alt=" J(A,B) = |A \cap B|\over|A \cup B|." /></p>
+
+<p>This is so-called  a <a href="http://en.wikipedia.org/wiki/Jaccard_index">Jaccard coefficient</a>.</p>
+
+<p>Where: J ∈ [0..1]</p>
+
+<p>j = 0 - if <em><em><em>A</em> ∩ </em>B = 0, that is 2 sets are disjoint meaning there are no similarities</em></p>
+
+<p><em>j = 1 - if __A</em> ∩ <em>B</em> = A = <em>B, that is 2 sets are identical.</em>
+__</p>
+
+<p>A, B are more similar when their <strong>Jaccard coefficient</strong> is closer to 1.</p>
+
+<p>This simple formula is cumbersome if the sets are quite large, e.g. 2 web-documents of more than 1MB in size. Ouch, that&rsquo;s too much. 1MB of text-data is <strong>1,048,576 characters </strong>provided that 1 ASCII char = 8 bits (of course for unicode charset it is greater).</p>
+
+<p>Now that we understand a bit of theory let&rsquo;s try to apply hashing to Jaccard coefficient. Everywhere I hear hashing it always leads to randomized algorithms.</p>
+
+<p>Ok, let&rsquo;s move on. The main idea is that similar objects hash to the same bucket. This follows from the fact that <strong>probability of collision higher for similar objects</strong>.</p>
+
+<p>Here we give an example for 2 sets A and B but the algorithm can be applied to any number of sets.</p>
+
+<ol>
+<li><p>Essentially, we need to construct a set of independent hash functions &lt;h1,h2,h3,&hellip;hk> <strong>randomly</strong>.  <em>k</em> = O(1/ε2), ε > 0 such that the expected error of the estimate is at most ε. For example, 400 hashes would be required to estimate <em>J</em>(<em>A</em>,<em>B</em>) with an expected error less than or equal to .05. So, k can be varied to increase/decrease the likelihood of false negatives.</p></li>
+<li><p>Next we initialize for each set A and B the <img src="http://www.toao.com/equations/49e83e4884bd478aecc7fb7e0a7e9477.png" alt="" /> value to infinity.</p></li>
+<li><p>For each element s in both sets A and B we compute the element&rsquo;s hash:</p></li>
+</ol>
+
+
+<p><img src="http://www.toao.com/equations/8664800335406d60ca14c723421d994c.png" alt="" /> such as: If <img src="http://www.toao.com/equations/d3d634b0636790f7fd707ad50b85b0a5.png" alt="" /> then <img src="http://www.toao.com/equations/f08914f853c4fcd405dafd052d100c5a.png" alt="" />.</p>
+
+<p>Eventually we should have <img src="http://www.toao.com/equations/49e83e4884bd478aecc7fb7e0a7e9477.png" alt="" /> for both sets A and B.</p>
+
+<ol>
+<li><p>If 2 sets A and B are similar then the probability P(  <img src="http://www.toao.com/equations/49e83e4884bd478aecc7fb7e0a7e9477.png" alt="" />A =  <img src="http://www.toao.com/equations/49e83e4884bd478aecc7fb7e0a7e9477.png" alt="" />B) = |<em>A</em> ∩ <em>B</em>| / |A U B|- is high and <strong>it</strong> <strong>is the actual Jaccard coefficient!</strong></p></li>
+<li><p>We calculated  <img src="http://www.toao.com/equations/49e83e4884bd478aecc7fb7e0a7e9477.png" alt="" /> statistics to estimate how similar are these 2 sets. General formula is: Similarity = identical <img src="http://www.toao.com/equations/49e83e4884bd478aecc7fb7e0a7e9477.png" alt="" />s / k</p></li>
+</ol>
+
+
+<p>In real world this requires considering more thoroughly different parameters, hash-functions etc. However, to demonstrate the algorithm I wrote a simple java code:</p>
+
+<p>[sourcecode language=&ldquo;java&rdquo;]
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;</p>
+
+<p>public class LSHMinHash<T> {</p>
+
+<pre><code>private final int hashes[];
+private final int numOfHashes;
+private final int numOfSets;
+private final Set&lt;T&gt; setA;
+private final Set&lt;T&gt; setB;
+private final Map&lt;T, boolean[]&gt; matrix;
+private final int[][] minHashes;
+
+public LSHMinHash(double e, Set&lt;T&gt; setA, Set&lt;T&gt; setB){
+    this.numOfHashes = (int)(1 / (e * e));
+    this.numOfSets = 2;
+    this.setA = setA;
+    this.setB = setB;
+    matrix = buildSetMatrix(setA, setB);
+    minHashes = initMinHashes(numOfSets, numOfHashes);
+    hashes = computeHashes(numOfHashes);
+}
+
+private Map&lt;T,boolean[]&gt; buildSetMatrix(Set&lt;T&gt; setA, Set&lt;T&gt; setB) {
+
+    Map&lt;T,boolean[]&gt; matrix = new HashMap&lt;T,boolean[]&gt;();
+
+    for(T element : setA){
+        matrix.put(element, new boolean[] { true, false } );
+    }
+
+    for(T element : setB){
+        if(matrix.containsKey(element)){
+            matrix.put(element, new boolean[] { true, true } );
+        }else if(!matrix.containsKey(element)){
+            matrix.put(element, new boolean[] { false, true } );
+        }
+    }
+
+    return matrix;
+}
+
+private int[][] initMinHashes(int numOfSets, int numOfHashes) {
+    int[][] minHashes = new int[numOfSets][numOfHashes];
+
+    for (int i = 0; i &lt; numOfSets; i++) {
+        for (int j = 0; j &lt; numOfHashes; j++) {
+            minHashes[i][j] = Integer.MAX_VALUE;
+        }
+    }
+    return minHashes;
+}
+
+private int[] computeHashes(int numOfHashes) {
+    int[] hashes = new int[numOfHashes];
+    Random r = new Random(31);
+
+    for (int i = 0; i &lt; numOfHashes; i++){
+        int a = (int)r.nextInt();
+        int b = (int)r.nextInt();
+        int c = (int)r.nextInt();
+        hashes[i] = (int)((a * (a * b * c &gt;&gt; 4) + a * a * b * c + c) &amp; 0xFFFFFFFF);
+    }
+    return hashes;
+}
+
+private void computeMinHashForSet(Set&lt;T&gt; set, int setIndex){
+    int hashIndex = 0;
+
+    for(T element : matrix.keySet()) {
+        for (int i = 0; i &lt; numOfHashes; i++) {
+            if(set.contains(element)) {
+                int hashValue = hashes[hashIndex];
+                if (hashValue &lt; minHashes[setIndex][hashIndex]) {
+                    minHashes[setIndex][hashIndex] = hashValue;
+                }
+            }
+        }
+        hashIndex++;
+    }
+}
+
+private double computeMinHash(int[][] minHashes, int numOfHashes) {
+    int identicalMinHashes = 0;
+    for (int i = 0; i &lt; numOfHashes; i++){
+        if (minHashes[0][i] == minHashes[1][i]) {
+            identicalMinHashes++;
+        }
+    }
+    return (1.0 * identicalMinHashes) / numOfHashes;
+}
+
+public double findSimilarities() {
+    computeMinHashForSet(setA, 0);
+    computeMinHashForSet(setB, 1);
+    return computeMinHash(minHashes, numOfHashes);
+}
+
+public static void main(String[] args){
+    Set&lt;String&gt; setA = new HashSet&lt;String&gt;();
+    setA.add("THIS");
+    setA.add("IS ");
+    setA.add("THE");
+    setA.add("CASE");
+
+    Set&lt;String&gt; setB = new HashSet&lt;String&gt;();
+    setB.add("THAT");
+    setB.add("IS ");
+    setB.add("THE");
+    setB.add("CASE");
+
+    double errorFactor = 0.001;
+
+    LSHMinHash&lt;String&gt; minHash = new LSHMinHash&lt;String&gt;(errorFactor, setA, setB);
+    System.out.println(minHash.findSimilarities());
+}
+</code></pre>
+
+<p>}
+[/sourcecode]</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[How Automatic Sharding Works or Consistent Hashing Under the Hood]]></title>
+    <link href="http://vibneiro.github.io/blog/2013/07/15/distributed-caching-under-consistent-hashing/"/>
+    <updated>2013-07-15T12:25:09+04:00</updated>
+    <id>http://vibneiro.github.io/blog/2013/07/15/distributed-caching-under-consistent-hashing</id>
+    <content type="html"><![CDATA[<h2>Preface</h2>
+
+<p>Here we&rsquo;re going to talk primarily about Consistent hashing. This technique involves such concepts as adaptive load balancing, routing, partitioning in distributed computing. There are many articles on the internet on this technique (refer to the list of references for some of them) but I haven&rsquo;t found information about how and where to keep the ring of hashes, thus I&rsquo;ve decided to describe some options with pros and cons. In order to make this post more clear for a wider audience I will first try to write a brief introduction of what this is all about and tell about <strong>the ring storage strategies</strong> at the end of this issue. So if you&rsquo;re already familiar with the algorithm you may want to skip over the main stuff and move on to the last chapter for pros and cons of descibed approaces.</p>
+
+<h3>Distributed cache and straightforward uniform load balancing</h3>
+
+<p>Key-value stores are extremely fast in single search-queries. A very popular one is a distributed hash table (DHT) kept in a fully decentralized manner, and thus particularly adapted to unstable networks where nodes can leave or join at any moment. Note that DHT is not suitable for range-queries albeit and I will probably write a separate post about special data structures responsible for that. Now let&rsquo;s consider a classic case - you have a cluster of cache-servers where you load-balance a huge data set uniformly. To be able to determine on which node a pair &lt;key, value> should be kept we use a simple hash-mapping:</p>
+
+<blockquote>Cache machine = hash(o) mod n where: n - number of machines in a cluster and o is an object to put/lookup.</blockquote>
+
+
+<p>What happens when a number of machines changes at runtime? You might add/remove a number of machines in a cluster for e.g. scalability reasons, a failure or whatever.  The change triggers moving almost all objects to new locations due to rehashing.  Each key-value pair will get reallocated completely across the cluster. You’ll end up moving a fraction<strong> n/(n+1)</strong> of your data to new machines. Indeed, this fact degrades all of the advantages of distributed hash tables. We need somehow to avoid this messy remapping. This is where consistent hashing comes in.</p>
+
+<h2>Consistent hashing</h2>
+
+<p>The main idea is to hash both data ids and cache-machines to a numeric range using the same hash-function. E.g. in Java a primitive type int has a number range of values between -231 to 231-1.  Assume the interval is [0,  231-1] for simplicity (java primitives cannot be unsigned). Now let&rsquo;s join starting and ending points together of this interval to create a ring so the values wrap around. We do not have 231 -1 available servers, the large size of the ring being merely intended to avoid collisions. As a hash function a good choise is either be e.g. MD5 or SHA-1 algorithm. As a machine&rsquo;s number we can take its IP-address and apply that hash function to it. By taking from the result the first 8 bytes we can map it to our ring [0,231-1].</p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2013/07/ring_range1.png"><img src="http://ivoroshilin.files.wordpress.com/2013/07/ring_range1.png" alt="ring_range" /></a></p>
+
+<p>Both the nodes and the keys are mapped to the same range on the ring. Ok, now we need to understand how to identify on this ring which data ids belong to which server&rsquo;s IP. It&rsquo;s really simple, we just move clockwise starting from zero (starting point on the ring) following the main rule of consistent hashing: If IP-n1 and IP-n2 are 2 adjacent nodes on the ring all data ids on the ring between them belong to IP-n1. That&rsquo;s it. <a href="http://ivoroshilin.files.wordpress.com/2013/07/ring_mapping1.png"><img src="http://ivoroshilin.files.wordpress.com/2013/07/ring_mapping1.png" alt="ring_mapping" /></a></p>
+
+<p>As depicted: { Id1, Id2, Id3} ∈ IP-3; {Id4} ∈ IP-1; ∅ ∈ IP-2.</p>
+
+<p><strong>Conclusion:</strong> Using consistent hashing we do not need to rehash the whole data set. Instead, the new server takes place at a position determined by the hash value on the ring, and part of the objects stored on its successor must be moved. The reorganization is local, as all the other nodes remain unaffected. if you add a machine to the cluster, only the data that needs to live on that machine is moved there; all the other data stays where it is. Because the hash function remains unaffected, the scheme maintains its consistency over the successive evolutions of the network configuration. Like naive hashing, consistent hashing spreads the distributed dictionary almost evenly across the cluster. One point to mention is what happens when a node goes down due to some disaster. In this case consistent hashing alone doesn&rsquo;t meet our requirements of reliability due to loss of data. Therefore there should definetely be replication and high availability which is feasible and out of scope of this introduction. You may want to find good references at the end of these article to find out more.</p>
+
+<h3>Problems with pure consistent hashing</h3>
+
+<p>In a nutshell, the basic consistent hashing has the following problems:</p>
+
+<ul>
+<li><p>There is a huge amount of data to be rehashed.</p></li>
+<li><p>A node picking a range of keys results in one node potentially carrying a larger keyspace than others, therefore still creating disbalance.</p></li>
+<li><p>Leaving/Joining a ring leads to disbalance of data.</p></li>
+<li><p>A more powerful machine needs to process more data than others.</p></li>
+<li><p>A fraction of data to be moved is less unpredictable and much higher.</p></li>
+</ul>
+
+
+<p><strong>Virtual nodes </strong>solve these issues.</p>
+
+<h2>Virtual nodes come to the rescue</h2>
+
+<p>Virtual nodes <strong>minimize changes</strong> <strong>to a node&rsquo;s assigned range</strong> by a number of smaller ranges to a single node. In other words, amount of data to be moved from one physical node to others is minimized. Let&rsquo;s split a real node into a number of virtual nodes. The idea is to build equally-sized subintervals (partitions) for each real server on the ring by dividing the hash-space into P evenly sized partitions, and assign P/N partitions per host. When a node joins/leaves all data from partitions of all real servers are uniformly get assigned to a new server and given back to remaining ones respectively. The number of virtual nodes is picked once during building of the ring  and never changes over the lifetime of the cluster. This ensures that each node picks equal size of data from the full data set, that is P/N and thus our data now are distributed more uniformly. This enforces that the number of virtual nodes must be much higher than the number of real ones.</p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2013/07/ring_hashing.png"><img src="http://ivoroshilin.files.wordpress.com/2013/07/ring_hashing.png" alt="ring_hashing" /></a></p>
+
+<p>Here&rsquo;s a pretty simple java-code of consistency ring&rsquo;s  with virtual nodes.</p>
+
+<p>[sourcecode language=&ldquo;java&rdquo;]
+public class Ring {</p>
+
+<pre><code>private SortedMap&lt;Long, T&gt; ring = new TreeMap&lt;Long, T&gt;();
+private HashMap&lt;String, T&gt; nodeMap = new HashMap&lt;String, T&gt;();
+private MD5Hash hash = new MD5Hash();
+private vNodeCount;
+
+public Ring(int vnodeCount, Collection pNodes) {
+
+    this.vnodeCount = vnodeCount;
+
+    for (T pNode : pNodes) {
+        addNode(ring, nodeMap, pNode, vnodeCount);
+    }
+}
+
+private void addNode(T pNode, int vnodeCount) {
+    for (int i = 0; i &lt; vnodeCount; i++) {
+        ring.put(hash.hash(pNode.toString() + i), pNode);
+    }
+}
+
+    public void removeNode(T node, int vnodeCount) {
+      for (int i = 0; i &lt; vnodeCount; i++) {
+        ring.remove(hash.hash(pNode.toString() + i));
+      }
+    }
+
+private T getNodeByObjectId(String objectId) {
+
+    long hashValue = hash.hash(objectId);
+
+    if (!ring.containsKey(hashValue)) {
+        SortedMap&lt;Long, T&gt; tailMap = ring.tailMap(hashValue);
+        hashValue = tailMap.isEmpty() ? ring.firstKey() : tailMap.firstKey();
+    }
+
+    return ring.get(hashValue);
+}
+
+private static class MD5Hash {
+    MessageDigest instance;
+
+    public MD5Hash() {
+        try {
+            instance = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+        }
+    }
+
+    long hash(String key) {
+        instance.reset();
+        instance.update(key.getBytes());
+        byte[] digest = instance.digest();
+
+        long h = 0;
+        for (int i = 0; i &lt; 4; i++) {
+            h &lt;&lt;= 8;
+            h |= ((int) digest[i]) &amp; 0xFF;
+        }
+        return h;
+    }
+};
+</code></pre>
+
+<p>}
+[/sourcecode]</p>
+
+<h2>Strategies to keep a data structure of the ring and their pros and cons</h2>
+
+<p>There are a few options on where to keep ring&rsquo;s data structure:</p>
+
+<ul>
+<li><p><strong>Central point of coordination:</strong> A dedicated machine keeps a ring and works as a <strong>central load-balancer</strong> which routes request to appropriate nodes.</p></li>
+<li><p>Pros: Very simple implementation. This would be a good fit for not a dynamic system having small number of nodes and/or data.</p></li>
+<li><p>Cons: A big drawback of this approach is scalability and reliability. Stable distributed systems don&rsquo;t have a <strong>single poing of failure.</strong></p></li>
+<li><p><strong><strong>No central point of coordination - full duplication:</strong> </strong>Each node keeps a full copy of the ring. Applicable for stable networks. This option is used e.g. in Amazon Dynamo.</p></li>
+<li><p>Pros: Queries are routed in one hop directly to the appropriate cache-server.</p></li>
+<li><p>Cons: Join/Leave of a server from the ring  requires notification/amendment of all cache-servers in the ring.</p></li>
+<li><p><strong>No central point of coordination - partial duplication: </strong>Each node keeps a partial copy of the ring. This option is direct implementation of CHORD algorithm. In terms of DHT each cache-machine has its predessesor and successor and when receiving a query one checks if it has the key or not. If there&rsquo;s no such a key on that machine, a mapping function is used to determine which of its neighbors (successor and predessesor) has the least distance to that key. Then it forwards the query to its neighbor thas has the least distance. The process continues until a current cache-machine finds the key and sends it back.</p></li>
+<li><p>Pros: For highly dynamic changes the previous option is not a fit due to heavy overhead of gossiping among nodes. Thus this option is the choice in this case.</p></li>
+<li><p>Cons: No direct routing of messages. The complexity of routing a message to the destination node in a ring is O(lg N).</p></li>
+</ul>
+
+
+<h3>Current trends in consistent hashing</h3>
+
+<p>There is a huge boom nowadays of new products that implement this technique. Some of them are: Dynamo, Riak, Cassandra, MemCached, Voldemort, CouchDB, Oracle Coherence, Trackerless Bit-Torrent networks, Web-caching frameworks, Content distribution networks.</p>
+
+<h2>References</h2>
+
+<ul>
+<li><p><a href="http://java.dzone.com/articles/simple-magic-consistent">The Simple Magic of Consistent Hashing</a></p></li>
+<li><p><a href="http://michaelnielsen.org/blog/consistent-hashing/">Consistent hashing</a></p></li>
+<li><p><a href="https://weblogs.java.net/blog/tomwhite/archive/2007/11/consistent_hash.html">Consistent hashing by Tom White</a></p></li>
+<li><p><a href="http://techspot.zzzeek.org/2012/07/07/the-absolutely-simplest-consistent-hashing-example">The Absolutely Simplest Consistent Hashing Example</a></p></li>
+<li><p><a href="http://cloudfundoo.wordpress.com/2012/05/28/distributed-hash-tables-and-consistent-hashing/">Distributed Hash Tables and Consistent Hashing</a></p></li>
+<li><p><a href="http://www.acunu.com/2/post/2012/07/virtual-nodes-strategies.html">Virtual Nodes strategies</a> <a href="http://www.tomkleinpeter.com/2008/03/17/programmers-toolbox-part-3-consistent-hashing/">Programmer&rsquo;s toolbox</a></p></li>
+<li><p><a href="http://www.tomkleinpeter.com/2008/03/17/programmers-toolbox-part-3-consistent-hashing/">Programmer&rsquo;s toolbox: consistent hashing</a></p></li>
+<li><p><a href="http://offthelip.org/?p=149">Distributed Hash Tables</a></p></li>
+<li><p><a href="http://www.lastfm.ru/user/RJ/journal/2007/04/10/rz_libketama_-_a_consistent_hashing_algo_for_memcache_clients">libketama - a consistent hashing algo for memcache clients</a></p></li>
+<li><p><a href="http://www.sarmady.com/siamak/papers/dht-soft-300807.pdf">A Peer-to-Peer Dictionary Using Chord DHT</a></p></li>
+<li><p><a href="http://www.read.seas.harvard.edu/~kohler/class/cs239-w08/decandia07dynamo.pdf">Dynamo: Amazon’s Highly Available Key-value Store</a></p></li>
+<li><p><a href="http://greg.brim.net/page/building_a_consistent_hashing_ring.html">Building a Consistent Hashing Ring</a></p></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[What You Should Know About Locality of Reference]]></title>
+    <link href="http://vibneiro.github.io/blog/2013/02/06/know-your-locality-of-reference-some-techniques-for-keeping-data-in-the-cpu-cache/"/>
+    <updated>2013-02-06T17:18:51+04:00</updated>
+    <id>http://vibneiro.github.io/blog/2013/02/06/know-your-locality-of-reference-some-techniques-for-keeping-data-in-the-cpu-cache</id>
+    <content type="html"><![CDATA[<h2><a href="http://ivoroshilin.com/2013/02/06/know-your-locality-of-reference-some-techniques-for-keeping-data-in-the-cpu-cache/"> </a></h2>
+
+<h2><strong>Introduction</strong></h2>
+
+<p>In the previous post we briefly described what might stand beyond asymptotic analysis of algorithms and data structures when it comes to empirical measurements of performance. In this post I continue talking about latter considering more closely the impact of memory hierarchies of modern computer architectures. A few basic data structures are taken for comparison of locality utilization with short explanations. Further, we&rsquo;re going to touch on effective utilization of CPU-cache by showing some techniques to improve performance.  All benchmarks are done on JVM HotSpot 6. Due to different algorithms of GC and memory allocation, the techniques might not / partly work on other platforms, but the idea to improve locality should work on the majority of modern CPU-architectures. I advice that every software developer should read <a href="http://t.co/nTxQAgzB">this excellent article</a> (especially &ldquo;sections 3 and 6) to better understand CPU-caches and memory and then come back to this post.</p>
+
+<h2><strong>Memory hierarchies and difference in speed</strong></h2>
+
+<p>There&rsquo;s a huge gap between the speed of CPUs and the latency of DRAM-memory. CPU&rsquo;s cache-memory is roughly 100 times faster than main memory which in turn 10k times faster than secondary storage. Thus, the processor will have to wait more than 100 cycles every time the memory is needed to deliver data. This problem is solved by sticking smaller, faster memory chips in between the processor and the main memory. These chips are called CPU-caches. Techniques in which cache is heavily utilized during the execution of a program can dramatically impact the performance of algorithms. Caches improve performance when memory accesses exhibit locality.</p>
+
+<h2>**Locality of reference</h2>
+
+<p>**</p>
+
+<p>Hierarchical memory is a hardware optimization that takes the benefits of spatial and temporal locality and can be used on several levels of the memory hierarchy. <a href="http://en.wikipedia.org/wiki/Locality_of_reference">Locality</a> describes the same value or related <a href="http://www.wikipedia.org/wiki/Computer_storage">storage</a> locations being frequently accessed from memory. There are two basic types of locality:</p>
+
+<ul>
+<li><p>Temporal locality refers to the reuse of specific data and/or resources within relatively small time durations. Access latency can be avoided by reusing the data fetched previously. With poor temporal locality, data that could have been reused is lost from a working area and must be fetched again. Loops over the same small amount of data result in excellent temporal locality.</p></li>
+<li><p>Spatial locality refers to the use of data elements within relatively close storage locations. The concept that likelihood of referencing a resource is higher if a resource near it was just referenced. With this type of locality, access latency can be amortized by retrieving multiple data items in a single fetch cycle and using good spatial locality to ensure that all the data fetched is useful. If the data is not useful, because of poor spatial locality, then more fetch cycles will be required to process the same data. A simple array is a good candidate for this type of locality.</p></li>
+</ul>
+
+
+<p>When high speed is needed it is very important to understand what data structures exhibit better locality of CPU-caches and how to improve one. Good locality is a good speed of data access affecting both throughput and latency. For CPU-caches the most common replacement policy is to fetch blocks from slower memory (DRAM) into fast memory (SRAM) 1 cache-line at a time when block of memory is touched by a program which doesn&rsquo;t reside in the cache, a kind of LRU that might differ not significantly from pure LRU-policy. Note that how the program-level locality is mapped onto memory-level depends on the compiler&rsquo;s layout of objects and on the allocator&rsquo;s placement of those objects in memory in the operating system. Most compilers layout data in consecutive areas of memory. Normally, compilers preserve the order of variables which helps to achieve a good locality on a program-level. The conventional wisdom is that programs spend 90% of their time executing 10% of the code.  By placing the most common instructions and data in the fast-but-small storage, while leaving the rest in the slow-but-large storage, we can lower the average memory-access time of a program significantly.  Next, we consider locality effects on classic algorithms and data structures with techniques.</p>
+
+<h2><strong>Arrays, linked lists and locality</strong></h2>
+
+<p>Now let&rsquo;s consider a simple analysis by example exhibiting poor locality of reference.</p>
+
+<p>I run the benchmark on an Intel Core 2 Duo CPU 3GHz using:</p>
+
+<ul>
+<li><p>JDK: 1.6.0_27</p></li>
+<li><p>JVM-params: -Xms512m -Xmx512m -XX:CompileThreshold=1 -XX:newRatio=128                                      -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode</p></li>
+</ul>
+
+
+<p>The benchmark was taken 100 times in a row to calculate average values. I performed a simple test by appending a single element in a loop N times to the end of a LinkedList and then did the same for an ArrayList. Mind you, the complexity of the operation on both collections is equal O(1).</p>
+
+<p><img src="http://ivoroshilin.files.wordpress.com/2013/02/graph.png" alt="graph" /></p>
+
+<p>As can be seen on the graph ArrayList is a winner.  In this benchmark I tried to do the same test with preallocated array for the first test and by default for the second one. Of course, for non-preallocated ArrayList total time grew higher, but nevertheless one has beaten LinkedList with the above figures.</p>
+
+<p>The thing is that <em>a dynamic array</em> allocates all elements contiguously in memory usually in a single continuous block of memory whereas a linked list contains its elements fragmentally. That is, nodes of a linked list can be scattered in arbitrary areas of memory. As have been said in the beginning caches of modern processors don&rsquo;t like random access to memory. Therefore, sequential access in arrays is faster than on linked lists on many machines, because they have a very good <a href="http://en.wikipedia.org/wiki/Locality_of_reference">locality of reference</a> and thus make good use of data caching.</p>
+
+<p>Recall that LinkedList will have to do additionally a memory allocation on each insertion of a new element. But, wait, access to elements in the memory takes longer than from CPU-cache. You can check this using a bit different test by iterating these two data structures from left to right with the exact parameters as above and see. Again, the iteration time is slower in LinkedList due to locality of reference. The ArrayList<code> </code>elements are closer together, so there are fewer <a href="https://secure.wikimedia.org/wikipedia/en/wiki/CPU_cache">cache misses</a> indeed. Even when the linked list does not include any cache-misses at all, the traversal will be slower. This is because visiting each item incurs the cost of two dereference operations instead of the single one that the array list needs, taking double the amount of time. Cache-misses are major selling point of the array backed up structures. Linked structures are potentially a cache miss on each node making the O(n) iteration actually significantly slower. The append (insert at end) time for ArrayList is <em>amortized</em> O(1), meaning that it&rsquo;s O(1) on average when doing a long series of appends. Any one of them may be O(n), but that one doubles the capacity so the next <em>n</em> of them can use pre-allocated space.  Of course, periodically the ArrayList&rsquo;s backing array may need to be resized (which won&rsquo;t be the case if it was chosen with a large enough initial capacity), but since the array grows exponentially the amortized cost will be low, and is bounded by O(lg n) complexity.</p>
+
+<p>Further optimizations:</p>
+
+<ul>
+<li><p><a href="http://en.wikipedia.org/wiki/Unrolled_linked_list">Unrolled LinkedList</a> - it can dramatically increase <a href="http://en.wikipedia.org/wiki/CPU_cache">cache</a> performance, while decreasing the memory.</p></li>
+<li><p><a href="http://java.dzone.com/articles/false-sharing">False sharing</a> - cache-optimization for arrays in SMP CPU-architecture - another technique used in multithreading.</p></li>
+</ul>
+
+
+<p><strong>The bottom line: </strong>Arrays are superior at exploiting CPU-cache in a sequential access unlike linked data structures. Thanks to spatial locality! The problem of linked lists is when the node is accessed, the whole cache line is fetched from main memory, yet it is mostly not used.</p>
+
+<h3>Large array and better cache utilization</h3>
+
+<p>Large Arrays in Hot Spot JVM are placed in contiguous memory as many other memory allocators try to do. However, all their elements might not fit into cache. An alternative is to split the array up into smaller ones so that each one fits into CPU-cache. The size of such a small array depends on many factors. I&rsquo;ll try to explain how to tune array-sizes in later posts.</p>
+
+<h2>**Hash tables</h2>
+
+<p>**</p>
+
+<p>Hash tables exhibit poor locality of reference, because they cause access patterns that jump around, this can trigger <a href="http://en.wikipedia.org/wiki/CPU_cache">microprocessor cache</a> misses that cause long delays. Randomization causes bad locality. Compact data structures such as arrays searched with <a href="http://en.wikipedia.org/wiki/Linear_search">linear search</a> may be faster in some cases. An interesting article <a href="http://www.siam.org/meetings/alenex05/papers/13gheileman.pdf">&ldquo;How caching affects hashing&rdquo;</a> reveals the fact that the number of collisions a hash table produces, may lead to superior performance. In this paper three basic approaches were analyzed: linear probing, linear double hashing and exponential double hashing. All three make up so called <strong>Open addressing</strong> or <strong>closed hashing</strong> method of collision resolution. Open addressing can lead to more concise tables yielding a better cache performance than classing bucketing. But as the load factor starts to get high its performance might downgrade. The experimental analysis provided that, assuming a nearly uniform distribution, linear probing outperforms double hashing due to the fact that the percentage of the cache hits per probe is higher in the case of linear probing provided that its data set is not very large. However, If data doesn&rsquo;t fit into memory, linear probing may work slower. A great minus of this type of implementation is that the operation of deletion in open addressing is very expensive because of its O(n) worst time complexity on the array.</p>
+
+<p>If a hash table tends to have many collisions, we can apply &ldquo;Unrolled linked list&rdquo; described above. Ideally each linked list&rsquo;s element should occupy one cache line on the appropriate cache level.  A great minus is that the size of a cache line is CPU-architecture-bound.</p>
+
+<h2><strong>Binary Search Trees</strong></h2>
+
+<p>Here I consider classic unbalanced Binary Searh trees (aka BST), Red-Black trees, AVL-trees and Splay-trees (aka The splay tree of Sleator and Tarjan) in terms of locality. Each tree should be applied in a different situation. All of these are linked data structures made up of nodes. Each node have 3 pointers: parent, left child and right child. Locality in trees is a tendency to look for the same element multiple times. Note that a set of operations exhibits no locality if every element is equally likely to be accessed at each point. Therefore, we&rsquo;re going to consider here only those cases where elements are accessed multiple times.</p>
+
+<h3>Splay-trees</h3>
+
+<p><a href="http://en.wikipedia.org/wiki/Splay_tree">Splay-trees</a> are the most intriguing due to the fact that they simply have the ability to optimize themselves for better locality of reference. The tree performs rotations of nodes to the root every time an access is made. Also note that they are not balanced trees as BST. Despite the fact that a worst case bound on the Splay-operation is O(n) for n nodes the amortized time for a set of operations is quite efficient (O(lg n)) which is compensated by these rotations and locality. Here we are talking about &ldquo;top-down splay-tree&rdquo; variation. Splay trees are the winner of locality among these ones when insertions happen quite frequently in sorted order and later accesses are sequential. Frequently used nodes are located near the root. In almost all other cases, because of the high cost of maintaining self-adjustment. Random insertion is the worst among all 4 data structures due to splay-overhear. On the contrary, the AVL-tree outperforms a Splay-trees when the search-key distribution is uniform and very frequent.</p>
+
+<h3>AVL-trees</h3>
+
+<p>If insertions happen quite frequently in sorted order the locality of <a href="http://en.wikipedia.org/wiki/AVL_tree">AVL-trees</a> is quite good provided that later accesses are more random. In other cases it may carry out far more comparisons than other trees which deteriorates its performance and therefore may stand behind others. The search performance of the AVL-tree is almost always better than that of Splay-trees.</p>
+
+<h3>Red-Black trees</h3>
+
+<p>If input is randomly ordered but sequential traversal happen frequently then <a href="http://en.wikipedia.org/wiki/Red%E2%80%93black_tree">red-black trees</a> should be used. Random insertions perform better over AVL-trees. However, for pathological inputs AVL-operations work faster than in Red-Black tree due to the stricter rule of rebalancing.</p>
+
+<h3>Unbalanced BSTs</h3>
+
+<p>When randomly ordered input can be relied upon it is best to use this basic kind of <a href="http://en.wikipedia.org/wiki/Binary_search_tree">binary search trees</a> over others. It requires the least extra overhead unlike the other tree-structures.</p>
+
+<p><strong>The bottom line:  </strong>Input set and distribution of data both matter. In addition to locality, sometimes other factors are much more important for performance.</p>
+
+<p>For random input set: BST - is the fastest among 4 remaining ones, then goes Red-Black tree, then goes the AVL-tree and the slowest one is a Splay-tree.</p>
+
+<p>Splay trees take much of the CPU-time mostly on rotations where they lose in speed. There are some optimizations towards fewer splay-operations for certain cases, but they are not discussed in this blog. Unbalanced BSTs are simpler in implementation and have lighter operations and only best work against random data.</p>
+
+<p>For pathological input set the picture is the opposite - from fastest to slowest: Splay-tree due to high locality, AVL-tree, Red-Black tree, BST - is extremely slow as it is unbalanced.</p>
+
+<p>As this series is devoted solely to locality and some facts mentioned are not directly related to it, in later series I&rsquo;ll try to give some empirical benchmarks on overall performance of these structures to make the picture more clear.</p>
+
+<h2><strong>Conclusion</strong></h2>
+
+<p>it is worth noting that <em>hidden constants</em> caused by locality of reference might differ depending on computer architecture and implementation. Multiple operations on data structures with non-sequential access to elements cause poor performance. Asymptotic comparison of cache-friendly data structures with others is meaningless because in reality the result can be quite the contrary. Defragmented location of related elements in memory causes CPU cache-losses which can drastically degrade overall performance. Especially It is sensible on large data volumes where low latency is at premium. Mind you, algorithm with good locality is not sufficient for better performance. A number of operations, their cost including CPU-time do matter too.</p>
+]]></content>
+  </entry>
+  
+</feed>

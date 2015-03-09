@@ -9,7 +9,8 @@
   <meta name="author" content="Ivan Voroshilin">
 
   
-  <meta name="description" content=" Blog Archives Recent Posts GitHub Repos Status updating... @vibneiro on GitHub Google+ ">
+  <meta name="description" content="Today I participated in a conference in Moscow/Russia devoted to new technologies in the software world.
+For those who attended, thanks for your &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -66,7 +67,1040 @@
       <div class="blog-index">
   
   
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/octopress/blog/2015/03/04/review-of-service-discovery-solutions/">Service Discovery Solutions in Distributed Systems</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-03-04T22:25:26+03:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>4</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>10:25 pm</span></time>
+        
+           | <a href="/octopress/blog/2015/03/04/review-of-service-discovery-solutions/#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io/blog/2015/03/04/review-of-service-discovery-solutions/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Today I participated in a conference in Moscow/Russia devoted to new technologies in the software world.
+For those who attended, thanks for your questions! I&rsquo;m attaching here the presentation:</p>
+
+<p>[slideshare id=45437768&amp;doc=servicedicsoveryindistributedsystems-150304130959-conversion-gate01&amp;w=650&amp;h=500]</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/octopress/blog/2015/02/05/toughest-backtracking-problems-in-algorithmic-competitions/">Toughest Backtracking Problems in Algorithmic Competitions</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-02-05T14:53:05+03:00'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>5</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>2:53 pm</span></time>
+        
+           | <a href="/octopress/blog/2015/02/05/toughest-backtracking-problems-in-algorithmic-competitions/#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io/blog/2015/02/05/toughest-backtracking-problems-in-algorithmic-competitions/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="https://ivoroshilin.files.wordpress.com/2015/02/backtrack.png"><img src="https://ivoroshilin.files.wordpress.com/2015/02/backtrack.png" alt="backtrack" /></a></p>
+
+<p><strong>TL;DR</strong></p>
+
+<p>In algorithmic competitions there are frequently problems that can be attacked with <a href="//en.wikipedia.org/wiki/Maze_generation_algorithm">recursive backtracking algorithms</a>) - a well-known approach to traverse <a href="//en.wikipedia.org/wiki/Depth-first_search">a search tree</a>). Usually, it is good smell, if there&rsquo;s a goal to analyze all existing combinations of a problem. And, of course, there needs to be the right strategy to meet time limits (e.g. prune it). Here, I&rsquo;ve decided to talk about a few very interesting backtracking problems I came across. I touch on a backtracking approach to develop in competitors, but bear in mind that, not trying to solve a problem by yourself, seeing the answer up front is a waste of time. Furthermore, this is an advanced level, if you haven&rsquo;t practiced a recursive backtracking or DFS, please spend some time on basic backtracking problems and come back.</p>
+
+<h4><strong>1. Chess Puzzler</strong></h4>
+
+<p><a href="https://ivoroshilin.files.wordpress.com/2015/02/chess.jpg"><img src="https://ivoroshilin.files.wordpress.com/2015/02/chess.jpg?w=300" alt="chess" /></a></p>
+
+<blockquote>
+
+> 
+> This is quite an interesting problem I&#8217;ve ever come across, solving it you realize some very important uses cases to consider like memory limits, recursion, combinatorics and optimization techniques. I&#8217;ve seen a chess problem in Skiena&#8217;s  algorithmic book some time ago, but as turned out, this one is very different.
+> 
+> 
+</blockquote>
+
+
+
+
+<blockquote>**Problem Statement:**</blockquote>
+
+
+
+
+<blockquote>
+
+> 
+> The problem is to find all distinct layouts of a set of normal chess pieces on a chess board with dimensions MxN where none of the pieces is in a position to take any of the others. Assume the color of the piece does not matter, and that there are no pawns among the pieces.
+> 
+> 
+</blockquote>
+
+
+
+
+<blockquote>Write a program which takes as input:</blockquote>
+
+
+
+
+<blockquote>•The dimensions of the board: M, N.</blockquote>
+
+
+
+
+<blockquote>•The number of pieces of each type (King, Queen, Bishop, Rook and Knight) to try and place on the board.</blockquote>
+
+
+
+
+<blockquote>
+
+> 
+> As output, the program should yield the number of distinct layouts for which all of the pieces can be placed on the board without threatening each other.
+> 
+> 
+</blockquote>
+
+
+<p><strong>Solution:</strong></p>
+
+<p>We represent each piece as: &ldquo;K&rdquo; - King &ldquo;N&rdquo; - Knight &ldquo;Q&rdquo; - Queen &ldquo;R&rdquo; - Rook &ldquo;B&rdquo; - Bishop M - Horizontal size of the board N - Vertical size of the board S - is a set of remaining pieces. For example: Input: 3×3 board containing 2 Kings and 1 Rook, that is S = [K,K,R]. Answer: 4 layouts.</p>
+
+<blockquote>[![layouts](https://ivoroshilin.files.wordpress.com/2015/02/layouts.png?w=300)](https://ivoroshilin.files.wordpress.com/2015/02/layouts.png)</blockquote>
+
+
+<p>Since we need to find all possible layouts of a chessboard, it can be solved with a recursive backtracking as follows. We take the next piece from S and calculate for it all possible freeSquares on the chess board. Next, by iterating in a loop over freeSquares for current piece, we try to put it in all possible freeSquares. Each loop-step is a potential solution (layout) calls itself recursively by trying to put the next piece for current chess board and so forth until there are no pieces left or freeSquares is empty. Once a piece is placed on the board, we update the set of the free squares by subtracting a set of squares threatened by this piece. In case the set of free squares is empty and there are still any remaining pieces not on the board, there&rsquo;s no solution to this combination and the recursive function backtracks to the upper level in the recursive tree trying the next loop-step. Thereby, we loop over all steps and stop traversing by pruning impossible configuration in advance - as simple as this. There could be some arithmetic optimization with a number of threatened squares for each piece type by taking into account all remaining pieces to be put on the board and number of free squares, calculated in one go. Since the time limit in this problem was 20 mins to solve, I ditched an optimization. Undoubtedly, my solution can be drastically improved by cutting the search tree even more, and hence I leave this to the reader. Moreover you might want to parallelize this recursive task.</p>
+
+<p>Finishing touch, namely what to do about duplicated pieces like 3 queens or 2 knights etc. Honestly, I spent a great deal of time on this while solving. The thing is that, duplicates are interchangeable in terms of different combinations on the chessboard. For instance, for a board of 1x2 length with free squares [x:1,y:1][x:1,y:2], 2 queens can be placed as [Q1][Q2] or [Q2][Q1] yielding 2 different combinations. A simple solution is to put at once all pieces of one type inside a loop-step. From combinatorics, we can enumerate all C(n, k) unique combinations (aka n choose k) in a single loop. Because we recurse, I created a <a href="https://github.com/vibneiro/Combinatorics/blob/master/Combinations.groovy">utility function</a> wrapped around with a standard java iterator which doesn&rsquo;t have to calculate all combinations up front, rather it traverses them lazily by calculating the next one on the fly. The reason for this was a memory taken on each level of the recursion stack to keep an array of all combinations. E.g. C(n, k) = C(1000,5) results into 8,250,291,250,200 elements. There were also some minor issues with Groovy not being able to correctly calculate a difference between 2 lists of coordinate-pairs. Thanks to guys on <a href="http://stackoverflow.com/">stackoverflow </a>who quickly replied with a <a href="http://stackoverflow.com/questions/27216832/groovy-language-how-to-get-difference-between-two-lists-of-pairs">workaround</a>. The full working code  is now available on <a href="https://github.com/vibneiro/ChessBoardSolver">GitHub</a>. If somebody of you have an idea to optimize it somehow, please comment one at the end of this post!</p>
+
+<h4><strong>2. To backtrack or not, that&rsquo;s the question: Meet &ldquo;Mine Sweeper Master&rdquo; from Google code jam 2014</strong></h4>
+
+<p><a href="https://ivoroshilin.files.wordpress.com/2015/02/minesweeper.png"><img src="https://ivoroshilin.files.wordpress.com/2015/02/minesweeper.png" alt="minesweeper" /></a></p>
+
+<p>A tricky and simple at the same time problem was posed last year on Google Code Jam in qualification round - a famous <a href="https://code.google.com/codejam/contest/2974486/dashboard#s=p2">Mine Sweeper master</a>. Yes, the one that comes with Windows operating system - I bet, most of you are aware of! It&rsquo;s well-known solving minesweeper is<strong> NP-complete.</strong> But conditions of the problem don&rsquo;t require you to do that (Please read a problem statement before proceeding).</p>
+
+<p>Solving it with a backtracking is the wrong way, as you are not required to analyze all configurations. The catch is that any correct result is a solution (read carefully a problem  statement)! And thus, you don&rsquo;t have to attack it with backtracking as this pattern is quite costly, aimed at getting all possible solutions. It is possible, but you won&rsquo;t pass the large set most likely. Hence, the simplest idea is to start at (0,0) - upper-left corner and fill an area of <code>N</code> cells  with non-mine space from left to right and top to bottom - line-by-line. Further, fill the rest with mines. Clicking the (0,0) cell should reveal if this is a good solution. If (0,0) is not a mine - we have won. If the square contains a 0, repeat this recursively for all the surrounding squares.</p>
+
+<p>There are also a number of important corner cases to consider for this approach:</p>
+
+<p><strong>Single non-mine</strong></p>
+
+<pre><code>If &lt;code&gt;N=1&lt;/code&gt;, any configuration is a correct solution.
+</code></pre>
+
+<p><strong>Single row or single column</strong></p>
+
+<pre><code>If &lt;code&gt;R=1&lt;/code&gt;, simply fill in the &lt;code&gt;N&lt;/code&gt; non-mines from left-to-right. If &lt;code&gt;C=1&lt;/code&gt;, fill &lt;code&gt;N&lt;/code&gt; rows with a (single) non-mine.
+</code></pre>
+
+<p><strong>Too few non-mines</strong></p>
+
+<pre><code>If &lt;code&gt;N&lt;/code&gt; is even, it must be &gt;= 4.
+
+
+
+
+If &lt;code&gt;N&lt;/code&gt; is odd, it must be &gt;= 9. Also, &lt;code&gt;R&lt;/code&gt; and &lt;code&gt;C&lt;/code&gt; must be &gt;= 3.
+
+
+
+
+Otherwise there's no solution.
+</code></pre>
+
+<p><strong>Can&rsquo;t fill first two rows</strong></p>
+
+<pre><code>If &lt;code&gt;N&lt;/code&gt; is even and you can't fill at least two rows with non-mines, then fill the first two rows with &lt;code&gt;N / 2&lt;/code&gt; non-mines.
+
+
+
+
+If &lt;code&gt;N&lt;/code&gt; is odd and you can't fill at least two rows with non-mines and a third row with 3 non-mines, then fill the first two rows with &lt;code&gt;(N - 3) / 2&lt;/code&gt; non-mines and the third row with 3 non-mines.
+</code></pre>
+
+<p><strong>Single non-mine in the last row</strong></p>
+
+<pre><code>If &lt;code&gt;N % C = 1&lt;/code&gt;, move the final non-mine from the last full row to the next row.
+</code></pre>
+
+<p>I was lazy to depict each one. As can be seen, there is bunch of special cases to consider to make this solution pass.</p>
+
+<h4><strong>3. Another Chess Board Puzzler: &ldquo;King&rdquo; from Google Code Jam 2008</strong></h4>
+
+<p>This is one of the toughest<a href="http://code.google.com/codejam/contest/32008/dashboard#s=p3"> problem</a>s from Google Code Jam. It differs in that <strong>no one solved it</strong> in global Code Jam rounds during the round in which it was posed. Algorithmic competitions is like sports, if you feel you can solve easier problems faster - go for it. Otherwise you&rsquo;re at risk of loosing the competition. Some day next time I will try to attack it too, and for now I say goodbye to  all of you.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/octopress/blog/2014/12/16/docker-creating-and-testing-httprest-server-on-top-of-akkaspray/">Dockerizing Spray HTTP Server</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2014-12-16T01:22:04+03:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>16</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>1:22 am</span></time>
+        
+           | <a href="/octopress/blog/2014/12/16/docker-creating-and-testing-httprest-server-on-top-of-akkaspray/#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io/blog/2014/12/16/docker-creating-and-testing-httprest-server-on-top-of-akkaspray/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="https://ivoroshilin.files.wordpress.com/2014/10/docker.png"><img src="https://ivoroshilin.files.wordpress.com/2014/10/docker.png" alt="docker" /></a><a href="https://ivoroshilin.files.wordpress.com/2014/12/spray.png"><img src="https://ivoroshilin.files.wordpress.com/2014/12/spray.png" alt="spray" /></a></p>
+
+<p>This is the continuation of the <a href="http://ivoroshilin.com/2014/10/30/docker-a-birds-eye-view/">previous article</a>. This series shows how simple it is to create a lightweight HTTP-server based on <a href="http://spray.io">Spray</a> framework, put it into a <a href="https://docs.docker.com">Docker</a>-image and run multiple instances on any single machine requiring no dependencies.</p>
+
+<h3>Implementing a lightweight RESTful HTTP Service</h3>
+
+<p>The whole project can be found on <a href="https://github.com/vibneiro/DockerSprayHttpServer">GitHub</a>. For impatient, git pull it and jump right to the next section. We&rsquo;re going to use Scala and Akka framework along with <a href="http://www.scala-sbt.org">SBT</a> build tool. From Spray framework we will use a <a href="http://spray.io/documentation/1.1-SNAPSHOT/spray-routing/">spray-routing</a> module which has a simple routing DSL for elegantly defining RESTful web services and it works on top of a <a href="http://spray.io/documentation/1.1-SNAPSHOT/spray-can/#spray-can">spray-can HTTP Server</a><em>.</em></p>
+
+<p>Ok, let&rsquo;s get started.</p>
+
+<p>[code language=&ldquo;scala&rdquo;]
+import akka.actor.{ActorSystem}
+import spray.routing.<em>
+import akka.util.Timeout
+import scala.concurrent.duration.</em>
+import scala.util.{Failure, Success}</p>
+
+<p>object HttpServer extends App with SimpleRoutingApp {</p>
+
+<p>  implicit val actorSystem = ActorSystem()
+  implicit val timeout = Timeout(1.second)
+  import actorSystem.dispatcher</p>
+
+<p>  startServer(interface = &ldquo;localhost&rdquo;, port = 8080) {</p>
+
+<pre><code>// GET /welcome --&gt; "Welcome!" response
+get {
+  path("welcome") {
+    complete {
+      &lt;html&gt;
+        &lt;h1&gt;"Welcome!&lt;/h1&gt;
+        &lt;p&gt;&lt;a href="/octopress/terminate?method=post"&gt;Stop the server&lt;/a&gt;&lt;/p&gt;
+      &lt;/html&gt;
+    }
+  }
+} ~
+  // POST /terminate --&gt; "The server is stopping" response
+  (post | parameter('method ! "post")) {
+    path("terminate") {
+      complete {
+        actorSystem.scheduler.scheduleOnce(1.second)(actorSystem.shutdown())(actorSystem.dispatcher)
+        "The server is stopping"
+      }
+    }
+  }
+</code></pre>
+
+<p>  }
+    .onComplete {
+    case Success(b) =>
+      println(&ldquo;Successfully started&rdquo;)
+    case Failure(ex) =>
+      println(ex.getMessage)
+      actorSystem.shutdown()
+  }
+}
+[/code]</p>
+
+<p>The REST API is as follows:</p>
+
+<ul>
+<li><p>GET/welcome &ndash;> responds with a &ldquo;Welcome&rdquo; and Post-hyperlink.</p></li>
+<li><p>POST/terminate &ndash;> will stop the server.</p></li>
+</ul>
+
+
+<p>DSL describing this API is inside of a method <strong>startServer.  </strong>And that&rsquo;s it!</p>
+
+<p>I didn&rsquo;t want to show the full power of Spray because this article is solely about Docker.</p>
+
+<p>Let&rsquo;s run it and check:</p>
+
+<p>[code language=&ldquo;bash&rdquo;]
+curl <a href="http://localhost:8080/welcome">http://localhost:8080/welcome</a>
+[/code]</p>
+
+<h3>Dockerizing the server</h3>
+
+<p>Because the Docker Engine uses Linux-specific kernel features, I&rsquo;m going to use <a href="https://docs.docker.com/installation/mac/">lightweight virtual machine</a> to run it on OS X. If you too, just download it, install and run - easy peasy. Just make sure before dockerizing that you&rsquo;ve set the following 3 env variables for connecting your client to the VM:</p>
+
+<p>[code language=&ldquo;bash&rdquo;]
+export DOCKER_HOST=tcp://192.168.59.103:2376
+export DOCKER_CERT_PATH=/Users/ivan/.boot2docker/certs/boot2docker-vm
+export DOCKER_TLS_VERIFY=1
+[/code]</p>
+
+<p>The remaining stuff doesn&rsquo;t differ much.</p>
+
+<p>We use a <a href="https://registry.hub.docker.com/u/dockerfile/java/">trusted automated java build</a> (OpenJDK Java 7 JRE Dockerfile) as a base of our image.</p>
+
+<p>First, you will need to create a Dockerfile for the image in your project:</p>
+
+<pre><code># Our base image
+FROM dockerfile/java
+
+WORKDIR /
+
+USER daemon
+
+# Here the stuff that we're going to place into the image
+ADD target/scala-2.11/docker-spray-http-server-assembly-1.0.jar /app/server.jar
+
+# entry jar to be run in a container
+ENTRYPOINT [ "java", "-jar", "/app/server.jar" ]
+
+# HTTP port
+EXPOSE 8080
+</code></pre>
+
+<p>Build your project as a single jar file:</p>
+
+<p>[code language=&ldquo;bash&rdquo;]
+DockerSprayHttpServer$ sbt assembly
+[/code]</p>
+
+<p>And now navigate to the project&rsquo;s folder and run:</p>
+
+<p>[code language=&ldquo;bash&rdquo;]
+DockerSprayHttpServer$ docker build .
+[/code]</p>
+
+<p>This will send the newly created image to the Docker daemon.</p>
+
+<h3>Running multiple instances on a single machine</h3>
+
+<p>Run the following command to see available docker images :</p>
+
+<p>[code language=&ldquo;bash&rdquo;]
+DockerSprayHttpServer$ docker images
+[/code]</p>
+
+<p><a href="https://ivoroshilin.files.wordpress.com/2014/12/d181d0bdd0b8d0bcd0bed0ba-d18dd0bad180d0b0d0bdd0b0-2014-12-15-d0b2-23-48-52.png"><img src="https://ivoroshilin.files.wordpress.com/2014/12/d181d0bdd0b8d0bcd0bed0ba-d18dd0bad180d0b0d0bdd0b0-2014-12-15-d0b2-23-48-52.png" alt="Снимок экрана 2014-12-15 в 23.48.52" /></a></p>
+
+<p>a83cda03f529 is not in the repo yet - what we&rsquo;ve just created. We&rsquo;re going to run multiple instances from it.</p>
+
+<p>First run the 1-st instance:</p>
+
+<p>[code language=&ldquo;bash&rdquo;]
+DockerSprayHttpServer$ docker run -d -p 10001:8080 a83cda03f529
+[/code]</p>
+
+<p>Note, that we have mapped our 8080&ndash;>10001 port.</p>
+
+<p>Now, let&rsquo;s verify the container is running:</p>
+
+<p>[code language=&ldquo;bash&rdquo;]
+DockerSprayHttpServer$ docker ps
+[/code]</p>
+
+<p><a href="https://ivoroshilin.files.wordpress.com/2014/12/d181d0bdd0b8d0bcd0bed0ba-d18dd0bad180d0b0d0bdd0b0-2014-12-16-d0b2-0-58-12.png"><img src="https://ivoroshilin.files.wordpress.com/2014/12/d181d0bdd0b8d0bcd0bed0ba-d18dd0bad180d0b0d0bdd0b0-2014-12-16-d0b2-0-58-12.png" alt="Снимок экрана 2014-12-16 в 0.58.12" /></a></p>
+
+<p>We exposed port 8080 for the http-server. When run in Docker-container, it maps our port onto another. On top of this I am  on OS X. Do you remember we set at the beginning 3 env vars? One of them is DOCKER_HOST.</p>
+
+<p>You can actually check this IP as follows:</p>
+
+<p>[code language=&ldquo;bash&rdquo;]
+DockerSprayHttpServer$ boot2docker ip
+[/code]</p>
+
+<p>We need to use this IP address (for OS X, as we are not on Linux).</p>
+
+<p>Let&rsquo;s test it:</p>
+
+<p>[code language=&ldquo;bash&rdquo;]
+DockerSprayHttpServer$ curl $(boot2docker ip):10001/welcome
+[/code]</p>
+
+<p>Great!</p>
+
+<p>You can run as many containers as you want! They are completely isolated. For Scala developers, by they way, I&rsquo;ve found a<a href="https://github.com/marcuslonnberg/sbt-docker"> nice contribution</a>, you can dockerize your artifacts right from SBT.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/octopress/blog/2014/10/30/docker-a-birds-eye-view/">Docker: A Bird&#8217;s-eye View</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2014-10-30T23:37:44+03:00'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>30</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>11:37 pm</span></time>
+        
+           | <a href="/octopress/blog/2014/10/30/docker-a-birds-eye-view/#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io/blog/2014/10/30/docker-a-birds-eye-view/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>Introduction</h3>
+
+<p>Docker is a new container technology that primarily allows to run multiple applications on the same old server and operating system. It also makes it easy to package and ship applications. Let&rsquo;s analyze why Docker can become a replacement of virtual machines and why it is better (or not). Though, undoubtedly it has easy-to-use deployment stuff.</p>
+
+<p><a href="https://ivoroshilin.files.wordpress.com/2014/10/docker.png"><img src="https://ivoroshilin.files.wordpress.com/2014/10/docker.png" alt="docker" /></a></p>
+
+<h3>The gist</h3>
+
+<p>VM hypervisors emulate virtual hardware and guzzle system resources heavily - each VM has its separated operating system. Conversely, Docker containers use a single shared operating system. Basically, each container has only its application and other dependencies. It is very lightweight as we don&rsquo;t set up a separate operating system for each container. You can run much more applications (containers) in a single physical instance of hardware unlike VM with Docker. Docker is extremely rapidly getting popular, because It&rsquo;s light, simple and you can save a great deal of money on hardware and electricity.</p>
+
+<p>There are 2 major parts of operating system (Linux) that ensure the proper work of Docker.</p>
+
+<h3>LXC</h3>
+
+<p>Docker is built on top of LXC and allows to divide up operating system&rsquo;s Kernel. It means that with Docker it is possible to use only Linux and share a single operating system for all containers. I&rsquo;ve heard, by the way, that Windows platform has recently adapted Docker too.</p>
+
+<p>The LXC technology (<a href="http://lxc.sourceforge.net/">LinuX Containers</a>), which Docker is based from, relies on <a href="http://en.wikipedia.org/wiki/Security-Enhanced_Linux">SELinux</a> and its <a href="http://en.wikipedia.org/wiki/Cgroups">cgroups</a> to keep everyone in their own sandbox. You can restrict hardware resources: CPU, memory, disk. It can also manage the networking and mounts of filesystem for you as well. In other words you can run multiple isolated Linux containers on one host. Linux Containers serve as a lightweight alternative to VMs as they don’t require the hypervisors. Unlike VMs, LXC don’t require the hypervisor - this is not VM, but an ordinary host.</p>
+
+<p>Assume, you have a container image of 1 GB. If you want to use virtualization, you will need 1 GB multiplied by a number of VMs required. With LXC you just share 1GB. Having 1 thousand containers requires just a little over 1GB of space for the containers OS, assuming they are all running the same OS image. Furthermore, LXCs have have better performance compared to VMs.</p>
+
+<h3>AuFS</h3>
+
+<p>Another technology used in Docker is <a href="http://en.wikipedia.org/wiki/Aufs">AuFS</a> -  advanced multi layered unification filesystem. Docker can save images for you and they can be represented as incremental updates to the baseline snapshots. You may have a base snapshot of e.g. Linux, make minor changes to it, save a new snapshot as a diff. AuFS allows incrementally merge all these snapshot updates into a single layered snapshot. That is the idea.</p>
+
+<h3>When to use Docker</h3>
+
+<p>If you need a full isolation of resources, a virtual machine is the way to go. However, if you need to run hundreds of isolated processes on an average host, then Docker is a good fit. There are some use cases when Docker is a win. I can see it as a good tool for development where you run tons of containers on a single machine, doing some interesting stuff in parallel with different deployments from a single Docker image. E.g. you can run a large number of development environments on the same host. For example, Dev, QA, Performance environments on old hardware also. Have a look at <a href="http://www.fig.sh">Fig</a> project which is intended for these purposes and works along with Docker. It has a straightforward tutorial and super easy commands.</p>
+
+<h3>Conclusion</h3>
+
+<p>Docker is another technique for performing the same tasks as in Virtual Machines but with the restriction of a shared OS Linux. It  is not quite mature however. There might be potential exploits to crash operating system bringing down all of the processes at once. This is the main drawback of Containers, whereas VMs ensure complete isolation. Besides that many companies use one in Production you might want to wait, but you can definitely start playing around with it on your dev continuous integration process.</p>
+
+<h3>References</h3>
+
+<p><a href="https://www.docker.com">Docker</a></p>
+
+<p><a href="http://blog.docker.com/2013/08/containers-docker-how-secure-are-they/">Containers and Docker: How secure are they </a></p>
+
+<p><a href="http://blog.dotcloud.com/under-the-hood-linux-kernels-on-dotcloud-part">PaaS under the hood</a></p>
+
+<p><a href="http://www.fig.sh">FIG</a></p>
+
+<p><a href="http://blog.docker.com/2014/08/getting-started-with-orchestration-using-fig/">Getting started with Docker Orcherstration using FIG</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/octopress/blog/2014/10/12/the-flip-side-of-rule-engines-and-some-tips-on-when-not-use-ones/">The Flip Side of Rule Engines on Example of Drools and Some Valuable Tips</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2014-10-12T02:21:19+04:00'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>12</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>2:21 am</span></time>
+        
+           | <a href="/octopress/blog/2014/10/12/the-flip-side-of-rule-engines-and-some-tips-on-when-not-use-ones/#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io/blog/2014/10/12/the-flip-side-of-rule-engines-and-some-tips-on-when-not-use-ones/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Hey there! This post is devoted to business rule engines and solely written based on my research and experience with Open-Source <a href="http://www.drools.org">Drools</a> engine that has been used in Production for more than 1 year in mission-critical systems. Undoubtedly, this engine is great for many features. But, I want to explain you what you should think of before using it or when not to use it all. Because it is very important step, once you adapted it in your project, it will be quite costly to remove one later.  I am going to be quick on the theory here, pointing you at issues and important things. If you don&rsquo;t understand something, feel free to ask me but first please refer to the official documentation. I&rsquo;ll try to underline the major issue I&rsquo;ve come across, surely there are many more.</p>
+
+<p>A rule engine is not a magical box that does something new . It is intended to be a tool that provides a higher level of abstraction so you can focus less on reinventing the wheel.</p>
+
+<p>On one of our projects we had a critical system with thousands of small &ldquo;if then else if&hellip;&rdquo; requirements from business that were initially developed as a sequence of checks on java. Gradually, we realized how this clutter turned into a very difficult mess to maintain. Hence we made a decision to apply some open source rule engine framework. After some high-level research Drools framework became our choice, primarily because it is free and open source. No one had experience on the team with commercial rule engines, however.</p>
+
+<p>Ok, let&rsquo;s get to it!</p>
+
+<p><img src="https://ivoroshilin.files.wordpress.com/2014/10/rule-engine-inkscape.png" alt="rule-engine-inkscape" /></p>
+
+<h3><strong>The order of rules execution</strong></h3>
+
+<p>Rule-engines are a good fit if you don&rsquo;t know the order in which rules are executed, e.g. the order doesn&#8217;t matter. Frequently, in order to understand this, you have to decompose your logic in such a way that you have separated simple flat rules not depending on each other.  In a nutshell, Rule engine is like a black box that have inputs and outputs. This is a necessary but not sufficient condition. Besides, when rules change objects data, that are used in other rules, it greatly increases complexity. Hence you always should be vigilant on the order of execution of different rules.</p>
+
+<p>Otherwise, if the order is determinate, frequently it would be better-off using BPM-engines or something else.</p>
+
+<h3><strong>Clear domain model with stable public API</strong></h3>
+
+<p>Rule-engines are not a fit if your system doesn&rsquo;t have a <strong>clear domain model.</strong> Most non-mature systems don&rsquo;t have one. It&rsquo;s evolution, sometimes requiring to understand with time. Even clear requirements not always so clear in practice. Why am I saying this? Well,  because a good rule of thumb it that:</p>
+
+<blockquote>&#8220;Rules should be working with only the Domain Model of your system with clear public API around it. If they don&#8217;t, your rules ultimately will turn into unmanageable mess. Period!&#8221;</blockquote>
+
+
+<p>It seems to be natural, but many developers don&rsquo;t realize it. Imagine, what happens if you rules start using internal code or other API that is not a part of domain logic.  With such a disgusting approach, the rules will be aware of more then they need to, like internal implementations/behaviors  and other dependencies =<strong> tightly coupled code</strong>. It&rsquo;s just like in OOP or SOA principles but in terms of rules. Tightly coupled code/rules is very difficult to change. Needless to say, if this code is not encapsulated. Eventually, you will have to modify your code triggering broken rules very often, when business requirements change.</p>
+
+<h3>Indepotence or exactly once</h3>
+
+<p>All rules must run multiple times without errors yielding the same result. It&rsquo;s like writing a bash-script and also considered a good rule of thumb. Otherwise you may encounter lots of misbehaving weird things.</p>
+
+<h3><strong>Forget Debugging tools, %100 coverage with tests is needed</strong></h3>
+
+<p>Rule-engines are difficult to refactor, you would have to analyze them and/or keep the whole graph in mind if there are dependencies. In terms of Drools it is impossible to trace rules line-by-line. Drools-rules are declarative and don&rsquo;t have a mechanism to debug them. Therefore, you should ideally cover 100% of your rules with JUnit-tests. I can give you a hint to use Spock-framework on top of Groovy as a Behavioural-Driven Development stuff, where each rule is simply covered with a test. Tests usually come directly from business specs. Each rule should contain only 1 simple thing as minimal as possible.</p>
+
+<h3>Cost of change</h3>
+
+<p>No one has any idea if there are conflicting rules when a new one is added or existing one is changed.  A complete regression test must be done when rules are changed. The Memory is sometimes a big issue too. And you can do very little to reduce the consumption - you use 3-rd party framework.</p>
+
+<h3><strong>Some rules need to be triggered twice or more</strong></h3>
+
+<p>Somebody of you can claim that Drools has a feature of rule-invalidation of Facts, but this again turns into unobvious, tangled mess getting in the way to quickly understand why rules yielded such a result. It&rsquo;s up to you, but you never know whether you will have to flush/invalidate rules in the long run.</p>
+
+<h3>Rete Algorithm vs your Domain API and traversals</h3>
+
+<p>The majority of modern rule engines including Drools work upon so called <a href="http://en.wikipedia.org/wiki/Rete_algorithm">Rete Algorithm</a>. Make sure that your codebase, which your rules call, can be built by a Rete algorithm in the working memory. If it&rsquo;s not, tree traversal of your codebase within rules on such a model will be a big performance issue!  Bear in mind, if you have internal traversal logic inside your public domain API (e.g. some of your methods do traversal for you) happening on LHS (Left hand side operation) clause , it is very bad for Drools&#8217; performance as latter has its own <strong>flexible querying model directly</strong> related to Rete-tree. Drools itself should be able to build the tree for you based on your API and efficiently traverse it.</p>
+
+<h3>Performance and external systems</h3>
+
+<p>What if you are required to save a set of operations to a database and each operation must be checked via rule engine. And the next operation depends on the result of the previous one. This imposes performance problems. All operation could be validated and afterwards saved in 1 go. Think it through in advance. I know there are Rule Groups in Drools, but my point - it&rsquo;s very complicated.</p>
+
+<h3>Rules Centralization</h3>
+
+<p>The same business rules may apply across different services, leading to redundancy and governance challenges. It imposes a burden upon us to keep the content of those rules in synch over time.  Thus, it is usually recommended to move them to a new dedicated rule service. The downside is that such a service becomes an additional architectural dependency for other services. The responsibility to build and maintain centralized rule service can introduce various headaches. When we need to change currently active rules or introduce new ones we need to ensure that these changes to the existing rule architecture do not have negative or unforeseen impacts, the worst of which can be a cascading effect that causes exceptions that compound across multiple rules (and multiple services), which should be thoroughly tested.</p>
+
+<p>And please! Make sure that your services know nothing about rules but only talk to the service via a clear contract.</p>
+
+<h3>Conclusion</h3>
+
+<p>This write-up only scratched the surface of issues coming from my experience. To be honest with you, I would say &ldquo;No&rdquo; to applying rule engine frameworks in my future projects to a large number of systems. Initially it seems to be pretty easy, but eventually you realize, that third-party rule engines are more of a pain that benefit, especially when it comes to interdependencies and a domain model. Project maintenance becomes very costly due to this.  It&rsquo;s not as simple as coding a bunch of <code>if </code>statements. The rules engine gives you the tools to handle rule relationships, but you still have to be able to imagine all of that in your mind.</p>
+
+<p>The most important thing, it is quite difficult to use a rule engine effectively and correctly. A team should have solid knowledge of how to use it and understanding with implementation of business model should be mature. Rule engines work well if there is a really flat independent logic among rules/facts. Each framework restricts you to use their specific model. It&rsquo;s not worth it!</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/octopress/blog/2014/09/15/project-euler-a-list-of-interesting-problems/">Project Euler: A List of Interesting Problems</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2014-09-15T10:17:39+04:00'><span class='date'><span class='date-month'>Sep</span> <span class='date-day'>15</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>10:17 am</span></time>
+        
+           | <a href="/octopress/blog/2014/09/15/project-euler-a-list-of-interesting-problems/#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io/blog/2014/09/15/project-euler-a-list-of-interesting-problems/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="https://ivoroshilin.files.wordpress.com/2014/09/euler.jpg"><img src="http://ivoroshilin.files.wordpress.com/2014/09/euler.jpg" alt="Euler" /></a></p>
+
+<p>If you are not aware a website called <a href="http://projecteuler.net/">Project Euler</a> has hundreds of algorithmic problems. Despite that most of them are related to math it&rsquo;s a good resource to warm up/train your brain in coding. You can use any programming language that you want and track progress.</p>
+
+<p>Here&rsquo;s a list of interesting Euler&rsquo;s problems in terms of diversity from my point of view with the aim to improve not only math but also programming skils (No/ Problem Titile):</p>
+
+<p>11 - Largest product in a grid
+12 - Highly divisible triangular number
+15 - Lattice paths
+24 - Lexicographic permutations
+54 - Poker hands
+59 - XOR decryption
+62 - Cubic permutations
+67 - Maximum path sum II
+68 - Magic 5-gon ring
+78 - Coin partitions
+79 - Passcode derivation
+81 - Path sum: two ways
+86 - Cuboid route
+94 - Almost equilateral triangles
+96 - Sudoku
+100 - Arranged probability
+107 - Minimal network
+109 - Darts
+114 - Counting block combinations I
+115 - Counting block combinations II
+116 - Red, green or blue tiles
+117 - Red, green, and blue tiles
+145 - How many reversible numbers are there below one-billion?
+148 - Exploring Pascal&rsquo;s triangle
+150 - Searching a triangular array for a sub-triangle having minimum-sum
+154 - Exploring Pascal&rsquo;s pyramid
+165 - Intersections
+166 - Criss Cross
+181 - Investigating in how many ways objects of two different colours can be grouped
+182 - RSA encryption
+186 - Connectedness of a network
+194 - Coloured Configurations
+208 - Robot Walks
+209 - Circular Logic
+232 - The Race
+267 - Billionaire
+275 - Balanced Sculptures
+280 - Ant and seeds</p>
+
+<p>Note that it is highly recommended to solve all Euler&rsquo;s problems one by one because solving a previous problem has a clue to the next ones.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/octopress/blog/2014/08/14/command-and-query-responsibility-segregation-and-event-sourcing-what-you-should-think-about-in-advance/">Command and Query Responsibility Segregation and Event Sourcing: What You Should Think About in Advance</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2014-08-14T22:35:09+04:00'><span class='date'><span class='date-month'>Aug</span> <span class='date-day'>14</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>10:35 pm</span></time>
+        
+           | <a href="/octopress/blog/2014/08/14/command-and-query-responsibility-segregation-and-event-sourcing-what-you-should-think-about-in-advance/#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io/blog/2014/08/14/command-and-query-responsibility-segregation-and-event-sourcing-what-you-should-think-about-in-advance/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>After quite a while this article has finally come out! I started to write it about 6 months ago but because of many factors in my life I procrastinated. This text is mainly devoted to those who want to see major pros and cons of this model. You won&rsquo;t find here the nuts and bolts however. For this, move to the reference section where listed really cool URLs for the start. Further the pattern will be named as CQRS/ES for simplicity.</p>
+
+<h1>2 main goals of the pattern</h1>
+
+<p>Some developers consider that this pattern is solely used for scalability reasons forgetting that one greatly reduces data model complexity.</p>
+
+<h1>Events and snapshots - no removal but always append</h1>
+
+<p>it is well known that append-only architectures distribute more easily than updating architectures because there are far fewer locks to deal with. Append-only operations require no locks on a database-side which increases both performance and scalability.</p>
+
+<h1>CQRS + Event Model</h1>
+
+<p>One of the largest issues when using Event Sourcing is that you cannot ask the system a query such as “Give me all users whose first names are ‘Greg’”. This is due to not having a representation of current state.</p>
+
+<p>With Event Sourcing <strong>the event model</strong> is also the persistence model <strong>on the Write side</strong>. This drastically lowers costs of development as <strong>no conversion between the models is needed</strong>.</p>
+
+<h1>Synchronizing write and read sides</h1>
+
+<p><strong>The choice of integration model</strong> though is very important as translation and synchronization between models <strong>can be become a very expensive undertaking</strong>. The model that is best suited is the introduction of events<strong>, events are a well known integration pattern</strong> and offer the best mechanism for model synchronization.</p>
+
+<p>CQRS suggests using 2 different databases: one optimized for reading (denormalized) and another for writing. It is a very tempting way to designing systems. The only big problem with this solution is that you need somehow to sync up your 2 data storages.</p>
+
+<p>You must definitely have a mechanism to recreate a read-side from the write-side. You might need to do this if the read side data store got out of synchronization for some reason, or because you needed to modify the structure of the read-side data store to support a new query. Remember that the CQRS pattern does not mandate that you use different stores on the read side and write side. You could decide to use a single relational store with a schema in third normal form and a set of denormalized views over that schema. However, replaying events is a very convenient mechanism for resynchronizing the read-side data store with the write-side data store.</p>
+
+<h1>Storage technology replaceability</h1>
+
+<p>CQRS/ES makes it easy to change your technologies. For example, you could start with a file-based event store for prototyping and development, and later switch to a Windows Azure table-based store for production.</p>
+
+<h1>Relational vs NoSQL solutions and the cost of maintenance - think twice</h1>
+
+<p>Let&rsquo;s mention major issues in case of using a relational database as a technology for this model.</p>
+
+<h2><strong>Pitfall 1: Limit in number of columns per table</strong></h2>
+
+<p>Read-side is always kept in a denormalized form for performance reasons and usually requires a huge number of columns. If you have e.g. Oracle 11g database and hit a maximum number of 1000 columns per table you won&rsquo;t be able to add more columns.</p>
+
+<h2><strong>Pitfall 2: Adding new columns</strong></h2>
+
+<p>In many cases in order to add new data to the domain model you must release a bunch of applications/services along with changing a schema of a database on the read-side, especially when a column is not empty but already has some data. Here, I prefer a NoSQL databases such as MongoDB with relaxed schema that doesn&rsquo;t require to change one (data are kept in JSON documents) thus<strong> you won&rsquo;t have to change the schema of a database at all! </strong>CQRS/ES patterns with NoSQL db might have a simple Event Storage for the write-side with a blob-column in which data are represented as history and read-side as a schema-less NoSQL db.</p>
+
+<h1>Eventual consistency - think twice</h1>
+
+<p>While not required, it is common to use messaging between the write and read sides. This means that the system will be in an inconsistent state from time to time. This pattern is not a fit for e.g. financial transactions where a strong consistency is required between 2 sides. However, in majority of cases strong consistency can be used only on the write-side whereas the read-side is used for querying and reporting.</p>
+
+<h1>Simple vs costly</h1>
+
+<p>Events are simple objects that describe what has happened in the system. By simply saving events, you are avoiding the complications associated with saving complex domain objects to a relational store; namely, the object-relational impedance mismatch.</p>
+
+<p>The event based model may be slightly more costly due to the need of definition of events but this cost is relatively low and it also offers a smaller Impedance Mismatch to bridge which helps to make up for the cost. The event based model also offers all of the benefits discussed in “Events” that also help to reduce the overall initial cost of the creation of the events. That said the CQRS and Event Sourcing model is actually less expensive in most cases. That said the CQRS and Event Sourcing model is actually<strong> less expensive in most cases.</strong></p>
+
+<h1>Flexibility</h1>
+
+<p>As long as you have a stream of events, you can project it to any form, even a conventional SQL database. For instance, my favorite approach is to project event streams into JSON documents stored in a cloud storage.</p>
+
+<p>Also a great benefit of the separate read layer is that it will not suffer from an <strong>impedance mismatch -</strong> It is connected directly to the data model, this can make queries much easier to optimize. On the write side you no longer need to worry about how your locks impact queries, and on the read side your database can be read-only.</p>
+
+<h1>Performance</h1>
+
+<p>Write-side:</p>
+
+<p>Because events are immutable, you can use an append-only operation when you save them. Events are also simple, standalone objects. Both these factors can lead to better performance and scalability for the system than approaches that use complex relational storage models. On top of this events reduce network volumes unlike full snapshots in case of a pure CQRS model.</p>
+
+<p>Read-Side:</p>
+
+<p>A normalized database schema can fail to provide adequate response times because of the excessive table JOIN operations. Despite advances in relational database technology, a JOIN operation is still very expensive compared to a single-table read.</p>
+
+<h1>Scalability</h1>
+
+<p>Command: In most systems, especially web systems, the Command side generally processes a very small number of transactions as a percentage of the whole. Scalability therefore is not always important.</p>
+
+<p>Query: In most systems, especially web systems, the Query side generally processes a very large number of transactions as a percentage of the whole (often times 2 or more orders of magnitude). Scalability is most often needed for the query side.</p>
+
+<h1>Distributed development teams</h1>
+
+<p>The architecture can be viewed as three distinct decoupled areas. The first is the client; it consumes DTOs and produces Commands. The second is the domain; it consumes commands and produces events. The third is the Read Model; it consumes events and produces DTOs. The decoupled nature of these three areas can be extremely valuable in terms of team characteristics. Instead of working in vertical slices the team can be working on three concurrent vertical slices, the client, the domain, and the read model. This allows for a much better scaling of the number of developers working on a project as since they are isolated from each other they cause less conflict when making changes. It would be reasonable to nearly triple a team size without introducing a larger amount of conflict due to not needing to introduce more communication for the developers.</p>
+
+<h1><strong>Conclusion</strong></h1>
+
+<p>There is no one right way to implement CQRS. It is not recommended to use this model for critical projects of course if you have no experience with one. Note that It is not possible to create an optimal solution for searching, reporting, and processing transactions utilizing a single model. </p>
+
+<h1>References</h1>
+
+<p><a href="http://www.kenneth-truyers.net/2013/12/05/introduction-to-domain-driven-design-cqrs-and-event-sourcing/%C2%A0">Introduction to Domain Driven Design, CQRS and Event Sourcing</a></p>
+
+<p><a href="http://www.bennadel.com/blog/2438-command-query-responsibility-segregation-cqrs-makes-domain-models-practical.htm">Command-Query-Responsibility-Segregation (CQRS) Makes Domain Models Practical</a></p>
+
+<p><a href="http://codebetter.com/gregyoung/2010/02/13/cqrs-and-event-sourcing/">CQRS and Event Sourcing</a></p>
+
+<p><a href="http://cqrs.wordpress.com">CQRS - Did you mean CARS?</a></p>
+
+<p><a href="http://msdn.microsoft.com/en-us/library/jj591577.aspx">A CQRS and ES Deep Dive</a></p>
+
+<p><a href="http://www.udidahan.com/wp-content/uploads/Clarified_CQRS.pdf">Clarified CQRS</a></p>
+
+<p> </p>
+
+<p> </p>
+
+<p> </p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/octopress/blog/2014/03/18/distributed-transactions-and-scalability-issues-in-large-scale-distributed-systems/">Distributed Transactions and Scalability Issues in Large-scale Distributed Systems</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2014-03-18T18:08:58+04:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>18</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>6:08 pm</span></time>
+        
+           | <a href="/octopress/blog/2014/03/18/distributed-transactions-and-scalability-issues-in-large-scale-distributed-systems/#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io/blog/2014/03/18/distributed-transactions-and-scalability-issues-in-large-scale-distributed-systems/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Distributed transactions is the main evil of scalability</h2>
+
+<p>It is very hard to scale distributed transactions to an extremely high level, moreover they reduce throughput. Unlike a transaction on a local database, a distributed transaction involves altering data on multiple nodes. It can be a database + JMS broker or just a set of different databases. As an example let&rsquo;s recall a classical 2-phase commit (2PC later) - a type of <a href="http://en.wikipedia.org/wiki/Atomic_commit">atomic commitment protocol</a> in a back-end service with high volume of transactions. This protocol provides ACID-like properties for global transaction processing. I won&rsquo;t go into details how it works under the hood, I&rsquo;ll just tell you that C (Consistency) from ACID is the main evil of  scalability in distributed systems. It puts a great burden due to its complex coordination algorithm.  Overall throughput can drop up to a few times. Locks in all of the data sources are being held during 2PC. The longer duration locks create the risk of higher contention. The 2PC coordinator also represents a Single Point of Failure, which is unacceptable for critical systems.  For systems that have reasonably high volume of messages, or sensitive SLAs, it’s worth giving up strong consistency for throughput.</p>
+
+<h2>But how can I live without distributed transactions to achieve higher scalability?</h2>
+
+<p>Algorithms such as 2PC use <strong>&ldquo;Exactly Once&rdquo;</strong> technique whereas we will use <strong>&ldquo;At least Once&rdquo;</strong> technique. The difference is that a developer should take care of that in his application code to cope with it. Most queueing technologies provide acknowledgements that a message has been accepted (handling is a separate deal). Databases use local transactions. We can deal with downstream failures without coordination. Read on!</p>
+
+<h3>Idempotence and fault tolerance</h3>
+
+<p>From math, <a href="http://en.wikipedia.org/wiki/Idempotence">idempotence</a> is as simple as that:</p>
+
+<h2><a href="http://ivoroshilin.files.wordpress.com/2014/03/idempotence.png"><img src="http://ivoroshilin.files.wordpress.com/2014/03/idempotence.png" alt="idempotence" /></a></h2>
+
+<p>That is, the result stays the same, no matter how many times a function gets called on the same argument. In distributed world<em> Idempotence</em> implies that an operation can be invoked repeatedly without changing the result. Why do I need one? Because we should somehow resolve processing duplicate requests in case of a system failure. Let&rsquo;s make it clear by considering an example. A client-appliction sends a financial transaction to a server (there might be a cluster of them load-balanced or just one) and waits for acknowledgment. For some reason, at this particular time:</p>
+
+<ul>
+<li><p>A server goes down or</p></li>
+<li><p>Client goes down or</p></li>
+<li><p>Network failure happens</p></li>
+</ul>
+
+
+<p>In all of these 3 cases, a client-app didn&rsquo;t get an acknowledgment message (reply) from the server about a transaction status. Of course, the client then should retry this transaction. The server must ensure that this financial transaction is accomplished &ldquo;<strong>At least Once&rdquo;</strong>. Here comes to the rescue <em>idempotence</em>. The server must remember a state - that a transaction with this Id has already been processed including saved acknowledgement message in order to check that it exists and reply with its acknowledgement message in case it does. We don&rsquo;t have expensive distributed transactions anymore - <strong>&ldquo;At least Once&rdquo;</strong> is a more relaxed and scalable approach. That is, instead of locking resources everywhere, we can assume that messages will arrive at least once.</p>
+
+<h3>Optimistic locking</h3>
+
+<p>Even though this technique is quite old, one goes well with <em>idempotence. </em>If two people are trying to affect change to the same entity at the same time we don&rsquo;t lock database records, rather we use a concept of versioning and optionally uniqueness. The idea is to save a version of each entity record in the database but to make sure before saving it wasn&rsquo;t changed. A simple example is a self-service kiosk where people check-in before boarding at the airport. They can select a vacant seat from the seat map.<a href="http://en.wikipedia.org/wiki/Check-in">
+</a></p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2014/03/seatmap.jpg"><img src="http://ivoroshilin.files.wordpress.com/2014/03/seatmap.jpg" alt="seatmap" /></a></p>
+
+<p>Each seat has a version = 1. When multiple people make their choice in parallel before proceeding the system simply checks if a seat-version hasn&rsquo;t changed. If it has a user is notified that the seat already been taken while she was thinking. This is a very simple example where version either can be 1 or 2. A more difficult situation could be in order-management systems where an order might have many versions but that doesn&rsquo;t change the point how optimistic locking works.  The idea again yields great trade-off in terms of speed because we don&rsquo;t use locking-mechanism.</p>
+
+<h3>Local atomic transactions and unique constraints</h3>
+
+<p>Local atomic transactions are usually restricted to a single store. Local transactions are primarily needed to apply a set of operations atomically to a single resource (e.g. relational database) as well as ensure correct ordering of operations within a transaction. In some cases, we can do away with transactions, particularly if we don&rsquo;t care about the order of operations within a transaction. In that case we can process operations asynchronously leading to a better throughput again. Sometimes, a model requiring the order can be redesigned for  asynchronicity of operations.</p>
+
+<h3>Putting it all together</h3>
+
+<p>In order to achieve greater throughput a system should correspond to the following principles:</p>
+
+<ol>
+<li><p>You can retry the operation if there is a failure down the stream based on idempotence.</p></li>
+<li><p>Don&rsquo;t use transactions and use optimistic locking if possible - it&rsquo;s much cheaper.</p></li>
+<li><p>Local transactions based on a single phase commit for each resource are more scalable than distributed ones increasing overall application availability.</p></li>
+<li><p>Messages may be reordered.</p></li>
+</ol>
+
+
+<h2>Wrapping up</h2>
+
+<p>Such great systems as Google&rsquo;s Bigtable or Spanner don&rsquo;t support traditional ACID transactions because they have a heavy overhead on a highly distributed data storage model. I was lucky to use all above techniques in my applications too involving mission-critical financial transactions and must say that a few years ago not so many people knew about the techniques but now I can hear about them more and more often. Oh yeah, I almost forgot! I urge you to read <a href="http://queue.acm.org/detail.cfm?id=2187821">this great article</a> written by Pat Helland that has even more use-cases. I bumped at it during my research to know more. And remember, you can live without distributed transactions if you implement idempotence and downstream failures correctly.</p>
+
+<h2>References</h2>
+
+<p>1. <a href="http://www.enterpriseintegrationpatterns.com/docs/IEEE_Software_Design_2PC.pdf">Your Coffee Shop Doesn’t Use Two-Phase Commit</a> by Gregor Hohpe.</p>
+
+<p>2. <a href="http://queue.acm.org/detail.cfm?id=2187821">Idempotence Is Not a Medical Condition</a> by Pat Helland.</p>
+
+<p>3. <a href="http://www.addsimplicity.com/adding_simplicity_an_engi/2006/12/2pc_or_not_2pc_.html">2PC or not 2PC, Wherefore Art Thou XA?</a> by Dan Pritchett.</p>
+
+<p>4. <a href="http://www-db.cs.wisc.edu/cidr/cidr2007/papers/cidr07p15.pdf">Life beyond Distributed Transactions: an Apostate’s Opinion</a> by Pat Helland.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/octopress/blog/2014/02/17/service-discovery-in-distributed-systems/">Service Discovery in Distributed Systems</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2014-02-17T15:28:01+04:00'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>17</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>3:28 pm</span></time>
+        
+           | <a href="/octopress/blog/2014/02/17/service-discovery-in-distributed-systems/#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io/blog/2014/02/17/service-discovery-in-distributed-systems/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>After quite a while I&rsquo;ve decided to continue writing my blog. There are always lots of ideas to share with you but as usual a lack of time.</p>
+
+<h1><strong>Introduction</strong></h1>
+
+<p>Service Discovery is an architectural pattern and a key component of most distributed systems and service oriented architectures.</p>
+
+<p> In simple terms it is a central gateway for all client applications that want to use other services. A client application doesn&rsquo;t have to know where a particular service is located (usually IP:port), moreover a service can be moved/redeployed to arbitrary boxes for any reasons. There&rsquo;s no need to change connection details, update configs or whatever - Service Discovery will take care of that. You as a client-app just need to ask it to get access to other services. The pattern yields a good benefit especially when there are hundreds of client applications and/or dozens of services.</p>
+
+<p>Most of the work in this article was made relying on trials and errors as well some research. I urge you to read also a great survey from Jason Wilder&rsquo;s blog on <a href="http://jasonwilder.com/blog/2014/02/04/service-discovery-in-the-cloud/">Open Source Service Discovery</a> frameworks.</p>
+
+<p>In this particular section I won&rsquo;t mention CAP-properties as they can vary depending on implementation. But CAP is important. If you want to know more about it I recommend moving to <a href="http://ivoroshilin.com/2012/12/13/brewers-cap-theorem-explained-base-versus-acid/">this article</a> devoted to the CAP-theorem.</p>
+
+<h2>High level components</h2>
+
+<p>Service Discovery is the process of finding a suitable Service and its location for a given task that asked a service consumer.  Let&rsquo;s break down Service Discovery into 3 main components:</p>
+
+<p><strong>Service Requestor</strong></p>
+
+<p>Any consuming application that want to use some service,  that is a client application or a consumer, user, etc.</p>
+
+<p><strong>Service Provider</strong></p>
+
+<p>In the most basic scenario there is a Service Provider that finds this service and talks to Service Requestor.</p>
+
+<p><strong>Service Registry</strong></p>
+
+<p>Service Registry stores information about all services. It can be either static or dynamic. This can be IP:port, access rights and so forth.</p>
+
+<p>This model comes directly from SOA but can be adapted to your needs. Conversation among 3 above entities might differ depending on implementation. As a quick example of such segregation refer to <a href="http://en.wikipedia.org/wiki/Web_Services_Discovery">Web Service Discovery</a>.</p>
+
+<h2>Discovery options</h2>
+
+<h3>1. Static service registry</h3>
+
+<p>This one is a very basic and easy option. A big drawback - it is static. Every time a service moves to another box, static repo should be updated manually. We won&rsquo;t go further here as it is quite obvious and have little benefit for flexibility.</p>
+
+<h3>2. Announcement</h3>
+
+<p>This pattern implies that as soon as a service is up, it registers itself in the <strong>Service Registry - </strong>sometimes such a notification is called<strong> Announcement. </strong>This simple approach greatly simplifies maintenance of service registry. It&rsquo;s worth mentioning  also that in distributed world we always care about <strong>No Single Point Of Failure</strong> principle<strong> </strong>where we have at least 2 redundant nodes for a service. Service Registry is usually implemented as a separate  independent component to be self-sufficient. Just for simplicity the registry can be a simple replicated memCached, ehCache or another storage, not necessarily cache.</p>
+
+<h3>A few words about ZooKeeper as a solution for Service Discovery.</h3>
+
+<p>A counterexample is ZooKeeper that does&rsquo;t follow <strong>Shared Nothing architectural </strong>pattern. Service Registry is coupled with the Service Provider. In ZooKeeper&rsquo;s world coordination-nodes in ensemble are NOT independent of each other because they share Service Registry and there&rsquo;s a write-contention due to the order of messages. The last word leads to ZooKeeper&rsquo;s poor write-scalability due to its synchronous replication among nodes. But in terms of requirements most applications involved into configuration management including Service Discovery don&rsquo;t require frequent writes but rather reads not blocking overall scalability.</p>
+
+<p>Let&rsquo;s pick up where we left off -  announcement.</p>
+
+<p>The process of announcement is depicted below:</p>
+
+<h3></h3>
+
+<h3><a href="http://ivoroshilin.files.wordpress.com/2014/02/announcement_pb.png"><img src="http://ivoroshilin.files.wordpress.com/2014/02/announcement_pb.png" alt="Announcement_pb" /></a></h3>
+
+<h3></h3>
+
+<h3></h3>
+
+<h3></h3>
+
+<h3>3. Multicasting</h3>
+
+<p>Using IGMP-protocol, a Service provider subscribes to a particular group, all services send a multicast message to this group. The downside of this approach is that IGMP is optional for IPv4 and not every hardware supports it.</p>
+
+<h3>Health checking</h3>
+
+<p>Once a service is registered in Service Registry a Service Provider needs to know if it&rsquo;s alive and healthy (that is, 100% of service is available).</p>
+
+<p><strong>Option 1 - on reconnect:</strong> As soon as a Service Requestor understands that there&rsquo;s no connection to the service it worked with, it reverts back to the Service Provider to get a new one. Each time a Service Requestor accesses Service Provider, one does health-checking (let&rsquo;s say it is almost the same as heartbeats plus probably some other stuff) to make sure that the service is alive, maintaining the Service Registry and returning response to the client containing information about a healthy service.</p>
+
+<p><strong>Option 2 - heartbeating:</strong> Service Provider receives heartbeats within equal time-slices from registered services. Once heartbeat is lost, the Service Provider removes corresponding record from the Service Registry. This is a good option to get a more real-time information though it is more difficult to implement. This way works ZooKeeper and other distributed systems.</p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2014/02/service-down_pn.png"><img src="http://ivoroshilin.files.wordpress.com/2014/02/service-down_pn.png" alt="Service Down_pn" /></a></p>
+
+<p>In both options if some service goes down clients get back to Service Provider. What strategy to use is up to the developer but option 1 is more complex but a better one in most scenarios.</p>
+
+<h3>Load Balancing</h3>
+
+<p>Load balancing can be easily implemented inside Service Provider as one becomes a central gateway of access for all Service Requestors to other services. For the sake of simplicity a very simple variation is round-robin. I won&rsquo;t go into details as it is a different topic and you can find on the internet.</p>
+
+<h3>Authentication</h3>
+
+<p>Again as with load balancing you might want to apply tokens with expiration or cryptographic keys.</p>
+
+<h2>Cooperation of all components</h2>
+
+<p>On a very high level the communication of components can happend as on the following picture:</p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2014/02/service-request_pb.png"><img src="http://ivoroshilin.files.wordpress.com/2014/02/service-request_pb.png" alt="Service Request_pb" /></a></p>
+
+<h3>Summary</h3>
+
+<p>We have defined what a Service Discovery is, broke it down into 3 components and described a few basic approaches.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/octopress/blog/2013/10/29/highload-conference-2013/">HighLoad Conference 2013</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2013-10-29T21:24:32+04:00'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>29</span><span class='date-suffix'>th</span>, <span class='date-year'>2013</span></span> <span class='time'>9:24 pm</span></time>
+        
+           | <a href="/octopress/blog/2013/10/29/highload-conference-2013/#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io/blog/2013/10/29/highload-conference-2013/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Today I was lucky to have attended the annual developers conference <a href="http://www.highload.ru">HighLoad++</a> 2013. This is the 7-th time. Some conference sessions are translated into English and available here: <a href="http://www.highload.co/freeonline/">http://www.highload.co/freeonline/</a></p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2013/10/pa293662.jpg"><img src="http://ivoroshilin.files.wordpress.com/2013/10/pa293662.jpg?w=300" alt="OLYMPUS DIGITAL CAMERA" /></a></p>
+
+<p>Listeners heard many buzzwords like horizontal scalability, replication, sharding and NoSql. Despite that I missed the first day of the conference what I really liked was not just new trends in technology but invaluable speakers&#8217; experience  on real projects with pros and cons, especially:</p>
+
+<ol>
+<li> <strong>&ldquo;MySql versus something else&rdquo;</strong> by <strong>Mark Callaghan [FaceBook]</strong> on storage efficiency, framework for analysis and benchmarking and database algorithms: <a href="https://www.facebook.com/MySQLatFacebook">https://www.facebook.com/MySQLatFacebook</a></li>
+</ol>
+
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2013/10/pa293677.jpg"><img src="http://ivoroshilin.files.wordpress.com/2013/10/pa293677.jpg" alt="PA293677" /></a></p>
+
+<ol>
+<li><p><strong>&ldquo;Cassandra vs In-Memory Data Grid in eCommerce&rdquo;</strong> by <strong>Alexander Soloviev  [Grid Dynamics]</strong> was very informative on deep analysis and benchmarking against different cases and their pros and cons.</p></li>
+<li><p><strong>&ldquo;Query Optimizer in MariaDB: now w/o indices&#8221; </strong>by <strong>Sergey Golubchik [Monty Program Ab]</strong></p></li>
+</ol>
+
+</div>
+  
+  
+
+
+    </article>
+  
   <div class="pagination">
+    
+      <a class="prev" href="/octopress/posts/2">&larr; Older</a>
     
     <a href="/octopress/blog/archives">Blog Archives</a>
     
@@ -77,6 +1111,26 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/octopress/blog/2015/03/04/review-of-service-discovery-solutions/">Service Discovery Solutions in Distributed Systems</a>
+      </li>
+    
+      <li class="post">
+        <a href="/octopress/blog/2015/02/05/toughest-backtracking-problems-in-algorithmic-competitions/">Toughest Backtracking Problems in Algorithmic Competitions</a>
+      </li>
+    
+      <li class="post">
+        <a href="/octopress/blog/2014/12/16/docker-creating-and-testing-httprest-server-on-top-of-akkaspray/">Dockerizing Spray HTTP Server</a>
+      </li>
+    
+      <li class="post">
+        <a href="/octopress/blog/2014/10/30/docker-a-birds-eye-view/">Docker: A Bird&#8217;s-eye View</a>
+      </li>
+    
+      <li class="post">
+        <a href="/octopress/blog/2014/10/12/the-flip-side-of-rule-engines-and-some-tips-on-when-not-use-ones/">The Flip Side of Rule Engines on Example of Drools and Some Valuable Tips</a>
+      </li>
     
   </ul>
 </section>
