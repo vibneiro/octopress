@@ -1,4 +1,4 @@
 User-agent: *
 Disallow: 
 
-Sitemap: http://vibneiro.github.io/octopress/sitemap.xml 
+Sitemap: http://vibneiro.github.io/sitemap.xml 
