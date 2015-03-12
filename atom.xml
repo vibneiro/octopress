@@ -4,20 +4,20 @@
   <title><![CDATA[Ivan Voroshilin's Blog.]]></title>
   <link href="http://vibneiro.github.io/atom.xml" rel="self"/>
   <link href="http://vibneiro.github.io/"/>
-  <updated>2015-03-12T23:56:35+03:00</updated>
+  <updated>2015-03-13T00:04:23+03:00</updated>
   <id>http://vibneiro.github.io/</id>
   <author>
     <name><![CDATA[Ivan Voroshilin]]></name>
-    
+    <email><![CDATA[mail@ivoroshilin.com]]></email>
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
   
   <entry>
     <title type="html"><![CDATA[Service Discovery Solutions in Distributed Systems]]></title>
-    <link href="http://vibneiro.github.io/blog/2015/03/04/review-of-service-discovery-solutions/"/>
+    <link href="http://vibneiro.github.io/2015/03/04/review-of-service-discovery-solutions/"/>
     <updated>2015-03-04T22:25:26+03:00</updated>
-    <id>http://vibneiro.github.io/blog/2015/03/04/review-of-service-discovery-solutions</id>
+    <id>http://vibneiro.github.io/2015/03/04/review-of-service-discovery-solutions</id>
     <content type="html"><![CDATA[<p>Today I participated in a conference in Moscow/Russia devoted to new technologies in the software world.
 For those who attended, thanks for your questions! I&rsquo;m attaching here the presentation:</p>
 
@@ -27,9 +27,9 @@ For those who attended, thanks for your questions! I&rsquo;m attaching here the 
   
   <entry>
     <title type="html"><![CDATA[Toughest Backtracking Problems in Algorithmic Competitions]]></title>
-    <link href="http://vibneiro.github.io/blog/2015/02/05/toughest-backtracking-problems-in-algorithmic-competitions/"/>
+    <link href="http://vibneiro.github.io/2015/02/05/toughest-backtracking-problems-in-algorithmic-competitions/"/>
     <updated>2015-02-05T14:53:05+03:00</updated>
-    <id>http://vibneiro.github.io/blog/2015/02/05/toughest-backtracking-problems-in-algorithmic-competitions</id>
+    <id>http://vibneiro.github.io/2015/02/05/toughest-backtracking-problems-in-algorithmic-competitions</id>
     <content type="html"><![CDATA[<p><a href="https://ivoroshilin.files.wordpress.com/2015/02/backtrack.png"><img src="https://ivoroshilin.files.wordpress.com/2015/02/backtrack.png" alt="backtrack" /></a></p>
 
 <p><strong>TL;DR</strong></p>
@@ -162,9 +162,9 @@ If &lt;code&gt;N&lt;/code&gt; is odd and you can't fill at least two rows with
   
   <entry>
     <title type="html"><![CDATA[Dockerizing Spray HTTP Server]]></title>
-    <link href="http://vibneiro.github.io/blog/2014/12/16/docker-creating-and-testing-httprest-server-on-top-of-akkaspray/"/>
+    <link href="http://vibneiro.github.io/2014/12/16/docker-creating-and-testing-httprest-server-on-top-of-akkaspray/"/>
     <updated>2014-12-16T01:22:04+03:00</updated>
-    <id>http://vibneiro.github.io/blog/2014/12/16/docker-creating-and-testing-httprest-server-on-top-of-akkaspray</id>
+    <id>http://vibneiro.github.io/2014/12/16/docker-creating-and-testing-httprest-server-on-top-of-akkaspray</id>
     <content type="html"><![CDATA[<p><a href="https://ivoroshilin.files.wordpress.com/2014/10/docker.png"><img src="https://ivoroshilin.files.wordpress.com/2014/10/docker.png" alt="docker" /></a><a href="https://ivoroshilin.files.wordpress.com/2014/12/spray.png"><img src="https://ivoroshilin.files.wordpress.com/2014/12/spray.png" alt="spray" /></a></p>
 
 <p>This is the continuation of the <a href="http://ivoroshilin.com/2014/10/30/docker-a-birds-eye-view/">previous article</a>. This series shows how simple it is to create a lightweight HTTP-server based on <a href="http://spray.io">Spray</a> framework, put it into a <a href="https://docs.docker.com">Docker</a>-image and run multiple instances on any single machine requiring no dependencies.</p>
@@ -340,9 +340,9 @@ DockerSprayHttpServer$ curl $(boot2docker ip):10001/welcome
   
   <entry>
     <title type="html"><![CDATA[Docker: A Bird's-eye View]]></title>
-    <link href="http://vibneiro.github.io/blog/2014/10/30/docker-a-birds-eye-view/"/>
+    <link href="http://vibneiro.github.io/2014/10/30/docker-a-birds-eye-view/"/>
     <updated>2014-10-30T23:37:44+03:00</updated>
-    <id>http://vibneiro.github.io/blog/2014/10/30/docker-a-birds-eye-view</id>
+    <id>http://vibneiro.github.io/2014/10/30/docker-a-birds-eye-view</id>
     <content type="html"><![CDATA[<h3>Introduction</h3>
 
 <p>Docker is a new container technology that primarily allows to run multiple applications on the same old server and operating system. It also makes it easy to package and ship applications. Let&rsquo;s analyze why Docker can become a replacement of virtual machines and why it is better (or not). Though, undoubtedly it has easy-to-use deployment stuff.</p>
@@ -391,9 +391,9 @@ DockerSprayHttpServer$ curl $(boot2docker ip):10001/welcome
   
   <entry>
     <title type="html"><![CDATA[The Flip Side of Rule Engines on Example of Drools and Some Valuable Tips]]></title>
-    <link href="http://vibneiro.github.io/blog/2014/10/12/the-flip-side-of-rule-engines-and-some-tips-on-when-not-use-ones/"/>
+    <link href="http://vibneiro.github.io/2014/10/12/the-flip-side-of-rule-engines-and-some-tips-on-when-not-use-ones/"/>
     <updated>2014-10-12T02:21:19+04:00</updated>
-    <id>http://vibneiro.github.io/blog/2014/10/12/the-flip-side-of-rule-engines-and-some-tips-on-when-not-use-ones</id>
+    <id>http://vibneiro.github.io/2014/10/12/the-flip-side-of-rule-engines-and-some-tips-on-when-not-use-ones</id>
     <content type="html"><![CDATA[<p>Hey there! This post is devoted to business rule engines and solely written based on my research and experience with Open-Source <a href="http://www.drools.org">Drools</a> engine that has been used in Production for more than 1 year in mission-critical systems. Undoubtedly, this engine is great for many features. But, I want to explain you what you should think of before using it or when not to use it all. Because it is very important step, once you adapted it in your project, it will be quite costly to remove one later.  I am going to be quick on the theory here, pointing you at issues and important things. If you don&rsquo;t understand something, feel free to ask me but first please refer to the official documentation. I&rsquo;ll try to underline the major issue I&rsquo;ve come across, surely there are many more.</p>
 
 <p>A rule engine is not a magical box that does something new . It is intended to be a tool that provides a higher level of abstraction so you can focus less on reinventing the wheel.</p>
@@ -459,9 +459,9 @@ DockerSprayHttpServer$ curl $(boot2docker ip):10001/welcome
   
   <entry>
     <title type="html"><![CDATA[Project Euler: A List of Interesting Problems]]></title>
-    <link href="http://vibneiro.github.io/blog/2014/09/15/project-euler-a-list-of-interesting-problems/"/>
+    <link href="http://vibneiro.github.io/2014/09/15/project-euler-a-list-of-interesting-problems/"/>
     <updated>2014-09-15T10:17:39+04:00</updated>
-    <id>http://vibneiro.github.io/blog/2014/09/15/project-euler-a-list-of-interesting-problems</id>
+    <id>http://vibneiro.github.io/2014/09/15/project-euler-a-list-of-interesting-problems</id>
     <content type="html"><![CDATA[<p><a href="https://ivoroshilin.files.wordpress.com/2014/09/euler.jpg"><img src="http://ivoroshilin.files.wordpress.com/2014/09/euler.jpg" alt="Euler" /></a></p>
 
 <p>If you are not aware a website called <a href="http://projecteuler.net/">Project Euler</a> has hundreds of algorithmic problems. Despite that most of them are related to math it&rsquo;s a good resource to warm up/train your brain in coding. You can use any programming language that you want and track progress.</p>
@@ -513,9 +513,9 @@ DockerSprayHttpServer$ curl $(boot2docker ip):10001/welcome
   
   <entry>
     <title type="html"><![CDATA[Command and Query Responsibility Segregation and Event Sourcing: What You Should Think About in Advance]]></title>
-    <link href="http://vibneiro.github.io/blog/2014/08/14/command-and-query-responsibility-segregation-and-event-sourcing-what-you-should-think-about-in-advance/"/>
+    <link href="http://vibneiro.github.io/2014/08/14/command-and-query-responsibility-segregation-and-event-sourcing-what-you-should-think-about-in-advance/"/>
     <updated>2014-08-14T22:35:09+04:00</updated>
-    <id>http://vibneiro.github.io/blog/2014/08/14/command-and-query-responsibility-segregation-and-event-sourcing-what-you-should-think-about-in-advance</id>
+    <id>http://vibneiro.github.io/2014/08/14/command-and-query-responsibility-segregation-and-event-sourcing-what-you-should-think-about-in-advance</id>
     <content type="html"><![CDATA[<p>After quite a while this article has finally come out! I started to write it about 6 months ago but because of many factors in my life I procrastinated. This text is mainly devoted to those who want to see major pros and cons of this model. You won&rsquo;t find here the nuts and bolts however. For this, move to the reference section where listed really cool URLs for the start. Further the pattern will be named as CQRS/ES for simplicity.</p>
 
 <h1>2 main goals of the pattern</h1>
@@ -620,9 +620,9 @@ DockerSprayHttpServer$ curl $(boot2docker ip):10001/welcome
   
   <entry>
     <title type="html"><![CDATA[Distributed Transactions and Scalability Issues in Large-scale Distributed Systems]]></title>
-    <link href="http://vibneiro.github.io/blog/2014/03/18/distributed-transactions-and-scalability-issues-in-large-scale-distributed-systems/"/>
+    <link href="http://vibneiro.github.io/2014/03/18/distributed-transactions-and-scalability-issues-in-large-scale-distributed-systems/"/>
     <updated>2014-03-18T18:08:58+04:00</updated>
-    <id>http://vibneiro.github.io/blog/2014/03/18/distributed-transactions-and-scalability-issues-in-large-scale-distributed-systems</id>
+    <id>http://vibneiro.github.io/2014/03/18/distributed-transactions-and-scalability-issues-in-large-scale-distributed-systems</id>
     <content type="html"><![CDATA[<h2>Distributed transactions is the main evil of scalability</h2>
 
 <p>It is very hard to scale distributed transactions to an extremely high level, moreover they reduce throughput. Unlike a transaction on a local database, a distributed transaction involves altering data on multiple nodes. It can be a database + JMS broker or just a set of different databases. As an example let&rsquo;s recall a classical 2-phase commit (2PC later) - a type of <a href="http://en.wikipedia.org/wiki/Atomic_commit">atomic commitment protocol</a> in a back-end service with high volume of transactions. This protocol provides ACID-like properties for global transaction processing. I won&rsquo;t go into details how it works under the hood, I&rsquo;ll just tell you that C (Consistency) from ACID is the main evil of  scalability in distributed systems. It puts a great burden due to its complex coordination algorithm.  Overall throughput can drop up to a few times. Locks in all of the data sources are being held during 2PC. The longer duration locks create the risk of higher contention. The 2PC coordinator also represents a Single Point of Failure, which is unacceptable for critical systems.  For systems that have reasonably high volume of messages, or sensitive SLAs, it’s worth giving up strong consistency for throughput.</p>
@@ -691,9 +691,9 @@ DockerSprayHttpServer$ curl $(boot2docker ip):10001/welcome
   
   <entry>
     <title type="html"><![CDATA[Service Discovery in Distributed Systems]]></title>
-    <link href="http://vibneiro.github.io/blog/2014/02/17/service-discovery-in-distributed-systems/"/>
+    <link href="http://vibneiro.github.io/2014/02/17/service-discovery-in-distributed-systems/"/>
     <updated>2014-02-17T15:28:01+04:00</updated>
-    <id>http://vibneiro.github.io/blog/2014/02/17/service-discovery-in-distributed-systems</id>
+    <id>http://vibneiro.github.io/2014/02/17/service-discovery-in-distributed-systems</id>
     <content type="html"><![CDATA[<p>After quite a while I&rsquo;ve decided to continue writing my blog. There are always lots of ideas to share with you but as usual a lack of time.</p>
 
 <h1><strong>Introduction</strong></h1>
@@ -790,9 +790,9 @@ DockerSprayHttpServer$ curl $(boot2docker ip):10001/welcome
   
   <entry>
     <title type="html"><![CDATA[HighLoad Conference 2013]]></title>
-    <link href="http://vibneiro.github.io/blog/2013/10/29/highload-conference-2013/"/>
+    <link href="http://vibneiro.github.io/2013/10/29/highload-conference-2013/"/>
     <updated>2013-10-29T21:24:32+04:00</updated>
-    <id>http://vibneiro.github.io/blog/2013/10/29/highload-conference-2013</id>
+    <id>http://vibneiro.github.io/2013/10/29/highload-conference-2013</id>
     <content type="html"><![CDATA[<p>Today I was lucky to have attended the annual developers conference <a href="http://www.highload.ru">HighLoad++</a> 2013. This is the 7-th time. Some conference sessions are translated into English and available here: <a href="http://www.highload.co/freeonline/">http://www.highload.co/freeonline/</a></p>
 
 <p><a href="http://ivoroshilin.files.wordpress.com/2013/10/pa293662.jpg"><img src="http://ivoroshilin.files.wordpress.com/2013/10/pa293662.jpg?w=300" alt="OLYMPUS DIGITAL CAMERA" /></a></p>
@@ -816,9 +816,9 @@ DockerSprayHttpServer$ curl $(boot2docker ip):10001/welcome
   
   <entry>
     <title type="html"><![CDATA[MinHash Algorithm or How to Quickly Find Similarities Among 2 Documents]]></title>
-    <link href="http://vibneiro.github.io/blog/2013/10/07/minhash-algorithm-or-how-to-quickly-find-similarities-among-2-documents/"/>
+    <link href="http://vibneiro.github.io/2013/10/07/minhash-algorithm-or-how-to-quickly-find-similarities-among-2-documents/"/>
     <updated>2013-10-07T02:57:48+04:00</updated>
-    <id>http://vibneiro.github.io/blog/2013/10/07/minhash-algorithm-or-how-to-quickly-find-similarities-among-2-documents</id>
+    <id>http://vibneiro.github.io/2013/10/07/minhash-algorithm-or-how-to-quickly-find-similarities-among-2-documents</id>
     <content type="html"><![CDATA[<p>MinHash is a technique from <a href="http://en.wikipedia.org/wiki/Locality_sensitive_hashing">Locality Sensitive Hashing</a> allowing to find similarities among 2 sets. This is a  buzzword frequently met in Data Mining  and Data Science fields of CS. What surprising is that this method was invented in 1997 and used in <a href="http://en.wikipedia.org/wiki/AltaVista">AltaVista</a> web-search engine back in the 90s to find similarities among web-documents and it also can be used to:</p>
 
 <ul>
@@ -1003,9 +1003,9 @@ public static void main(String[] args){
   
   <entry>
     <title type="html"><![CDATA[Google Code Jam. Qualification Round 2013. Problem D - Treasure. Solved.]]></title>
-    <link href="http://vibneiro.github.io/blog/2013/09/11/google-code-jam-qualification-round-2013-problem-d-treasure/"/>
+    <link href="http://vibneiro.github.io/2013/09/11/google-code-jam-qualification-round-2013-problem-d-treasure/"/>
     <updated>2013-09-11T18:34:59+04:00</updated>
-    <id>http://vibneiro.github.io/blog/2013/09/11/google-code-jam-qualification-round-2013-problem-d-treasure</id>
+    <id>http://vibneiro.github.io/2013/09/11/google-code-jam-qualification-round-2013-problem-d-treasure</id>
     <content type="html"><![CDATA[<p><a href="http://ivoroshilin.files.wordpress.com/2013/09/1.jpg"><img src="http://ivoroshilin.files.wordpress.com/2013/09/1.jpg" alt="1" /></a></p>
 
 <p>This was <a href="https://code.google.com/codejam/contest/2270488/dashboard#s=p3&amp;a=3">the problem</a> I wasn&rsquo;t able to optimise with given time constraint in April.  Later I killed half a day to complete it thinking of different algorithms from the graph theory such as Eulerian path
@@ -1065,9 +1065,9 @@ if (!marked[w]) dfs(G, w);
   
   <entry>
     <title type="html"><![CDATA[How Automatic Sharding Works or Consistent Hashing Under the Hood]]></title>
-    <link href="http://vibneiro.github.io/blog/2013/07/15/distributed-caching-under-consistent-hashing/"/>
+    <link href="http://vibneiro.github.io/2013/07/15/distributed-caching-under-consistent-hashing/"/>
     <updated>2013-07-15T12:25:09+04:00</updated>
-    <id>http://vibneiro.github.io/blog/2013/07/15/distributed-caching-under-consistent-hashing</id>
+    <id>http://vibneiro.github.io/2013/07/15/distributed-caching-under-consistent-hashing</id>
     <content type="html"><![CDATA[<h2>Preface</h2>
 
 <p>Here we&rsquo;re going to talk primarily about Consistent hashing. This technique involves such concepts as adaptive load balancing, routing, partitioning in distributed computing. There are many articles on the internet on this technique (refer to the list of references for some of them) but I haven&rsquo;t found information about how and where to keep the ring of hashes, thus I&rsquo;ve decided to describe some options with pros and cons. In order to make this post more clear for a wider audience I will first try to write a brief introduction of what this is all about and tell about <strong>the ring storage strategies</strong> at the end of this issue. So if you&rsquo;re already familiar with the algorithm you may want to skip over the main stuff and move on to the last chapter for pros and cons of descibed approaces.</p>
@@ -1228,9 +1228,9 @@ private static class MD5Hash {
   
   <entry>
     <title type="html"><![CDATA[Annual Conference Java One 2013]]></title>
-    <link href="http://vibneiro.github.io/blog/2013/04/23/java-one-2013/"/>
+    <link href="http://vibneiro.github.io/2013/04/23/java-one-2013/"/>
     <updated>2013-04-23T18:57:31+04:00</updated>
-    <id>http://vibneiro.github.io/blog/2013/04/23/java-one-2013</id>
+    <id>http://vibneiro.github.io/2013/04/23/java-one-2013</id>
     <content type="html"><![CDATA[<p><a href="http://ivoroshilin.files.wordpress.com/2013/04/javaone2013.jpg"><img src="http://ivoroshilin.files.wordpress.com/2013/04/javaone2013.jpg" alt="javaone2013" /></a></p>
 
 <p>Java One 2013, Moscow</p>
@@ -1245,9 +1245,9 @@ private static class MD5Hash {
   
   <entry>
     <title type="html"><![CDATA[Google Code Jam 2013 - Qualification Round Finished]]></title>
-    <link href="http://vibneiro.github.io/blog/2013/04/14/google-code-jam-2013-qualification-round-i-have-posted-my-solutions/"/>
+    <link href="http://vibneiro.github.io/2013/04/14/google-code-jam-2013-qualification-round-i-have-posted-my-solutions/"/>
     <updated>2013-04-14T13:09:16+04:00</updated>
-    <id>http://vibneiro.github.io/blog/2013/04/14/google-code-jam-2013-qualification-round-i-have-posted-my-solutions</id>
+    <id>http://vibneiro.github.io/2013/04/14/google-code-jam-2013-qualification-round-i-have-posted-my-solutions</id>
     <content type="html"><![CDATA[<p>As many of you know, it&rsquo;s been 10 hours since qualification round finished at Google code jam contest: <a href="http://code.google.com/codejam/">http://code.google.com/codejam/</a></p>
 
 <p>Appx. <strong>21000</strong> participants took part around the world with 25h time available for the round.</p>
@@ -1595,9 +1595,9 @@ public static void main(String[] args) throws Exception {
   
   <entry>
     <title type="html"><![CDATA[What You Should Know About Locality of Reference]]></title>
-    <link href="http://vibneiro.github.io/blog/2013/02/06/know-your-locality-of-reference-some-techniques-for-keeping-data-in-the-cpu-cache/"/>
+    <link href="http://vibneiro.github.io/2013/02/06/know-your-locality-of-reference-some-techniques-for-keeping-data-in-the-cpu-cache/"/>
     <updated>2013-02-06T17:18:51+04:00</updated>
-    <id>http://vibneiro.github.io/blog/2013/02/06/know-your-locality-of-reference-some-techniques-for-keeping-data-in-the-cpu-cache</id>
+    <id>http://vibneiro.github.io/2013/02/06/know-your-locality-of-reference-some-techniques-for-keeping-data-in-the-cpu-cache</id>
     <content type="html"><![CDATA[<h2><a href="http://ivoroshilin.com/2013/02/06/know-your-locality-of-reference-some-techniques-for-keeping-data-in-the-cpu-cache/"> </a></h2>
 
 <h2><strong>Introduction</strong></h2>
@@ -1704,9 +1704,9 @@ public static void main(String[] args) throws Exception {
   
   <entry>
     <title type="html"><![CDATA[Asymptotic Complexity: Beware of Hidden Constants]]></title>
-    <link href="http://vibneiro.github.io/blog/2013/01/11/when-asymptotic-analysis-of-complexity-doesnt-work/"/>
+    <link href="http://vibneiro.github.io/2013/01/11/when-asymptotic-analysis-of-complexity-doesnt-work/"/>
     <updated>2013-01-11T15:24:57+04:00</updated>
-    <id>http://vibneiro.github.io/blog/2013/01/11/when-asymptotic-analysis-of-complexity-doesnt-work</id>
+    <id>http://vibneiro.github.io/2013/01/11/when-asymptotic-analysis-of-complexity-doesnt-work</id>
     <content type="html"><![CDATA[<h3><strong>Asymptotic complexity and invisible constant factor</strong></h3>
 
 <p>Today I&rsquo;m going to explain what stands behind asymptotic complexity of algorithms when it comes to measurement of performance on modern computer hardware. Let&rsquo;s recall that asymptotic analysis is based on idealized sequential RAM-model. Complexity shows how good an algorithm scales as N grows from mathematical point of view. Two or more algorithms with different complexity solving the same task DOES NOT mean one will work slower or faster. Computer architecture is more complex than <a href="http://en.wikipedia.org/wiki/Random-access_machine">RAM-model</a>. There are different memory hierarchies, branching strategies, prefetching techniques, pipelining and other hardware factors which are not taken into account in this model. Constant-factors hidden in Big-Oh notation are not fixed, but variable in fact. Popular books on algorithms not always explain clearly this fact. While Big-Oh has many theoretically useful insights, it cannot actually predict performance. Read on, to find out why.</p>
@@ -1731,9 +1731,9 @@ public static void main(String[] args) throws Exception {
   
   <entry>
     <title type="html"><![CDATA[Brewer's CAP Theorem Explained: BASE Versus ACID]]></title>
-    <link href="http://vibneiro.github.io/blog/2012/12/13/brewers-cap-theorem-explained-base-versus-acid/"/>
+    <link href="http://vibneiro.github.io/2012/12/13/brewers-cap-theorem-explained-base-versus-acid/"/>
     <updated>2012-12-13T17:21:22+04:00</updated>
-    <id>http://vibneiro.github.io/blog/2012/12/13/brewers-cap-theorem-explained-base-versus-acid</id>
+    <id>http://vibneiro.github.io/2012/12/13/brewers-cap-theorem-explained-base-versus-acid</id>
     <content type="html"><![CDATA[<p>The goal of this article is to give more clarity to the theorem and show pros and cons of ACID and BASE models that might stand in the way of implementing distributed systems.</p>
 
 <h2>What is CAP about?</h2>

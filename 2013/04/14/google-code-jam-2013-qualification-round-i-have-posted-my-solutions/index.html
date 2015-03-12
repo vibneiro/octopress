@@ -1,0 +1,651 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Google Code Jam 2013 - Qualification Round Finished - Ivan Voroshilin&#8217;s Blog.</title>
+  <meta name="author" content="Ivan Voroshilin">
+
+  
+  <meta name="description" content="As many of you know, it&rsquo;s been 10 hours since qualification round finished at Google code jam contest: http://code.google.com/codejam/ Appx. &hellip;">
+
+  
+  <meta name="keywords" content="distributed, algorithm, Ivan, Voroshilin, code, google, jam, " />
+
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://vibneiro.github.io/2013/04/14/google-code-jam-2013-qualification-round-i-have-posted-my-solutions/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/octopress/atom.xml" rel="alternate" title="Ivan Voroshilin's Blog." type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-37693662-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Ivan Voroshilin&#8217;s Blog.</a></h1>
+  
+    <h2>Algorithmic contests, distributed systems and software architecture</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/octopress/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="vibneiro.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Google Code Jam 2013 - Qualification Round Finished</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2013-04-14T13:09:16+04:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>14</span><span class='date-suffix'>th</span>, <span class='date-year'>2013</span></span> <span class='time'>1:09 pm</span></time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>As many of you know, it&rsquo;s been 10 hours since qualification round finished at Google code jam contest: <a href="http://code.google.com/codejam/">http://code.google.com/codejam/</a></p>
+
+<p>Appx. <strong>21000</strong> participants took part around the world with 25h time available for the round.</p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2013/04/codejam_pic.jpg"><img src="http://ivoroshilin.files.wordpress.com/2013/04/codejam_pic.jpg" alt="codejam_pic" /></a></p>
+
+<p>Here are my solutions to 3 problems given out of 4:</p>
+
+<p><a href="https://github.com/vibneiro/googleJam2013">https://github.com/vibneiro/googleJam2013</a></p>
+
+<p>So, here&rsquo;s the analysis:</p>
+
+<h2>1. Problem A: Tic-Tac-Toe-Tomek</h2>
+
+<p>Works on small and large sets. Just a simple algorithm to implement. The point is to comply with all the conditions. The goal is to find a winner. If there&rsquo;s no winner, it should be draw, otherwise if we have empty cells the game is not completed.</p>
+
+<p>[sourcecode language=&ldquo;java&rdquo;]
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.util.Scanner;</p>
+
+<p>/<em>*
+  @Author: Ivan Voroshilin
+  @Date: April 13 2013
+  Problem A
+  Small and large inputs
+ </em>/
+public class TicTacToeTomek {</p>
+
+<pre><code>private final static char XPLAYER = 'X';
+private final static char OPLAYER = 'O';
+private final static char T = 'T';
+private final static char EMPTY = '.';
+
+private final static String X_WON = "X won";
+private final static String O_WON = "O won";
+private final static String DRAW = "Draw";
+private final static String NOT_COMPLETED = "Game has not completed";
+
+private void solve(Scanner sc, PrintWriter pw) {
+
+    char[][] array = { sc.next().toCharArray(), sc.next().toCharArray(), sc.next().toCharArray(), sc.next().toCharArray() };
+
+    int xXCount = 0;
+    int yXCount = 0;
+    int xOCount = 0;
+    int yOCount = 0;
+
+    int dForwardXCount = 0;
+    int dBackwardXCount = 0;
+    int dForwardOCount = 0;
+    int dBackwardOCount = 0;
+    boolean hasEmptyCells = false;
+    boolean hasWinner = false;
+
+    for(int x = 0; x &lt; array.length; x++) { // 4
+
+        for(int y = 0; y &lt; array.length; y++) { // 4
+
+            //x-X
+            if(array[x][y] == XPLAYER || array[x][y] == T) {
+                xXCount++;
+            }
+
+            //y-X
+            if(array[y][x] == XPLAYER || array[x][y] == T) {
+                yXCount++;
+            }
+
+            //x-O
+            if(array[x][y] == OPLAYER || array[x][y] == T) {
+                xOCount++;
+            }
+
+            //y-O
+            if(array[y][x] == OPLAYER || array[x][y] == T) {
+                yOCount++;
+            }
+
+            if(array[x][y] == EMPTY) {
+                hasEmptyCells = true;
+            }
+        }
+
+        if(!hasWinner &amp;&amp; (xXCount == array.length || yXCount == array.length)) {
+            System.out.println(X_WON);
+            pw.println(X_WON);
+            hasWinner = true;
+        }
+
+        if(!hasWinner &amp;&amp; (xOCount == array.length || yOCount == array.length)) {
+            System.out.println(O_WON);
+            pw.println(O_WON);
+            hasWinner = true;
+        }
+
+        xXCount = yXCount = xOCount = yOCount = 0;
+
+        if(array[x][x] == XPLAYER || array[x][x] == T) {
+            dForwardXCount++;
+        }
+
+        if(array[(array.length - 1 - x)][x] == XPLAYER || array[(array.length - 1 - x)][x] == T) {
+            dBackwardXCount++;
+        }
+
+        if(array[x][x] == OPLAYER || array[x][x] == T) {
+            dForwardOCount++;
+        }
+
+        if(array[(array.length - 1 - x)][x] == OPLAYER || array[(array.length - 1 - x)][x] == T) {
+            dBackwardOCount++;
+        }
+
+    }
+
+    if(!hasWinner &amp;&amp; (dForwardXCount == array.length || dBackwardXCount == array.length)) {
+        System.out.println(X_WON);
+        pw.println(X_WON);
+        hasWinner = true;
+    } else
+    if(!hasWinner &amp;&amp; (dForwardOCount == array.length || dBackwardOCount == array.length)) {
+        System.out.println(O_WON);
+        pw.println(O_WON);
+        hasWinner = true;
+    }
+
+    if(!hasWinner) {
+        if(hasEmptyCells) {
+            System.out.println(NOT_COMPLETED);
+            pw.println(NOT_COMPLETED);
+        } else {
+            System.out.println(DRAW);
+            pw.println(DRAW);
+        }
+    }
+
+}
+
+public static void main(String[] args) throws Exception {
+
+    Scanner sc = new Scanner(new FileReader("A-large.in.txt"));
+    PrintWriter pw = new PrintWriter(new FileWriter("output.txt"));
+
+    int caseCnt = sc.nextInt();
+    sc.nextLine();
+    for (int caseNum = 0; caseNum &lt; caseCnt; caseNum++) {
+        System.out.println("Processing test case " + (caseNum + 1));
+        pw.print("Case #" + (caseNum + 1) + ": ");
+        new TicTacToeTomek().solve(sc, pw);
+
+    }
+
+    pw.flush();
+    pw.close();
+    sc.close();
+}
+</code></pre>
+
+<p>}</p>
+
+<p>[/sourcecode]</p>
+
+<h2>3. Problem C: Fair and Square</h2>
+
+<h3>Small Data Sets</h3>
+
+<p>On small data sets it is a piece of cake - a classical algorithmic task which took me about 10 mins to write the code:</p>
+
+<p>[sourcecode language=&ldquo;java&rdquo;]
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.util.Scanner;</p>
+
+<p>/<em>*
+ @Author: Ivan Voroshilin
+ @Date: April 13 2013
+ Problem C
+ Small inputs
+ </em>/
+public class FairNSquare {</p>
+
+<pre><code>private boolean isPalindrome(long num) {
+    long reversed = 0;
+    long n = num;
+
+    while (n &gt; 0) {
+        reversed = reversed * 10 + n % 10;
+        n /= 10;
+    }
+
+    return num == reversed;
+}
+
+private void solve(Scanner sc, PrintWriter pw) {
+
+    sc.nextLong();
+
+    long a = sc.nextLong();
+    long b = sc.nextLong();
+
+    System.out.println(a);
+    System.out.println(b);
+
+    long number = a;
+    long count = 0;
+
+    while(number &lt;= b) {
+        if(isPalindrome(number)) {
+            double d = Math.sqrt(number);
+            if((d % 1) == 0 &amp;&amp; isPalindrome((long)d)) {
+                count++;
+            }
+        }
+        number++;
+    }
+
+    pw.println(count);
+}
+
+public static void main(String[] args) throws Exception {
+
+    Scanner sc = new Scanner(new FileReader("C-small-attempt0.in.txt"));
+    PrintWriter pw = new PrintWriter(new FileWriter("output.txt"));
+
+    int caseCnt = sc.nextInt();
+    sc.nextLine();
+    for (int caseNum = 0; caseNum &lt; caseCnt; caseNum++) {
+        System.out.println("Processing test case " + (caseNum + 1));
+        pw.print("Case #" + (caseNum + 1) + ": ");
+        new FairNSquare().solve(sc, pw);
+    }
+
+    pw.flush();
+    pw.close();
+    sc.close();
+}
+</code></pre>
+
+<p>}
+[/sourcecode]</p>
+
+<h3>Large Data Sets</h3>
+
+<p>I tried to come up with a solution on large data sets, wrote the code which works using standard Bisection method based on a binary search but struggled to optimize time complexity of square root on BigInteger and palindrome checking on large ranges, I vaguely remember from Euler&rsquo;s project there were some mathematical proofs regarding number 11 and palindromic numbers. There might be some very important facts which would allow to optimize for better performance however I decided not to waste time on it and moved to another problem.</p>
+
+<p>Ok, here&rsquo;s my solution which as been said didn&rsquo;t pass time requirement.</p>
+
+<p>[sourcecode language=&ldquo;java&rdquo;]
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.math.BigInteger;
+import java.util.Scanner;</p>
+
+<p>/<em>*
+ @Author: Ivan Voroshilin
+ @Date: April 13 2013
+ Problem C
+ Large inputs
+ Comment: Poor time complexity
+ </em>/
+public class FairNSquareLarge {</p>
+
+<pre><code>private static boolean isPalindrome(BigInteger num) {
+    BigInteger reversed = BigInteger.ZERO;
+    BigInteger n = num;
+
+    while (n.compareTo(BigInteger.ZERO) &gt; 0) {
+        reversed = reversed.multiply(BigInteger.valueOf(10)).add(n.mod(BigInteger.valueOf(10)));
+        n = n.divide(BigInteger.valueOf(10));
+    }
+
+    return num.compareTo(reversed) == 0;
+}
+
+private static BigInteger sqrt(BigInteger n) {
+    BigInteger a = BigInteger.ONE;
+    BigInteger b = new BigInteger(n.shiftRight(5).add(new BigInteger("8")).toString());
+    while(b.compareTo(a) &gt;= 0) {
+        BigInteger mid = new BigInteger(a.add(b).shiftRight(1).toString());
+        if(mid.multiply(mid).compareTo(n) &gt; 0) b = mid.subtract(BigInteger.ONE);
+        else a = mid.add(BigInteger.ONE);
+    }
+    return a.subtract(BigInteger.ONE);
+}
+
+private void solve(Scanner sc, PrintWriter pw) {
+
+    BigInteger a = sc.nextBigInteger();
+    BigInteger b = sc.nextBigInteger();
+
+    BigInteger number = a;
+    long count = 0;
+
+    while(number.compareTo(b) &lt;= 0) {
+        if(isPalindrome(number)) {
+
+            BigInteger d = sqrt(number);
+
+            if(d.multiply(d).compareTo(number) == 0 &amp;&amp; isPalindrome(d)) {
+                count++;
+            }
+        }
+        number = number.add(BigInteger.ONE);
+        System.out.println(number.toString());
+    }
+
+    pw.println(count);
+}
+
+public static void main(String[] args) throws Exception {
+
+    Scanner sc = new Scanner(new FileReader("C-large-1.in.txt"));
+    PrintWriter pw = new PrintWriter(new FileWriter("output.txt"));
+
+    int caseCnt = sc.nextInt();
+    sc.nextLine();
+    for (int caseNum = 0; caseNum &lt; caseCnt; caseNum++) {
+        System.out.println("Processing test case " + (caseNum + 1));
+        pw.print("Case #" + (caseNum + 1) + ": ");
+        new FairNSquareLarge().solve(sc, pw);
+    }
+
+    pw.flush();
+    pw.close();
+    sc.close();
+}
+</code></pre>
+
+<p>}
+[/sourcecode]</p>
+
+<h2>4. Problem D: Treasure</h2>
+
+<h3>Small Data Sets</h3>
+
+<p>I first did a straightforward BFS with checking for deadlocks and then realized from conditions that there might be several paths to open all chests and the goal is to select minimal path from all sorted lexicographically. Sure, we could make a simple systematic backtracking using all permutations of paths which has a terrible complexity O(n!) and doesn&rsquo;t meet time requirements even on small sets, e.g. N=20 chests where we have 20! distinct permutations (ouch!).</p>
+
+<p>I had time pressure (1h until the end of round) and nixed that idea to proceed but this problem is really challenging. Sorry!</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">vibneiro</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2013-04-14T13:09:16+04:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>14</span><span class='date-suffix'>th</span>, <span class='date-year'>2013</span></span> <span class='time'>1:09 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/categories/google-jam/'>google jam</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://vibneiro.github.io/2013/04/14/google-code-jam-2013-qualification-round-i-have-posted-my-solutions/" data-via="vibneiro" data-counturl="http://vibneiro.github.io/2013/04/14/google-code-jam-2013-qualification-round-i-have-posted-my-solutions/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/2013/02/06/know-your-locality-of-reference-some-techniques-for-keeping-data-in-the-cpu-cache/" title="Previous Post: What you should know about locality of reference">&laquo; What you should know about locality of reference</a>
+      
+      
+        <a class="basic-alignment right" href="/2013/04/23/java-one-2013/" title="Next Post: Annual conference Java One 2013">Annual conference Java One 2013 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Ivan Voroshilin</h1>
+  <p>A software geek.</p>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2015/03/04/review-of-service-discovery-solutions/">Service Discovery Solutions in Distributed Systems</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2015/02/05/toughest-backtracking-problems-in-algorithmic-competitions/">Toughest Backtracking Problems in Algorithmic Competitions</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2014/12/16/docker-creating-and-testing-httprest-server-on-top-of-akkaspray/">Dockerizing Spray HTTP Server</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2014/10/30/docker-a-birds-eye-view/">Docker: A Bird&#8217;s-eye View</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2014/10/12/the-flip-side-of-rule-engines-and-some-tips-on-when-not-use-ones/">The Flip Side of Rule Engines on Example of Drools and Some Valuable Tips</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  
+  <a href="https://github.com/vibneiro">@vibneiro</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'vibneiro',
+            count: 10,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/vibneiro?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+<section class="twitter2">
+  <h1>
+    <a href="https://twitter.com/vibneiro">
+      <img src="https://twitter.com/images/resources/twitter-bird-light-bgs.png" width="32" height="32">
+      vibneiro
+    </a>
+  </h1>
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Ivan Voroshilin -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-37693662-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'vibneiro';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://vibneiro.github.io/2013/04/14/google-code-jam-2013-qualification-round-i-have-posted-my-solutions/';
+        var disqus_url = 'http://vibneiro.github.io/2013/04/14/google-code-jam-2013-qualification-round-i-have-posted-my-solutions/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

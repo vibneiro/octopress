@@ -1,0 +1,369 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>The Flip Side of Rule Engines on Example of Drools and Some Valuable Tips - Ivan Voroshilin&#8217;s Blog.</title>
+  <meta name="author" content="Ivan Voroshilin">
+
+  
+  <meta name="description" content="Hey there! This post is devoted to business rule engines and solely written based on my research and experience with Open-Source Drools engine that &hellip;">
+
+  
+  <meta name="keywords" content="distributed, algorithm, Ivan, Voroshilin, code, google, jam, " />
+
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://vibneiro.github.io/2014/10/12/the-flip-side-of-rule-engines-and-some-tips-on-when-not-use-ones/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/octopress/atom.xml" rel="alternate" title="Ivan Voroshilin's Blog." type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-37693662-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Ivan Voroshilin&#8217;s Blog.</a></h1>
+  
+    <h2>Algorithmic contests, distributed systems and software architecture</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/octopress/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="vibneiro.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">The Flip Side of Rule Engines on Example of Drools and Some Valuable Tips</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2014-10-12T02:21:19+04:00'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>12</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>2:21 am</span></time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Hey there! This post is devoted to business rule engines and solely written based on my research and experience with Open-Source <a href="http://www.drools.org">Drools</a> engine that has been used in Production for more than 1 year in mission-critical systems. Undoubtedly, this engine is great for many features. But, I want to explain you what you should think of before using it or when not to use it all. Because it is very important step, once you adapted it in your project, it will be quite costly to remove one later.  I am going to be quick on the theory here, pointing you at issues and important things. If you don&rsquo;t understand something, feel free to ask me but first please refer to the official documentation. I&rsquo;ll try to underline the major issue I&rsquo;ve come across, surely there are many more.</p>
+
+<p>A rule engine is not a magical box that does something new . It is intended to be a tool that provides a higher level of abstraction so you can focus less on reinventing the wheel.</p>
+
+<p>On one of our projects we had a critical system with thousands of small &ldquo;if then else if&hellip;&rdquo; requirements from business that were initially developed as a sequence of checks on java. Gradually, we realized how this clutter turned into a very difficult mess to maintain. Hence we made a decision to apply some open source rule engine framework. After some high-level research Drools framework became our choice, primarily because it is free and open source. No one had experience on the team with commercial rule engines, however.</p>
+
+<p>Ok, let&rsquo;s get to it!</p>
+
+<p><img src="https://ivoroshilin.files.wordpress.com/2014/10/rule-engine-inkscape.png" alt="rule-engine-inkscape" /></p>
+
+<h3><strong>The order of rules execution</strong></h3>
+
+<p>Rule-engines are a good fit if you don&rsquo;t know the order in which rules are executed, e.g. the order doesn&#8217;t matter. Frequently, in order to understand this, you have to decompose your logic in such a way that you have separated simple flat rules not depending on each other.  In a nutshell, Rule engine is like a black box that have inputs and outputs. This is a necessary but not sufficient condition. Besides, when rules change objects data, that are used in other rules, it greatly increases complexity. Hence you always should be vigilant on the order of execution of different rules.</p>
+
+<p>Otherwise, if the order is determinate, frequently it would be better-off using BPM-engines or something else.</p>
+
+<h3><strong>Clear domain model with stable public API</strong></h3>
+
+<p>Rule-engines are not a fit if your system doesn&rsquo;t have a <strong>clear domain model.</strong> Most non-mature systems don&rsquo;t have one. It&rsquo;s evolution, sometimes requiring to understand with time. Even clear requirements not always so clear in practice. Why am I saying this? Well,  because a good rule of thumb it that:</p>
+
+<blockquote>&#8220;Rules should be working with only the Domain Model of your system with clear public API around it. If they don&#8217;t, your rules ultimately will turn into unmanageable mess. Period!&#8221;</blockquote>
+
+
+<p>It seems to be natural, but many developers don&rsquo;t realize it. Imagine, what happens if you rules start using internal code or other API that is not a part of domain logic.  With such a disgusting approach, the rules will be aware of more then they need to, like internal implementations/behaviors  and other dependencies =<strong> tightly coupled code</strong>. It&rsquo;s just like in OOP or SOA principles but in terms of rules. Tightly coupled code/rules is very difficult to change. Needless to say, if this code is not encapsulated. Eventually, you will have to modify your code triggering broken rules very often, when business requirements change.</p>
+
+<h3>Indepotence or exactly once</h3>
+
+<p>All rules must run multiple times without errors yielding the same result. It&rsquo;s like writing a bash-script and also considered a good rule of thumb. Otherwise you may encounter lots of misbehaving weird things.</p>
+
+<h3><strong>Forget Debugging tools, %100 coverage with tests is needed</strong></h3>
+
+<p>Rule-engines are difficult to refactor, you would have to analyze them and/or keep the whole graph in mind if there are dependencies. In terms of Drools it is impossible to trace rules line-by-line. Drools-rules are declarative and don&rsquo;t have a mechanism to debug them. Therefore, you should ideally cover 100% of your rules with JUnit-tests. I can give you a hint to use Spock-framework on top of Groovy as a Behavioural-Driven Development stuff, where each rule is simply covered with a test. Tests usually come directly from business specs. Each rule should contain only 1 simple thing as minimal as possible.</p>
+
+<h3>Cost of change</h3>
+
+<p>No one has any idea if there are conflicting rules when a new one is added or existing one is changed.  A complete regression test must be done when rules are changed. The Memory is sometimes a big issue too. And you can do very little to reduce the consumption - you use 3-rd party framework.</p>
+
+<h3><strong>Some rules need to be triggered twice or more</strong></h3>
+
+<p>Somebody of you can claim that Drools has a feature of rule-invalidation of Facts, but this again turns into unobvious, tangled mess getting in the way to quickly understand why rules yielded such a result. It&rsquo;s up to you, but you never know whether you will have to flush/invalidate rules in the long run.</p>
+
+<h3>Rete Algorithm vs your Domain API and traversals</h3>
+
+<p>The majority of modern rule engines including Drools work upon so called <a href="http://en.wikipedia.org/wiki/Rete_algorithm">Rete Algorithm</a>. Make sure that your codebase, which your rules call, can be built by a Rete algorithm in the working memory. If it&rsquo;s not, tree traversal of your codebase within rules on such a model will be a big performance issue!  Bear in mind, if you have internal traversal logic inside your public domain API (e.g. some of your methods do traversal for you) happening on LHS (Left hand side operation) clause , it is very bad for Drools&#8217; performance as latter has its own <strong>flexible querying model directly</strong> related to Rete-tree. Drools itself should be able to build the tree for you based on your API and efficiently traverse it.</p>
+
+<h3>Performance and external systems</h3>
+
+<p>What if you are required to save a set of operations to a database and each operation must be checked via rule engine. And the next operation depends on the result of the previous one. This imposes performance problems. All operation could be validated and afterwards saved in 1 go. Think it through in advance. I know there are Rule Groups in Drools, but my point - it&rsquo;s very complicated.</p>
+
+<h3>Rules Centralization</h3>
+
+<p>The same business rules may apply across different services, leading to redundancy and governance challenges. It imposes a burden upon us to keep the content of those rules in synch over time.  Thus, it is usually recommended to move them to a new dedicated rule service. The downside is that such a service becomes an additional architectural dependency for other services. The responsibility to build and maintain centralized rule service can introduce various headaches. When we need to change currently active rules or introduce new ones we need to ensure that these changes to the existing rule architecture do not have negative or unforeseen impacts, the worst of which can be a cascading effect that causes exceptions that compound across multiple rules (and multiple services), which should be thoroughly tested.</p>
+
+<p>And please! Make sure that your services know nothing about rules but only talk to the service via a clear contract.</p>
+
+<h3>Conclusion</h3>
+
+<p>This write-up only scratched the surface of issues coming from my experience. To be honest with you, I would say &ldquo;No&rdquo; to applying rule engine frameworks in my future projects to a large number of systems. Initially it seems to be pretty easy, but eventually you realize, that third-party rule engines are more of a pain that benefit, especially when it comes to interdependencies and a domain model. Project maintenance becomes very costly due to this.  It&rsquo;s not as simple as coding a bunch of <code>if </code>statements. The rules engine gives you the tools to handle rule relationships, but you still have to be able to imagine all of that in your mind.</p>
+
+<p>The most important thing, it is quite difficult to use a rule engine effectively and correctly. A team should have solid knowledge of how to use it and understanding with implementation of business model should be mature. Rule engines work well if there is a really flat independent logic among rules/facts. Each framework restricts you to use their specific model. It&rsquo;s not worth it!</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">vibneiro</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2014-10-12T02:21:19+04:00'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>12</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>2:21 am</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/categories/patterns/'>patterns</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://vibneiro.github.io/2014/10/12/the-flip-side-of-rule-engines-and-some-tips-on-when-not-use-ones/" data-via="vibneiro" data-counturl="http://vibneiro.github.io/2014/10/12/the-flip-side-of-rule-engines-and-some-tips-on-when-not-use-ones/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/2014/09/15/project-euler-a-list-of-interesting-problems/" title="Previous Post: Project Euler: a list of interesting problems">&laquo; Project Euler: a list of interesting problems</a>
+      
+      
+        <a class="basic-alignment right" href="/2014/10/30/docker-a-birds-eye-view/" title="Next Post: Docker: A bird's-eye view">Docker: A bird&#8217;s-eye view &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Ivan Voroshilin</h1>
+  <p>A software geek.</p>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2015/03/04/review-of-service-discovery-solutions/">Service Discovery Solutions in Distributed Systems</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2015/02/05/toughest-backtracking-problems-in-algorithmic-competitions/">Toughest Backtracking Problems in Algorithmic Competitions</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2014/12/16/docker-creating-and-testing-httprest-server-on-top-of-akkaspray/">Dockerizing Spray HTTP Server</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2014/10/30/docker-a-birds-eye-view/">Docker: A Bird&#8217;s-eye View</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2014/10/12/the-flip-side-of-rule-engines-and-some-tips-on-when-not-use-ones/">The Flip Side of Rule Engines on Example of Drools and Some Valuable Tips</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  
+  <a href="https://github.com/vibneiro">@vibneiro</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'vibneiro',
+            count: 10,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/vibneiro?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+<section class="twitter2">
+  <h1>
+    <a href="https://twitter.com/vibneiro">
+      <img src="https://twitter.com/images/resources/twitter-bird-light-bgs.png" width="32" height="32">
+      vibneiro
+    </a>
+  </h1>
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Ivan Voroshilin -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-37693662-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'vibneiro';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://vibneiro.github.io/2014/10/12/the-flip-side-of-rule-engines-and-some-tips-on-when-not-use-ones/';
+        var disqus_url = 'http://vibneiro.github.io/2014/10/12/the-flip-side-of-rule-engines-and-some-tips-on-when-not-use-ones/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

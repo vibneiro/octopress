@@ -1,0 +1,488 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>MinHash Algorithm or How to Quickly Find Similarities Among 2 Documents - Ivan Voroshilin&#8217;s Blog.</title>
+  <meta name="author" content="Ivan Voroshilin">
+
+  
+  <meta name="description" content="MinHash is a technique from Locality Sensitive Hashing allowing to find similarities among 2 sets. This is a  buzzword frequently met in Data Mining &hellip;">
+
+  
+  <meta name="keywords" content="distributed, algorithm, Ivan, Voroshilin, code, google, jam, " />
+
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://vibneiro.github.io/2013/10/07/minhash-algorithm-or-how-to-quickly-find-similarities-among-2-documents/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/octopress/atom.xml" rel="alternate" title="Ivan Voroshilin's Blog." type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-37693662-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Ivan Voroshilin&#8217;s Blog.</a></h1>
+  
+    <h2>Algorithmic contests, distributed systems and software architecture</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/octopress/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="vibneiro.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">MinHash Algorithm or How to Quickly Find Similarities Among 2 Documents</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2013-10-07T02:57:48+04:00'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>7</span><span class='date-suffix'>th</span>, <span class='date-year'>2013</span></span> <span class='time'>2:57 am</span></time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>MinHash is a technique from <a href="http://en.wikipedia.org/wiki/Locality_sensitive_hashing">Locality Sensitive Hashing</a> allowing to find similarities among 2 sets. This is a  buzzword frequently met in Data Mining  and Data Science fields of CS. What surprising is that this method was invented in 1997 and used in <a href="http://en.wikipedia.org/wiki/AltaVista">AltaVista</a> web-search engine back in the 90s to find similarities among web-documents and it also can be used to:</p>
+
+<ul>
+<li><p>Find duplicates</p></li>
+<li><p>Near duplicate image detection</p></li>
+<li><p>Near neighbor search</p></li>
+</ul>
+
+
+<p>Basically the algorithm can be applied to anything that can be presented by numbers.</p>
+
+<p>Let&rsquo;s start with a bit of math from theory of probability and statistics.</p>
+
+<p>Define a formula of two sets <em>A</em> and <em>B:</em></p>
+
+<p><img src="http://upload.wikimedia.org/math/1/8/6/186c7f4e83da32e889d606140fae25a0.png" alt=" J(A,B) = |A \cap B|\over|A \cup B|." /></p>
+
+<p>This is so-called  a <a href="http://en.wikipedia.org/wiki/Jaccard_index">Jaccard coefficient</a>.</p>
+
+<p>Where: J ∈ [0..1]</p>
+
+<p>j = 0 - if <em><em><em>A</em> ∩ </em>B = 0, that is 2 sets are disjoint meaning there are no similarities</em></p>
+
+<p><em>j = 1 - if __A</em> ∩ <em>B</em> = A = <em>B, that is 2 sets are identical.</em>
+__</p>
+
+<p>A, B are more similar when their <strong>Jaccard coefficient</strong> is closer to 1.</p>
+
+<p>This simple formula is cumbersome if the sets are quite large, e.g. 2 web-documents of more than 1MB in size. Ouch, that&rsquo;s too much. 1MB of text-data is <strong>1,048,576 characters </strong>provided that 1 ASCII char = 8 bits (of course for unicode charset it is greater).</p>
+
+<p>Now that we understand a bit of theory let&rsquo;s try to apply hashing to Jaccard coefficient. Everywhere I hear hashing it always leads to randomized algorithms.</p>
+
+<p>Ok, let&rsquo;s move on. The main idea is that similar objects hash to the same bucket. This follows from the fact that <strong>probability of collision higher for similar objects</strong>.</p>
+
+<p>Here we give an example for 2 sets A and B but the algorithm can be applied to any number of sets.</p>
+
+<ol>
+<li><p>Essentially, we need to construct a set of independent hash functions &lt;h1,h2,h3,&hellip;hk> <strong>randomly</strong>.  <em>k</em> = O(1/ε2), ε > 0 such that the expected error of the estimate is at most ε. For example, 400 hashes would be required to estimate <em>J</em>(<em>A</em>,<em>B</em>) with an expected error less than or equal to .05. So, k can be varied to increase/decrease the likelihood of false negatives.</p></li>
+<li><p>Next we initialize for each set A and B the <img src="http://www.toao.com/equations/49e83e4884bd478aecc7fb7e0a7e9477.png" alt="" /> value to infinity.</p></li>
+<li><p>For each element s in both sets A and B we compute the element&rsquo;s hash:</p></li>
+</ol>
+
+
+<p><img src="http://www.toao.com/equations/8664800335406d60ca14c723421d994c.png" alt="" /> such as: If <img src="http://www.toao.com/equations/d3d634b0636790f7fd707ad50b85b0a5.png" alt="" /> then <img src="http://www.toao.com/equations/f08914f853c4fcd405dafd052d100c5a.png" alt="" />.</p>
+
+<p>Eventually we should have <img src="http://www.toao.com/equations/49e83e4884bd478aecc7fb7e0a7e9477.png" alt="" /> for both sets A and B.</p>
+
+<ol>
+<li><p>If 2 sets A and B are similar then the probability P(  <img src="http://www.toao.com/equations/49e83e4884bd478aecc7fb7e0a7e9477.png" alt="" />A =  <img src="http://www.toao.com/equations/49e83e4884bd478aecc7fb7e0a7e9477.png" alt="" />B) = |<em>A</em> ∩ <em>B</em>| / |A U B|- is high and <strong>it</strong> <strong>is the actual Jaccard coefficient!</strong></p></li>
+<li><p>We calculated  <img src="http://www.toao.com/equations/49e83e4884bd478aecc7fb7e0a7e9477.png" alt="" /> statistics to estimate how similar are these 2 sets. General formula is: Similarity = identical <img src="http://www.toao.com/equations/49e83e4884bd478aecc7fb7e0a7e9477.png" alt="" />s / k</p></li>
+</ol>
+
+
+<p>In real world this requires considering more thoroughly different parameters, hash-functions etc. However, to demonstrate the algorithm I wrote a simple java code:</p>
+
+<p>[sourcecode language=&ldquo;java&rdquo;]
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;</p>
+
+<p>public class LSHMinHash<T> {</p>
+
+<pre><code>private final int hashes[];
+private final int numOfHashes;
+private final int numOfSets;
+private final Set&lt;T&gt; setA;
+private final Set&lt;T&gt; setB;
+private final Map&lt;T, boolean[]&gt; matrix;
+private final int[][] minHashes;
+
+public LSHMinHash(double e, Set&lt;T&gt; setA, Set&lt;T&gt; setB){
+    this.numOfHashes = (int)(1 / (e * e));
+    this.numOfSets = 2;
+    this.setA = setA;
+    this.setB = setB;
+    matrix = buildSetMatrix(setA, setB);
+    minHashes = initMinHashes(numOfSets, numOfHashes);
+    hashes = computeHashes(numOfHashes);
+}
+
+private Map&lt;T,boolean[]&gt; buildSetMatrix(Set&lt;T&gt; setA, Set&lt;T&gt; setB) {
+
+    Map&lt;T,boolean[]&gt; matrix = new HashMap&lt;T,boolean[]&gt;();
+
+    for(T element : setA){
+        matrix.put(element, new boolean[] { true, false } );
+    }
+
+    for(T element : setB){
+        if(matrix.containsKey(element)){
+            matrix.put(element, new boolean[] { true, true } );
+        }else if(!matrix.containsKey(element)){
+            matrix.put(element, new boolean[] { false, true } );
+        }
+    }
+
+    return matrix;
+}
+
+private int[][] initMinHashes(int numOfSets, int numOfHashes) {
+    int[][] minHashes = new int[numOfSets][numOfHashes];
+
+    for (int i = 0; i &lt; numOfSets; i++) {
+        for (int j = 0; j &lt; numOfHashes; j++) {
+            minHashes[i][j] = Integer.MAX_VALUE;
+        }
+    }
+    return minHashes;
+}
+
+private int[] computeHashes(int numOfHashes) {
+    int[] hashes = new int[numOfHashes];
+    Random r = new Random(31);
+
+    for (int i = 0; i &lt; numOfHashes; i++){
+        int a = (int)r.nextInt();
+        int b = (int)r.nextInt();
+        int c = (int)r.nextInt();
+        hashes[i] = (int)((a * (a * b * c &gt;&gt; 4) + a * a * b * c + c) &amp; 0xFFFFFFFF);
+    }
+    return hashes;
+}
+
+private void computeMinHashForSet(Set&lt;T&gt; set, int setIndex){
+    int hashIndex = 0;
+
+    for(T element : matrix.keySet()) {
+        for (int i = 0; i &lt; numOfHashes; i++) {
+            if(set.contains(element)) {
+                int hashValue = hashes[hashIndex];
+                if (hashValue &lt; minHashes[setIndex][hashIndex]) {
+                    minHashes[setIndex][hashIndex] = hashValue;
+                }
+            }
+        }
+        hashIndex++;
+    }
+}
+
+private double computeMinHash(int[][] minHashes, int numOfHashes) {
+    int identicalMinHashes = 0;
+    for (int i = 0; i &lt; numOfHashes; i++){
+        if (minHashes[0][i] == minHashes[1][i]) {
+            identicalMinHashes++;
+        }
+    }
+    return (1.0 * identicalMinHashes) / numOfHashes;
+}
+
+public double findSimilarities() {
+    computeMinHashForSet(setA, 0);
+    computeMinHashForSet(setB, 1);
+    return computeMinHash(minHashes, numOfHashes);
+}
+
+public static void main(String[] args){
+    Set&lt;String&gt; setA = new HashSet&lt;String&gt;();
+    setA.add("THIS");
+    setA.add("IS ");
+    setA.add("THE");
+    setA.add("CASE");
+
+    Set&lt;String&gt; setB = new HashSet&lt;String&gt;();
+    setB.add("THAT");
+    setB.add("IS ");
+    setB.add("THE");
+    setB.add("CASE");
+
+    double errorFactor = 0.001;
+
+    LSHMinHash&lt;String&gt; minHash = new LSHMinHash&lt;String&gt;(errorFactor, setA, setB);
+    System.out.println(minHash.findSimilarities());
+}
+</code></pre>
+
+<p>}
+[/sourcecode]</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">vibneiro</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2013-10-07T02:57:48+04:00'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>7</span><span class='date-suffix'>th</span>, <span class='date-year'>2013</span></span> <span class='time'>2:57 am</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/categories/algorithms/'>algorithms</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://vibneiro.github.io/2013/10/07/minhash-algorithm-or-how-to-quickly-find-similarities-among-2-documents/" data-via="vibneiro" data-counturl="http://vibneiro.github.io/2013/10/07/minhash-algorithm-or-how-to-quickly-find-similarities-among-2-documents/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/2013/09/11/google-code-jam-qualification-round-2013-problem-d-treasure/" title="Previous Post: Google Code Jam. Qualification Round 2013. Problem D - Treasure. Solved.">&laquo; Google Code Jam. Qualification Round 2013. Problem D - Treasure. Solved.</a>
+      
+      
+        <a class="basic-alignment right" href="/2013/10/29/highload-conference-2013/" title="Next Post: HighLoad Conference 2013">HighLoad Conference 2013 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Ivan Voroshilin</h1>
+  <p>A software geek.</p>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2015/03/04/review-of-service-discovery-solutions/">Service Discovery Solutions in Distributed Systems</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2015/02/05/toughest-backtracking-problems-in-algorithmic-competitions/">Toughest Backtracking Problems in Algorithmic Competitions</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2014/12/16/docker-creating-and-testing-httprest-server-on-top-of-akkaspray/">Dockerizing Spray HTTP Server</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2014/10/30/docker-a-birds-eye-view/">Docker: A Bird&#8217;s-eye View</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2014/10/12/the-flip-side-of-rule-engines-and-some-tips-on-when-not-use-ones/">The Flip Side of Rule Engines on Example of Drools and Some Valuable Tips</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  
+  <a href="https://github.com/vibneiro">@vibneiro</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'vibneiro',
+            count: 10,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/vibneiro?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+<section class="twitter2">
+  <h1>
+    <a href="https://twitter.com/vibneiro">
+      <img src="https://twitter.com/images/resources/twitter-bird-light-bgs.png" width="32" height="32">
+      vibneiro
+    </a>
+  </h1>
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Ivan Voroshilin -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-37693662-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'vibneiro';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://vibneiro.github.io/2013/10/07/minhash-algorithm-or-how-to-quickly-find-similarities-among-2-documents/';
+        var disqus_url = 'http://vibneiro.github.io/2013/10/07/minhash-algorithm-or-how-to-quickly-find-similarities-among-2-documents/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

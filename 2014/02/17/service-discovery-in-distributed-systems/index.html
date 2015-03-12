@@ -1,0 +1,400 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Service Discovery in Distributed Systems - Ivan Voroshilin&#8217;s Blog.</title>
+  <meta name="author" content="Ivan Voroshilin">
+
+  
+  <meta name="description" content="After quite a while I&rsquo;ve decided to continue writing my blog. There are always lots of ideas to share with you but as usual a lack of time. &hellip;">
+
+  
+  <meta name="keywords" content="distributed, algorithm, Ivan, Voroshilin, code, google, jam, " />
+
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://vibneiro.github.io/2014/02/17/service-discovery-in-distributed-systems/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/octopress/atom.xml" rel="alternate" title="Ivan Voroshilin's Blog." type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-37693662-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Ivan Voroshilin&#8217;s Blog.</a></h1>
+  
+    <h2>Algorithmic contests, distributed systems and software architecture</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/octopress/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="vibneiro.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Service Discovery in Distributed Systems</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2014-02-17T15:28:01+04:00'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>17</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>3:28 pm</span></time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>After quite a while I&rsquo;ve decided to continue writing my blog. There are always lots of ideas to share with you but as usual a lack of time.</p>
+
+<h1><strong>Introduction</strong></h1>
+
+<p>Service Discovery is an architectural pattern and a key component of most distributed systems and service oriented architectures.</p>
+
+<p> In simple terms it is a central gateway for all client applications that want to use other services. A client application doesn&rsquo;t have to know where a particular service is located (usually IP:port), moreover a service can be moved/redeployed to arbitrary boxes for any reasons. There&rsquo;s no need to change connection details, update configs or whatever - Service Discovery will take care of that. You as a client-app just need to ask it to get access to other services. The pattern yields a good benefit especially when there are hundreds of client applications and/or dozens of services.</p>
+
+<p>Most of the work in this article was made relying on trials and errors as well some research. I urge you to read also a great survey from Jason Wilder&rsquo;s blog on <a href="http://jasonwilder.com/blog/2014/02/04/service-discovery-in-the-cloud/">Open Source Service Discovery</a> frameworks.</p>
+
+<p>In this particular section I won&rsquo;t mention CAP-properties as they can vary depending on implementation. But CAP is important. If you want to know more about it I recommend moving to <a href="http://ivoroshilin.com/2012/12/13/brewers-cap-theorem-explained-base-versus-acid/">this article</a> devoted to the CAP-theorem.</p>
+
+<h2>High level components</h2>
+
+<p>Service Discovery is the process of finding a suitable Service and its location for a given task that asked a service consumer.  Let&rsquo;s break down Service Discovery into 3 main components:</p>
+
+<p><strong>Service Requestor</strong></p>
+
+<p>Any consuming application that want to use some service,  that is a client application or a consumer, user, etc.</p>
+
+<p><strong>Service Provider</strong></p>
+
+<p>In the most basic scenario there is a Service Provider that finds this service and talks to Service Requestor.</p>
+
+<p><strong>Service Registry</strong></p>
+
+<p>Service Registry stores information about all services. It can be either static or dynamic. This can be IP:port, access rights and so forth.</p>
+
+<p>This model comes directly from SOA but can be adapted to your needs. Conversation among 3 above entities might differ depending on implementation. As a quick example of such segregation refer to <a href="http://en.wikipedia.org/wiki/Web_Services_Discovery">Web Service Discovery</a>.</p>
+
+<h2>Discovery options</h2>
+
+<h3>1. Static service registry</h3>
+
+<p>This one is a very basic and easy option. A big drawback - it is static. Every time a service moves to another box, static repo should be updated manually. We won&rsquo;t go further here as it is quite obvious and have little benefit for flexibility.</p>
+
+<h3>2. Announcement</h3>
+
+<p>This pattern implies that as soon as a service is up, it registers itself in the <strong>Service Registry - </strong>sometimes such a notification is called<strong> Announcement. </strong>This simple approach greatly simplifies maintenance of service registry. It&rsquo;s worth mentioning  also that in distributed world we always care about <strong>No Single Point Of Failure</strong> principle<strong> </strong>where we have at least 2 redundant nodes for a service. Service Registry is usually implemented as a separate  independent component to be self-sufficient. Just for simplicity the registry can be a simple replicated memCached, ehCache or another storage, not necessarily cache.</p>
+
+<h3>A few words about ZooKeeper as a solution for Service Discovery.</h3>
+
+<p>A counterexample is ZooKeeper that does&rsquo;t follow <strong>Shared Nothing architectural </strong>pattern. Service Registry is coupled with the Service Provider. In ZooKeeper&rsquo;s world coordination-nodes in ensemble are NOT independent of each other because they share Service Registry and there&rsquo;s a write-contention due to the order of messages. The last word leads to ZooKeeper&rsquo;s poor write-scalability due to its synchronous replication among nodes. But in terms of requirements most applications involved into configuration management including Service Discovery don&rsquo;t require frequent writes but rather reads not blocking overall scalability.</p>
+
+<p>Let&rsquo;s pick up where we left off -  announcement.</p>
+
+<p>The process of announcement is depicted below:</p>
+
+<h3></h3>
+
+<h3><a href="http://ivoroshilin.files.wordpress.com/2014/02/announcement_pb.png"><img src="http://ivoroshilin.files.wordpress.com/2014/02/announcement_pb.png" alt="Announcement_pb" /></a></h3>
+
+<h3></h3>
+
+<h3></h3>
+
+<h3></h3>
+
+<h3>3. Multicasting</h3>
+
+<p>Using IGMP-protocol, a Service provider subscribes to a particular group, all services send a multicast message to this group. The downside of this approach is that IGMP is optional for IPv4 and not every hardware supports it.</p>
+
+<h3>Health checking</h3>
+
+<p>Once a service is registered in Service Registry a Service Provider needs to know if it&rsquo;s alive and healthy (that is, 100% of service is available).</p>
+
+<p><strong>Option 1 - on reconnect:</strong> As soon as a Service Requestor understands that there&rsquo;s no connection to the service it worked with, it reverts back to the Service Provider to get a new one. Each time a Service Requestor accesses Service Provider, one does health-checking (let&rsquo;s say it is almost the same as heartbeats plus probably some other stuff) to make sure that the service is alive, maintaining the Service Registry and returning response to the client containing information about a healthy service.</p>
+
+<p><strong>Option 2 - heartbeating:</strong> Service Provider receives heartbeats within equal time-slices from registered services. Once heartbeat is lost, the Service Provider removes corresponding record from the Service Registry. This is a good option to get a more real-time information though it is more difficult to implement. This way works ZooKeeper and other distributed systems.</p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2014/02/service-down_pn.png"><img src="http://ivoroshilin.files.wordpress.com/2014/02/service-down_pn.png" alt="Service Down_pn" /></a></p>
+
+<p>In both options if some service goes down clients get back to Service Provider. What strategy to use is up to the developer but option 1 is more complex but a better one in most scenarios.</p>
+
+<h3>Load Balancing</h3>
+
+<p>Load balancing can be easily implemented inside Service Provider as one becomes a central gateway of access for all Service Requestors to other services. For the sake of simplicity a very simple variation is round-robin. I won&rsquo;t go into details as it is a different topic and you can find on the internet.</p>
+
+<h3>Authentication</h3>
+
+<p>Again as with load balancing you might want to apply tokens with expiration or cryptographic keys.</p>
+
+<h2>Cooperation of all components</h2>
+
+<p>On a very high level the communication of components can happend as on the following picture:</p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2014/02/service-request_pb.png"><img src="http://ivoroshilin.files.wordpress.com/2014/02/service-request_pb.png" alt="Service Request_pb" /></a></p>
+
+<h3>Summary</h3>
+
+<p>We have defined what a Service Discovery is, broke it down into 3 components and described a few basic approaches.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">vibneiro</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2014-02-17T15:28:01+04:00'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>17</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>3:28 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/categories/patterns/'>patterns</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://vibneiro.github.io/2014/02/17/service-discovery-in-distributed-systems/" data-via="vibneiro" data-counturl="http://vibneiro.github.io/2014/02/17/service-discovery-in-distributed-systems/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/2013/10/29/highload-conference-2013/" title="Previous Post: HighLoad Conference 2013">&laquo; HighLoad Conference 2013</a>
+      
+      
+        <a class="basic-alignment right" href="/2014/03/18/distributed-transactions-and-scalability-issues-in-large-scale-distributed-systems/" title="Next Post: Distributed transactions and scalability issues in large-scale distributed systems">Distributed transactions and scalability issues in large-scale distributed systems &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Ivan Voroshilin</h1>
+  <p>A software geek.</p>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2015/03/04/review-of-service-discovery-solutions/">Service Discovery Solutions in Distributed Systems</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2015/02/05/toughest-backtracking-problems-in-algorithmic-competitions/">Toughest Backtracking Problems in Algorithmic Competitions</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2014/12/16/docker-creating-and-testing-httprest-server-on-top-of-akkaspray/">Dockerizing Spray HTTP Server</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2014/10/30/docker-a-birds-eye-view/">Docker: A Bird&#8217;s-eye View</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2014/10/12/the-flip-side-of-rule-engines-and-some-tips-on-when-not-use-ones/">The Flip Side of Rule Engines on Example of Drools and Some Valuable Tips</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  
+  <a href="https://github.com/vibneiro">@vibneiro</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'vibneiro',
+            count: 10,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/vibneiro?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+<section class="twitter2">
+  <h1>
+    <a href="https://twitter.com/vibneiro">
+      <img src="https://twitter.com/images/resources/twitter-bird-light-bgs.png" width="32" height="32">
+      vibneiro
+    </a>
+  </h1>
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Ivan Voroshilin -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-37693662-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'vibneiro';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://vibneiro.github.io/2014/02/17/service-discovery-in-distributed-systems/';
+        var disqus_url = 'http://vibneiro.github.io/2014/02/17/service-discovery-in-distributed-systems/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

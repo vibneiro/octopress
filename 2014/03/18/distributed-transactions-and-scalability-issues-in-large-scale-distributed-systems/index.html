@@ -1,0 +1,372 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Distributed Transactions and Scalability Issues in Large-scale Distributed Systems - Ivan Voroshilin&#8217;s Blog.</title>
+  <meta name="author" content="Ivan Voroshilin">
+
+  
+  <meta name="description" content="Distributed transactions is the main evil of scalability It is very hard to scale distributed transactions to an extremely high level, moreover they &hellip;">
+
+  
+  <meta name="keywords" content="distributed, algorithm, Ivan, Voroshilin, code, google, jam, " />
+
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://vibneiro.github.io/2014/03/18/distributed-transactions-and-scalability-issues-in-large-scale-distributed-systems/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/octopress/atom.xml" rel="alternate" title="Ivan Voroshilin's Blog." type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-37693662-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Ivan Voroshilin&#8217;s Blog.</a></h1>
+  
+    <h2>Algorithmic contests, distributed systems and software architecture</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/octopress/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="vibneiro.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Distributed Transactions and Scalability Issues in Large-scale Distributed Systems</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2014-03-18T18:08:58+04:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>18</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>6:08 pm</span></time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h2>Distributed transactions is the main evil of scalability</h2>
+
+<p>It is very hard to scale distributed transactions to an extremely high level, moreover they reduce throughput. Unlike a transaction on a local database, a distributed transaction involves altering data on multiple nodes. It can be a database + JMS broker or just a set of different databases. As an example let&rsquo;s recall a classical 2-phase commit (2PC later) - a type of <a href="http://en.wikipedia.org/wiki/Atomic_commit">atomic commitment protocol</a> in a back-end service with high volume of transactions. This protocol provides ACID-like properties for global transaction processing. I won&rsquo;t go into details how it works under the hood, I&rsquo;ll just tell you that C (Consistency) from ACID is the main evil of  scalability in distributed systems. It puts a great burden due to its complex coordination algorithm.  Overall throughput can drop up to a few times. Locks in all of the data sources are being held during 2PC. The longer duration locks create the risk of higher contention. The 2PC coordinator also represents a Single Point of Failure, which is unacceptable for critical systems.  For systems that have reasonably high volume of messages, or sensitive SLAs, it’s worth giving up strong consistency for throughput.</p>
+
+<h2>But how can I live without distributed transactions to achieve higher scalability?</h2>
+
+<p>Algorithms such as 2PC use <strong>&ldquo;Exactly Once&rdquo;</strong> technique whereas we will use <strong>&ldquo;At least Once&rdquo;</strong> technique. The difference is that a developer should take care of that in his application code to cope with it. Most queueing technologies provide acknowledgements that a message has been accepted (handling is a separate deal). Databases use local transactions. We can deal with downstream failures without coordination. Read on!</p>
+
+<h3>Idempotence and fault tolerance</h3>
+
+<p>From math, <a href="http://en.wikipedia.org/wiki/Idempotence">idempotence</a> is as simple as that:</p>
+
+<h2><a href="http://ivoroshilin.files.wordpress.com/2014/03/idempotence.png"><img src="http://ivoroshilin.files.wordpress.com/2014/03/idempotence.png" alt="idempotence" /></a></h2>
+
+<p>That is, the result stays the same, no matter how many times a function gets called on the same argument. In distributed world<em> Idempotence</em> implies that an operation can be invoked repeatedly without changing the result. Why do I need one? Because we should somehow resolve processing duplicate requests in case of a system failure. Let&rsquo;s make it clear by considering an example. A client-appliction sends a financial transaction to a server (there might be a cluster of them load-balanced or just one) and waits for acknowledgment. For some reason, at this particular time:</p>
+
+<ul>
+<li><p>A server goes down or</p></li>
+<li><p>Client goes down or</p></li>
+<li><p>Network failure happens</p></li>
+</ul>
+
+
+<p>In all of these 3 cases, a client-app didn&rsquo;t get an acknowledgment message (reply) from the server about a transaction status. Of course, the client then should retry this transaction. The server must ensure that this financial transaction is accomplished &ldquo;<strong>At least Once&rdquo;</strong>. Here comes to the rescue <em>idempotence</em>. The server must remember a state - that a transaction with this Id has already been processed including saved acknowledgement message in order to check that it exists and reply with its acknowledgement message in case it does. We don&rsquo;t have expensive distributed transactions anymore - <strong>&ldquo;At least Once&rdquo;</strong> is a more relaxed and scalable approach. That is, instead of locking resources everywhere, we can assume that messages will arrive at least once.</p>
+
+<h3>Optimistic locking</h3>
+
+<p>Even though this technique is quite old, one goes well with <em>idempotence. </em>If two people are trying to affect change to the same entity at the same time we don&rsquo;t lock database records, rather we use a concept of versioning and optionally uniqueness. The idea is to save a version of each entity record in the database but to make sure before saving it wasn&rsquo;t changed. A simple example is a self-service kiosk where people check-in before boarding at the airport. They can select a vacant seat from the seat map.<a href="http://en.wikipedia.org/wiki/Check-in">
+</a></p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2014/03/seatmap.jpg"><img src="http://ivoroshilin.files.wordpress.com/2014/03/seatmap.jpg" alt="seatmap" /></a></p>
+
+<p>Each seat has a version = 1. When multiple people make their choice in parallel before proceeding the system simply checks if a seat-version hasn&rsquo;t changed. If it has a user is notified that the seat already been taken while she was thinking. This is a very simple example where version either can be 1 or 2. A more difficult situation could be in order-management systems where an order might have many versions but that doesn&rsquo;t change the point how optimistic locking works.  The idea again yields great trade-off in terms of speed because we don&rsquo;t use locking-mechanism.</p>
+
+<h3>Local atomic transactions and unique constraints</h3>
+
+<p>Local atomic transactions are usually restricted to a single store. Local transactions are primarily needed to apply a set of operations atomically to a single resource (e.g. relational database) as well as ensure correct ordering of operations within a transaction. In some cases, we can do away with transactions, particularly if we don&rsquo;t care about the order of operations within a transaction. In that case we can process operations asynchronously leading to a better throughput again. Sometimes, a model requiring the order can be redesigned for  asynchronicity of operations.</p>
+
+<h3>Putting it all together</h3>
+
+<p>In order to achieve greater throughput a system should correspond to the following principles:</p>
+
+<ol>
+<li><p>You can retry the operation if there is a failure down the stream based on idempotence.</p></li>
+<li><p>Don&rsquo;t use transactions and use optimistic locking if possible - it&rsquo;s much cheaper.</p></li>
+<li><p>Local transactions based on a single phase commit for each resource are more scalable than distributed ones increasing overall application availability.</p></li>
+<li><p>Messages may be reordered.</p></li>
+</ol>
+
+
+<h2>Wrapping up</h2>
+
+<p>Such great systems as Google&rsquo;s Bigtable or Spanner don&rsquo;t support traditional ACID transactions because they have a heavy overhead on a highly distributed data storage model. I was lucky to use all above techniques in my applications too involving mission-critical financial transactions and must say that a few years ago not so many people knew about the techniques but now I can hear about them more and more often. Oh yeah, I almost forgot! I urge you to read <a href="http://queue.acm.org/detail.cfm?id=2187821">this great article</a> written by Pat Helland that has even more use-cases. I bumped at it during my research to know more. And remember, you can live without distributed transactions if you implement idempotence and downstream failures correctly.</p>
+
+<h2>References</h2>
+
+<p>1. <a href="http://www.enterpriseintegrationpatterns.com/docs/IEEE_Software_Design_2PC.pdf">Your Coffee Shop Doesn’t Use Two-Phase Commit</a> by Gregor Hohpe.</p>
+
+<p>2. <a href="http://queue.acm.org/detail.cfm?id=2187821">Idempotence Is Not a Medical Condition</a> by Pat Helland.</p>
+
+<p>3. <a href="http://www.addsimplicity.com/adding_simplicity_an_engi/2006/12/2pc_or_not_2pc_.html">2PC or not 2PC, Wherefore Art Thou XA?</a> by Dan Pritchett.</p>
+
+<p>4. <a href="http://www-db.cs.wisc.edu/cidr/cidr2007/papers/cidr07p15.pdf">Life beyond Distributed Transactions: an Apostate’s Opinion</a> by Pat Helland.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">vibneiro</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2014-03-18T18:08:58+04:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>18</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>6:08 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/categories/scalability/'>scalability</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://vibneiro.github.io/2014/03/18/distributed-transactions-and-scalability-issues-in-large-scale-distributed-systems/" data-via="vibneiro" data-counturl="http://vibneiro.github.io/2014/03/18/distributed-transactions-and-scalability-issues-in-large-scale-distributed-systems/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/2014/02/17/service-discovery-in-distributed-systems/" title="Previous Post: Service Discovery in distributed systems">&laquo; Service Discovery in distributed systems</a>
+      
+      
+        <a class="basic-alignment right" href="/2014/08/14/command-and-query-responsibility-segregation-and-event-sourcing-what-you-should-think-about-in-advance/" title="Next Post: Command And Query Responsibility Segregation and Event Sourcing: What you should think about in advance">Command And Query Responsibility Segregation and Event Sourcing: What you should think about in advance &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Ivan Voroshilin</h1>
+  <p>A software geek.</p>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2015/03/04/review-of-service-discovery-solutions/">Service Discovery Solutions in Distributed Systems</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2015/02/05/toughest-backtracking-problems-in-algorithmic-competitions/">Toughest Backtracking Problems in Algorithmic Competitions</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2014/12/16/docker-creating-and-testing-httprest-server-on-top-of-akkaspray/">Dockerizing Spray HTTP Server</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2014/10/30/docker-a-birds-eye-view/">Docker: A Bird&#8217;s-eye View</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2014/10/12/the-flip-side-of-rule-engines-and-some-tips-on-when-not-use-ones/">The Flip Side of Rule Engines on Example of Drools and Some Valuable Tips</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  
+  <a href="https://github.com/vibneiro">@vibneiro</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'vibneiro',
+            count: 10,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/vibneiro?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+<section class="twitter2">
+  <h1>
+    <a href="https://twitter.com/vibneiro">
+      <img src="https://twitter.com/images/resources/twitter-bird-light-bgs.png" width="32" height="32">
+      vibneiro
+    </a>
+  </h1>
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Ivan Voroshilin -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-37693662-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'vibneiro';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://vibneiro.github.io/2014/03/18/distributed-transactions-and-scalability-issues-in-large-scale-distributed-systems/';
+        var disqus_url = 'http://vibneiro.github.io/2014/03/18/distributed-transactions-and-scalability-issues-in-large-scale-distributed-systems/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>About Me - Ivan Voroshilin&#8217;s Blog.</title>
+  <title>Asymptotic Complexity: Beware of Hidden Constants - Ivan Voroshilin&#8217;s Blog.</title>
   <meta name="author" content="Ivan Voroshilin">
 
   
-  <meta name="description" content="About Me I have 11 years’ experience working as a software developer with a broad knowledge base of skills. I started programming on my own at the &hellip;">
+  <meta name="description" content="Asymptotic complexity and invisible constant factor Today I&rsquo;m going to explain what stands behind asymptotic complexity of algorithms when it &hellip;">
 
   
   <meta name="keywords" content="distributed, algorithm, Ivan, Voroshilin, code, google, jam, " />
@@ -21,7 +21,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://vibneiro.github.io/about/">
+  <link rel="canonical" href="http://vibneiro.github.io/2013/01/11/when-asymptotic-analysis-of-complexity-doesnt-work/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/octopress/atom.xml" rel="alternate" title="Ivan Voroshilin's Blog." type="application/atom+xml">
@@ -80,34 +80,93 @@
   <div id="main">
     <div id="content">
       <div>
-<article role="article">
+<article class="hentry" role="article">
   
   <header>
-    <h1 class="entry-title">About Me</h1>
+    
+      <h1 class="entry-title">Asymptotic Complexity: Beware of Hidden Constants</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2013-01-11T15:24:57+04:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>11</span><span class='date-suffix'>th</span>, <span class='date-year'>2013</span></span> <span class='time'>3:24 pm</span></time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io">Comments</a>
+        
+      </p>
     
   </header>
-  
-  <p>I have 11 years’ experience working as a software developer with a broad knowledge base of skills. I started programming on my own at the age of 12, back then my first languages were Basic and 4 years later C++. That was my hobby. That’s how I got into the software world and since then I have experience of working with a wide range of technologies and languages, distributed and cross-functional teams.</p>
 
-<p>I’ve been constantly trying to keep up and grow, love my profession and feel very lucky when thinking that on the other hand software development is my hobby. I like solving algorithmic and math problems as well as researching more elegant solutions. On the other hand I like innovations and open source projects.</p>
 
-<p>Currently I occupy my time by working as a principle software engineer on large enterprise projects. Occasionally I speak at scientific conferences, write articles and work on innovative software projects.</p>
+<div class="entry-content"><h3><strong>Asymptotic complexity and invisible constant factor</strong></h3>
 
-  
-    <footer>
+<p>Today I&rsquo;m going to explain what stands behind asymptotic complexity of algorithms when it comes to measurement of performance on modern computer hardware. Let&rsquo;s recall that asymptotic analysis is based on idealized sequential RAM-model. Complexity shows how good an algorithm scales as N grows from mathematical point of view. Two or more algorithms with different complexity solving the same task DOES NOT mean one will work slower or faster. Computer architecture is more complex than <a href="http://en.wikipedia.org/wiki/Random-access_machine">RAM-model</a>. There are different memory hierarchies, branching strategies, prefetching techniques, pipelining and other hardware factors which are not taken into account in this model. Constant-factors hidden in Big-Oh notation are not fixed, but variable in fact. Popular books on algorithms not always explain clearly this fact. While Big-Oh has many theoretically useful insights, it cannot actually predict performance. Read on, to find out why.</p>
+
+<p><strong>1. Constant hidden even in simple arithmetic operations is not a constant at all:</strong></p>
+
+<p>In terms of sequential Random Access Model and computer hardware we now try to add two numbers without a calculator using our brain: 1+2, 2+10, 34+55. A piece of cake! OK, so far so good. Try again, now: 34523+119987. Feel the difference? It takes you much longer to calculate the latter. This analogy shows the difference in complexity. In the RAM model adding 2 numbers <strong>is always a constant-time</strong>, but in real computer hardware it&rsquo;s not like that as constant-factor is variable. On top of this, some instructions are slower than others. Take addition and division as an example. They are both O(1) but with different constant factors.</p>
+
+<p><strong>2. Some algorithms require more instructions than others</strong></p>
+
+<p>For instance, certain algorithms may make fewer instructions per one pass (e.g. copy, exchange, shift, whatever). This also partly makes up a hidden constant. Due to this fact they tend to work faster in some cases.</p>
+
+<p><strong>3. Computer memory hierarchy gets in the way of analysis</strong></p>
+
+<p>Computer memory in the analysis of complexity is treated as a linear array with uniform access times. In the analysis A superior algorithm is the one that executes fewer instructions. In reality the assumption that every memory access has equal cost is not valid.</p>
+
+<h2><strong>Conclusion</strong></h2>
+
+<p>I didn&rsquo;t mention compilers that make optimizations. All of these factors form a hidden constant in the big-Oh which spoils the analysis. Asymptotic analysis is built upon mathematical model which is machine-independent and thus fragile. Hidden constants might impact algorithm&rsquo;s scalability very heavily. Due to this fact performance benchmarks may yield the opposite results. On some data an algorithm might be much slower then one with better complexity. The most vicious enemy is memory-hierarchy in modern CPUs. Yes, Big-Oh still matters, but you should handle it with care. In the next post I&rsquo;ll try to show this on real examples.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
       
-      
-        <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://vibneiro.github.io/about/index.html" data-via="vibneiro" data-counturl="http://vibneiro.github.io/about/index.html" >Tweet</a>
+
+<span class="byline author vcard">Posted by <span class="fn">vibneiro</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2013-01-11T15:24:57+04:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>11</span><span class='date-suffix'>th</span>, <span class='date-year'>2013</span></span> <span class='time'>3:24 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/categories/algorithms/'>algorithms</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://vibneiro.github.io/2013/01/11/when-asymptotic-analysis-of-complexity-doesnt-work/" data-via="vibneiro" data-counturl="http://vibneiro.github.io/2013/01/11/when-asymptotic-analysis-of-complexity-doesnt-work/" >Tweet</a>
   
   
   
 </div>
 
+    
+    <p class="meta">
       
-    </footer>
-  
+        <a class="basic-alignment left" href="/2012/12/13/brewers-cap-theorem-explained-base-versus-acid/" title="Previous Post: Brewer's CAP theorem explained: BASE versus ACID">&laquo; Brewer&#8217;s CAP theorem explained: BASE versus ACID</a>
+      
+      
+        <a class="basic-alignment right" href="/2013/02/06/know-your-locality-of-reference-some-techniques-for-keeping-data-in-the-cpu-cache/" title="Next Post: What you should know about locality of reference">What you should know about locality of reference &raquo;</a>
+      
+    </p>
+  </footer>
 </article>
 
   <section>
@@ -234,8 +293,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://vibneiro.github.io/about/index.html';
-        var disqus_url = 'http://vibneiro.github.io/about/index.html';
+        var disqus_identifier = 'http://vibneiro.github.io/2013/01/11/when-asymptotic-analysis-of-complexity-doesnt-work/';
+        var disqus_url = 'http://vibneiro.github.io/2013/01/11/when-asymptotic-analysis-of-complexity-doesnt-work/';
         var disqus_script = 'embed.js';
       
     (function () {

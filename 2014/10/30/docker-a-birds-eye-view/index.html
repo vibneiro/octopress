@@ -1,0 +1,352 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Docker: A Bird&#8217;s-eye View - Ivan Voroshilin&#8217;s Blog.</title>
+  <meta name="author" content="Ivan Voroshilin">
+
+  
+  <meta name="description" content="Introduction Docker is a new container technology that primarily allows to run multiple applications on the same old server and operating system. It &hellip;">
+
+  
+  <meta name="keywords" content="distributed, algorithm, Ivan, Voroshilin, code, google, jam, " />
+
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://vibneiro.github.io/2014/10/30/docker-a-birds-eye-view/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/octopress/atom.xml" rel="alternate" title="Ivan Voroshilin's Blog." type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-37693662-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Ivan Voroshilin&#8217;s Blog.</a></h1>
+  
+    <h2>Algorithmic contests, distributed systems and software architecture</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/octopress/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="vibneiro.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Docker: A Bird&#8217;s-eye View</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2014-10-30T23:37:44+03:00'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>30</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>11:37 pm</span></time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h3>Introduction</h3>
+
+<p>Docker is a new container technology that primarily allows to run multiple applications on the same old server and operating system. It also makes it easy to package and ship applications. Let&rsquo;s analyze why Docker can become a replacement of virtual machines and why it is better (or not). Though, undoubtedly it has easy-to-use deployment stuff.</p>
+
+<p><a href="https://ivoroshilin.files.wordpress.com/2014/10/docker.png"><img src="https://ivoroshilin.files.wordpress.com/2014/10/docker.png" alt="docker" /></a></p>
+
+<h3>The gist</h3>
+
+<p>VM hypervisors emulate virtual hardware and guzzle system resources heavily - each VM has its separated operating system. Conversely, Docker containers use a single shared operating system. Basically, each container has only its application and other dependencies. It is very lightweight as we don&rsquo;t set up a separate operating system for each container. You can run much more applications (containers) in a single physical instance of hardware unlike VM with Docker. Docker is extremely rapidly getting popular, because It&rsquo;s light, simple and you can save a great deal of money on hardware and electricity.</p>
+
+<p>There are 2 major parts of operating system (Linux) that ensure the proper work of Docker.</p>
+
+<h3>LXC</h3>
+
+<p>Docker is built on top of LXC and allows to divide up operating system&rsquo;s Kernel. It means that with Docker it is possible to use only Linux and share a single operating system for all containers. I&rsquo;ve heard, by the way, that Windows platform has recently adapted Docker too.</p>
+
+<p>The LXC technology (<a href="http://lxc.sourceforge.net/">LinuX Containers</a>), which Docker is based from, relies on <a href="http://en.wikipedia.org/wiki/Security-Enhanced_Linux">SELinux</a> and its <a href="http://en.wikipedia.org/wiki/Cgroups">cgroups</a> to keep everyone in their own sandbox. You can restrict hardware resources: CPU, memory, disk. It can also manage the networking and mounts of filesystem for you as well. In other words you can run multiple isolated Linux containers on one host. Linux Containers serve as a lightweight alternative to VMs as they don’t require the hypervisors. Unlike VMs, LXC don’t require the hypervisor - this is not VM, but an ordinary host.</p>
+
+<p>Assume, you have a container image of 1 GB. If you want to use virtualization, you will need 1 GB multiplied by a number of VMs required. With LXC you just share 1GB. Having 1 thousand containers requires just a little over 1GB of space for the containers OS, assuming they are all running the same OS image. Furthermore, LXCs have have better performance compared to VMs.</p>
+
+<h3>AuFS</h3>
+
+<p>Another technology used in Docker is <a href="http://en.wikipedia.org/wiki/Aufs">AuFS</a> -  advanced multi layered unification filesystem. Docker can save images for you and they can be represented as incremental updates to the baseline snapshots. You may have a base snapshot of e.g. Linux, make minor changes to it, save a new snapshot as a diff. AuFS allows incrementally merge all these snapshot updates into a single layered snapshot. That is the idea.</p>
+
+<h3>When to use Docker</h3>
+
+<p>If you need a full isolation of resources, a virtual machine is the way to go. However, if you need to run hundreds of isolated processes on an average host, then Docker is a good fit. There are some use cases when Docker is a win. I can see it as a good tool for development where you run tons of containers on a single machine, doing some interesting stuff in parallel with different deployments from a single Docker image. E.g. you can run a large number of development environments on the same host. For example, Dev, QA, Performance environments on old hardware also. Have a look at <a href="http://www.fig.sh">Fig</a> project which is intended for these purposes and works along with Docker. It has a straightforward tutorial and super easy commands.</p>
+
+<h3>Conclusion</h3>
+
+<p>Docker is another technique for performing the same tasks as in Virtual Machines but with the restriction of a shared OS Linux. It  is not quite mature however. There might be potential exploits to crash operating system bringing down all of the processes at once. This is the main drawback of Containers, whereas VMs ensure complete isolation. Besides that many companies use one in Production you might want to wait, but you can definitely start playing around with it on your dev continuous integration process.</p>
+
+<h3>References</h3>
+
+<p><a href="https://www.docker.com">Docker</a></p>
+
+<p><a href="http://blog.docker.com/2013/08/containers-docker-how-secure-are-they/">Containers and Docker: How secure are they </a></p>
+
+<p><a href="http://blog.dotcloud.com/under-the-hood-linux-kernels-on-dotcloud-part">PaaS under the hood</a></p>
+
+<p><a href="http://www.fig.sh">FIG</a></p>
+
+<p><a href="http://blog.docker.com/2014/08/getting-started-with-orchestration-using-fig/">Getting started with Docker Orcherstration using FIG</a></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">vibneiro</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2014-10-30T23:37:44+03:00'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>30</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>11:37 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/categories/backlog/'>backlog</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://vibneiro.github.io/2014/10/30/docker-a-birds-eye-view/" data-via="vibneiro" data-counturl="http://vibneiro.github.io/2014/10/30/docker-a-birds-eye-view/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/2014/10/12/the-flip-side-of-rule-engines-and-some-tips-on-when-not-use-ones/" title="Previous Post: The flip side of rule engines on example of Drools and some valuable tips">&laquo; The flip side of rule engines on example of Drools and some valuable tips</a>
+      
+      
+        <a class="basic-alignment right" href="/2014/12/16/docker-creating-and-testing-httprest-server-on-top-of-akkaspray/" title="Next Post: Dockerizing Spray HTTP Server">Dockerizing Spray HTTP Server &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Ivan Voroshilin</h1>
+  <p>A software geek.</p>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2015/03/04/review-of-service-discovery-solutions/">Service Discovery Solutions in Distributed Systems</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2015/02/05/toughest-backtracking-problems-in-algorithmic-competitions/">Toughest Backtracking Problems in Algorithmic Competitions</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2014/12/16/docker-creating-and-testing-httprest-server-on-top-of-akkaspray/">Dockerizing Spray HTTP Server</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2014/10/30/docker-a-birds-eye-view/">Docker: A Bird&#8217;s-eye View</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2014/10/12/the-flip-side-of-rule-engines-and-some-tips-on-when-not-use-ones/">The Flip Side of Rule Engines on Example of Drools and Some Valuable Tips</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  
+  <a href="https://github.com/vibneiro">@vibneiro</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'vibneiro',
+            count: 10,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/vibneiro?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+<section class="twitter2">
+  <h1>
+    <a href="https://twitter.com/vibneiro">
+      <img src="https://twitter.com/images/resources/twitter-bird-light-bgs.png" width="32" height="32">
+      vibneiro
+    </a>
+  </h1>
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Ivan Voroshilin -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-37693662-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'vibneiro';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://vibneiro.github.io/2014/10/30/docker-a-birds-eye-view/';
+        var disqus_url = 'http://vibneiro.github.io/2014/10/30/docker-a-birds-eye-view/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
