@@ -9,7 +9,7 @@
   <meta name="author" content="Ivan Voroshilin">
 
   
-  <meta name="description" content="If you are not aware a website called Project Euler has hundreds of algorithmic problems. Despite that most of them are related to math it&rsquo;s a &hellip;">
+  <meta name="description" content="Today I was lucky to have attended the annual developers conference HighLoad++ 2013. This is the 7-th time. Some conference sessions are translated &hellip;">
 
   
   <meta name="keywords" content="distributed, algorithm, Ivan, Voroshilin, code, google, jam, software, architecture, geek, blog" />
@@ -87,7 +87,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/2014/09/15/project-euler-a-list-of-interesting-problems/">Project Euler: A List of Interesting Problems</a></h1>
+      <h1 class="entry-title"><a href="/2013/10/29/highload-conference-2013/">HighLoad Conference 2013</a></h1>
     
     
       <p class="meta">
@@ -96,286 +96,555 @@
 
 
 
-<time class='entry-date' datetime='2014-09-15T10:17:39+04:00'><span class='date'><span class='date-month'>Sep</span> <span class='date-day'>15</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>10:17 am</span></time>
+<time class='entry-date' datetime='2013-10-29T21:24:32+04:00'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>29</span><span class='date-suffix'>th</span>, <span class='date-year'>2013</span></span> <span class='time'>9:24 pm</span></time>
         
-           | <a href="/2014/09/15/project-euler-a-list-of-interesting-problems/#disqus_thread"
-             data-disqus-identifier="http://vibneiro.github.io/2014/09/15/project-euler-a-list-of-interesting-problems/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><a href="https://ivoroshilin.files.wordpress.com/2014/09/euler.jpg"><img src="http://ivoroshilin.files.wordpress.com/2014/09/euler.jpg" alt="Euler" /></a></p>
-
-<p>If you are not aware a website called <a href="http://projecteuler.net/">Project Euler</a> has hundreds of algorithmic problems. Despite that most of them are related to math it&rsquo;s a good resource to warm up/train your brain in coding. You can use any programming language that you want and track progress.</p>
-
-<p>Here&rsquo;s a list of interesting Euler&rsquo;s problems in terms of diversity from my point of view with the aim to improve not only math but also programming skils (No/ Problem Titile):</p>
-
-<p>11 - Largest product in a grid
-12 - Highly divisible triangular number
-15 - Lattice paths
-24 - Lexicographic permutations
-54 - Poker hands
-59 - XOR decryption
-62 - Cubic permutations
-67 - Maximum path sum II
-68 - Magic 5-gon ring
-78 - Coin partitions
-79 - Passcode derivation
-81 - Path sum: two ways
-86 - Cuboid route
-94 - Almost equilateral triangles
-96 - Sudoku
-100 - Arranged probability
-107 - Minimal network
-109 - Darts
-114 - Counting block combinations I
-115 - Counting block combinations II
-116 - Red, green or blue tiles
-117 - Red, green, and blue tiles
-145 - How many reversible numbers are there below one-billion?
-148 - Exploring Pascal&rsquo;s triangle
-150 - Searching a triangular array for a sub-triangle having minimum-sum
-154 - Exploring Pascal&rsquo;s pyramid
-165 - Intersections
-166 - Criss Cross
-181 - Investigating in how many ways objects of two different colours can be grouped
-182 - RSA encryption
-186 - Connectedness of a network
-194 - Coloured Configurations
-208 - Robot Walks
-209 - Circular Logic
-232 - The Race
-267 - Billionaire
-275 - Balanced Sculptures
-280 - Ant and seeds</p>
-
-<p>Note that it is highly recommended to solve all Euler&rsquo;s problems one by one because solving a previous problem has a clue to the next ones.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/2014/08/14/command-and-query-responsibility-segregation-and-event-sourcing-what-you-should-think-about-in-advance/">Command and Query Responsibility Segregation and Event Sourcing: What You Should Think About in Advance</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2014-08-14T22:35:09+04:00'><span class='date'><span class='date-month'>Aug</span> <span class='date-day'>14</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>10:35 pm</span></time>
-        
-           | <a href="/2014/08/14/command-and-query-responsibility-segregation-and-event-sourcing-what-you-should-think-about-in-advance/#disqus_thread"
-             data-disqus-identifier="http://vibneiro.github.io/2014/08/14/command-and-query-responsibility-segregation-and-event-sourcing-what-you-should-think-about-in-advance/">Comments</a>
+           | <a href="/2013/10/29/highload-conference-2013/#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io/2013/10/29/highload-conference-2013/">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>After quite a while this article has finally come out! I started to write it about 6 months ago but because of many factors in my life I procrastinated. This text is mainly devoted to those who want to see major pros and cons of this model. You won&rsquo;t find here the nuts and bolts however. For this, move to the reference section where listed really cool URLs for the start. Further the pattern will be named as CQRS/ES for simplicity.</p>
+  <div class="entry-content"><p>Today I was lucky to have attended the annual developers conference <a href="http://www.highload.ru">HighLoad++</a> 2013. This is the 7-th time. Some conference sessions are translated into English and available here: <a href="http://www.highload.co/freeonline/">http://www.highload.co/freeonline/</a></p>
 
-<h1>2 main goals of the pattern</h1>
+<p><a href="http://ivoroshilin.files.wordpress.com/2013/10/pa293662.jpg"><img src="http://ivoroshilin.files.wordpress.com/2013/10/pa293662.jpg?w=300" alt="OLYMPUS DIGITAL CAMERA" /></a></p>
 
-<p>Some developers consider that this pattern is solely used for scalability reasons forgetting that one greatly reduces data model complexity.</p>
-
-<h1>Events and snapshots - no removal but always append</h1>
-
-<p>it is well known that append-only architectures distribute more easily than updating architectures because there are far fewer locks to deal with. Append-only operations require no locks on a database-side which increases both performance and scalability.</p>
-
-<h1>CQRS + Event Model</h1>
-
-<p>One of the largest issues when using Event Sourcing is that you cannot ask the system a query such as “Give me all users whose first names are ‘Greg’”. This is due to not having a representation of current state.</p>
-
-<p>With Event Sourcing <strong>the event model</strong> is also the persistence model <strong>on the Write side</strong>. This drastically lowers costs of development as <strong>no conversion between the models is needed</strong>.</p>
-
-<h1>Synchronizing write and read sides</h1>
-
-<p><strong>The choice of integration model</strong> though is very important as translation and synchronization between models <strong>can be become a very expensive undertaking</strong>. The model that is best suited is the introduction of events<strong>, events are a well known integration pattern</strong> and offer the best mechanism for model synchronization.</p>
-
-<p>CQRS suggests using 2 different databases: one optimized for reading (denormalized) and another for writing. It is a very tempting way to designing systems. The only big problem with this solution is that you need somehow to sync up your 2 data storages.</p>
-
-<p>You must definitely have a mechanism to recreate a read-side from the write-side. You might need to do this if the read side data store got out of synchronization for some reason, or because you needed to modify the structure of the read-side data store to support a new query. Remember that the CQRS pattern does not mandate that you use different stores on the read side and write side. You could decide to use a single relational store with a schema in third normal form and a set of denormalized views over that schema. However, replaying events is a very convenient mechanism for resynchronizing the read-side data store with the write-side data store.</p>
-
-<h1>Storage technology replaceability</h1>
-
-<p>CQRS/ES makes it easy to change your technologies. For example, you could start with a file-based event store for prototyping and development, and later switch to a Windows Azure table-based store for production.</p>
-
-<h1>Relational vs NoSQL solutions and the cost of maintenance - think twice</h1>
-
-<p>Let&rsquo;s mention major issues in case of using a relational database as a technology for this model.</p>
-
-<h2><strong>Pitfall 1: Limit in number of columns per table</strong></h2>
-
-<p>Read-side is always kept in a denormalized form for performance reasons and usually requires a huge number of columns. If you have e.g. Oracle 11g database and hit a maximum number of 1000 columns per table you won&rsquo;t be able to add more columns.</p>
-
-<h2><strong>Pitfall 2: Adding new columns</strong></h2>
-
-<p>In many cases in order to add new data to the domain model you must release a bunch of applications/services along with changing a schema of a database on the read-side, especially when a column is not empty but already has some data. Here, I prefer a NoSQL databases such as MongoDB with relaxed schema that doesn&rsquo;t require to change one (data are kept in JSON documents) thus<strong> you won&rsquo;t have to change the schema of a database at all! </strong>CQRS/ES patterns with NoSQL db might have a simple Event Storage for the write-side with a blob-column in which data are represented as history and read-side as a schema-less NoSQL db.</p>
-
-<h1>Eventual consistency - think twice</h1>
-
-<p>While not required, it is common to use messaging between the write and read sides. This means that the system will be in an inconsistent state from time to time. This pattern is not a fit for e.g. financial transactions where a strong consistency is required between 2 sides. However, in majority of cases strong consistency can be used only on the write-side whereas the read-side is used for querying and reporting.</p>
-
-<h1>Simple vs costly</h1>
-
-<p>Events are simple objects that describe what has happened in the system. By simply saving events, you are avoiding the complications associated with saving complex domain objects to a relational store; namely, the object-relational impedance mismatch.</p>
-
-<p>The event based model may be slightly more costly due to the need of definition of events but this cost is relatively low and it also offers a smaller Impedance Mismatch to bridge which helps to make up for the cost. The event based model also offers all of the benefits discussed in “Events” that also help to reduce the overall initial cost of the creation of the events. That said the CQRS and Event Sourcing model is actually less expensive in most cases. That said the CQRS and Event Sourcing model is actually<strong> less expensive in most cases.</strong></p>
-
-<h1>Flexibility</h1>
-
-<p>As long as you have a stream of events, you can project it to any form, even a conventional SQL database. For instance, my favorite approach is to project event streams into JSON documents stored in a cloud storage.</p>
-
-<p>Also a great benefit of the separate read layer is that it will not suffer from an <strong>impedance mismatch -</strong> It is connected directly to the data model, this can make queries much easier to optimize. On the write side you no longer need to worry about how your locks impact queries, and on the read side your database can be read-only.</p>
-
-<h1>Performance</h1>
-
-<p>Write-side:</p>
-
-<p>Because events are immutable, you can use an append-only operation when you save them. Events are also simple, standalone objects. Both these factors can lead to better performance and scalability for the system than approaches that use complex relational storage models. On top of this events reduce network volumes unlike full snapshots in case of a pure CQRS model.</p>
-
-<p>Read-Side:</p>
-
-<p>A normalized database schema can fail to provide adequate response times because of the excessive table JOIN operations. Despite advances in relational database technology, a JOIN operation is still very expensive compared to a single-table read.</p>
-
-<h1>Scalability</h1>
-
-<p>Command: In most systems, especially web systems, the Command side generally processes a very small number of transactions as a percentage of the whole. Scalability therefore is not always important.</p>
-
-<p>Query: In most systems, especially web systems, the Query side generally processes a very large number of transactions as a percentage of the whole (often times 2 or more orders of magnitude). Scalability is most often needed for the query side.</p>
-
-<h1>Distributed development teams</h1>
-
-<p>The architecture can be viewed as three distinct decoupled areas. The first is the client; it consumes DTOs and produces Commands. The second is the domain; it consumes commands and produces events. The third is the Read Model; it consumes events and produces DTOs. The decoupled nature of these three areas can be extremely valuable in terms of team characteristics. Instead of working in vertical slices the team can be working on three concurrent vertical slices, the client, the domain, and the read model. This allows for a much better scaling of the number of developers working on a project as since they are isolated from each other they cause less conflict when making changes. It would be reasonable to nearly triple a team size without introducing a larger amount of conflict due to not needing to introduce more communication for the developers.</p>
-
-<h1><strong>Conclusion</strong></h1>
-
-<p>There is no one right way to implement CQRS. It is not recommended to use this model for critical projects of course if you have no experience with one. Note that It is not possible to create an optimal solution for searching, reporting, and processing transactions utilizing a single model. </p>
-
-<h1>References</h1>
-
-<p><a href="http://www.kenneth-truyers.net/2013/12/05/introduction-to-domain-driven-design-cqrs-and-event-sourcing/%C2%A0">Introduction to Domain Driven Design, CQRS and Event Sourcing</a></p>
-
-<p><a href="http://www.bennadel.com/blog/2438-command-query-responsibility-segregation-cqrs-makes-domain-models-practical.htm">Command-Query-Responsibility-Segregation (CQRS) Makes Domain Models Practical</a></p>
-
-<p><a href="http://codebetter.com/gregyoung/2010/02/13/cqrs-and-event-sourcing/">CQRS and Event Sourcing</a></p>
-
-<p><a href="http://cqrs.wordpress.com">CQRS - Did you mean CARS?</a></p>
-
-<p><a href="http://msdn.microsoft.com/en-us/library/jj591577.aspx">A CQRS and ES Deep Dive</a></p>
-
-<p><a href="http://www.udidahan.com/wp-content/uploads/Clarified_CQRS.pdf">Clarified CQRS</a></p>
-
-<p> </p>
-
-<p> </p>
-
-<p> </p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/2014/03/18/distributed-transactions-and-scalability-issues-in-large-scale-distributed-systems/">Distributed Transactions and Scalability Issues in Large-scale Distributed Systems</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2014-03-18T18:08:58+04:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>18</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>6:08 pm</span></time>
-        
-           | <a href="/2014/03/18/distributed-transactions-and-scalability-issues-in-large-scale-distributed-systems/#disqus_thread"
-             data-disqus-identifier="http://vibneiro.github.io/2014/03/18/distributed-transactions-and-scalability-issues-in-large-scale-distributed-systems/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Distributed transactions is the main evil of scalability</h2>
-
-<p>It is very hard to scale distributed transactions to an extremely high level, moreover they reduce throughput. Unlike a transaction on a local database, a distributed transaction involves altering data on multiple nodes. It can be a database + JMS broker or just a set of different databases. As an example let&rsquo;s recall a classical 2-phase commit (2PC later) - a type of <a href="http://en.wikipedia.org/wiki/Atomic_commit">atomic commitment protocol</a> in a back-end service with high volume of transactions. This protocol provides ACID-like properties for global transaction processing. I won&rsquo;t go into details how it works under the hood, I&rsquo;ll just tell you that C (Consistency) from ACID is the main evil of  scalability in distributed systems. It puts a great burden due to its complex coordination algorithm.  Overall throughput can drop up to a few times. Locks in all of the data sources are being held during 2PC. The longer duration locks create the risk of higher contention. The 2PC coordinator also represents a Single Point of Failure, which is unacceptable for critical systems.  For systems that have reasonably high volume of messages, or sensitive SLAs, it’s worth giving up strong consistency for throughput.</p>
-
-<h2>But how can I live without distributed transactions to achieve higher scalability?</h2>
-
-<p>Algorithms such as 2PC use <strong>&ldquo;Exactly Once&rdquo;</strong> technique whereas we will use <strong>&ldquo;At least Once&rdquo;</strong> technique. The difference is that a developer should take care of that in his application code to cope with it. Most queueing technologies provide acknowledgements that a message has been accepted (handling is a separate deal). Databases use local transactions. We can deal with downstream failures without coordination. Read on!</p>
-
-<h3>Idempotence and fault tolerance</h3>
-
-<p>From math, <a href="http://en.wikipedia.org/wiki/Idempotence">idempotence</a> is as simple as that:</p>
-
-<h2><a href="http://ivoroshilin.files.wordpress.com/2014/03/idempotence.png"><img src="http://ivoroshilin.files.wordpress.com/2014/03/idempotence.png" alt="idempotence" /></a></h2>
-
-<p>That is, the result stays the same, no matter how many times a function gets called on the same argument. In distributed world<em> Idempotence</em> implies that an operation can be invoked repeatedly without changing the result. Why do I need one? Because we should somehow resolve processing duplicate requests in case of a system failure. Let&rsquo;s make it clear by considering an example. A client-appliction sends a financial transaction to a server (there might be a cluster of them load-balanced or just one) and waits for acknowledgment. For some reason, at this particular time:</p>
-
-<ul>
-<li><p>A server goes down or</p></li>
-<li><p>Client goes down or</p></li>
-<li><p>Network failure happens</p></li>
-</ul>
-
-
-<p>In all of these 3 cases, a client-app didn&rsquo;t get an acknowledgment message (reply) from the server about a transaction status. Of course, the client then should retry this transaction. The server must ensure that this financial transaction is accomplished &ldquo;<strong>At least Once&rdquo;</strong>. Here comes to the rescue <em>idempotence</em>. The server must remember a state - that a transaction with this Id has already been processed including saved acknowledgement message in order to check that it exists and reply with its acknowledgement message in case it does. We don&rsquo;t have expensive distributed transactions anymore - <strong>&ldquo;At least Once&rdquo;</strong> is a more relaxed and scalable approach. That is, instead of locking resources everywhere, we can assume that messages will arrive at least once.</p>
-
-<h3>Optimistic locking</h3>
-
-<p>Even though this technique is quite old, one goes well with <em>idempotence. </em>If two people are trying to affect change to the same entity at the same time we don&rsquo;t lock database records, rather we use a concept of versioning and optionally uniqueness. The idea is to save a version of each entity record in the database but to make sure before saving it wasn&rsquo;t changed. A simple example is a self-service kiosk where people check-in before boarding at the airport. They can select a vacant seat from the seat map.<a href="http://en.wikipedia.org/wiki/Check-in">
-</a></p>
-
-<p><a href="http://ivoroshilin.files.wordpress.com/2014/03/seatmap.jpg"><img src="http://ivoroshilin.files.wordpress.com/2014/03/seatmap.jpg" alt="seatmap" /></a></p>
-
-<p>Each seat has a version = 1. When multiple people make their choice in parallel before proceeding the system simply checks if a seat-version hasn&rsquo;t changed. If it has a user is notified that the seat already been taken while she was thinking. This is a very simple example where version either can be 1 or 2. A more difficult situation could be in order-management systems where an order might have many versions but that doesn&rsquo;t change the point how optimistic locking works.  The idea again yields great trade-off in terms of speed because we don&rsquo;t use locking-mechanism.</p>
-
-<h3>Local atomic transactions and unique constraints</h3>
-
-<p>Local atomic transactions are usually restricted to a single store. Local transactions are primarily needed to apply a set of operations atomically to a single resource (e.g. relational database) as well as ensure correct ordering of operations within a transaction. In some cases, we can do away with transactions, particularly if we don&rsquo;t care about the order of operations within a transaction. In that case we can process operations asynchronously leading to a better throughput again. Sometimes, a model requiring the order can be redesigned for  asynchronicity of operations.</p>
-
-<h3>Putting it all together</h3>
-
-<p>In order to achieve greater throughput a system should correspond to the following principles:</p>
+<p>Listeners heard many buzzwords like horizontal scalability, replication, sharding and NoSql. Despite that I missed the first day of the conference what I really liked was not just new trends in technology but invaluable speakers&#8217; experience  on real projects with pros and cons, especially:</p>
 
 <ol>
-<li><p>You can retry the operation if there is a failure down the stream based on idempotence.</p></li>
-<li><p>Don&rsquo;t use transactions and use optimistic locking if possible - it&rsquo;s much cheaper.</p></li>
-<li><p>Local transactions based on a single phase commit for each resource are more scalable than distributed ones increasing overall application availability.</p></li>
-<li><p>Messages may be reordered.</p></li>
+<li> <strong>&ldquo;MySql versus something else&rdquo;</strong> by <strong>Mark Callaghan [FaceBook]</strong> on storage efficiency, framework for analysis and benchmarking and database algorithms: <a href="https://www.facebook.com/MySQLatFacebook">https://www.facebook.com/MySQLatFacebook</a></li>
 </ol>
 
 
-<h2>Wrapping up</h2>
+<p><a href="http://ivoroshilin.files.wordpress.com/2013/10/pa293677.jpg"><img src="http://ivoroshilin.files.wordpress.com/2013/10/pa293677.jpg" alt="PA293677" /></a></p>
 
-<p>Such great systems as Google&rsquo;s Bigtable or Spanner don&rsquo;t support traditional ACID transactions because they have a heavy overhead on a highly distributed data storage model. I was lucky to use all above techniques in my applications too involving mission-critical financial transactions and must say that a few years ago not so many people knew about the techniques but now I can hear about them more and more often. Oh yeah, I almost forgot! I urge you to read <a href="http://queue.acm.org/detail.cfm?id=2187821">this great article</a> written by Pat Helland that has even more use-cases. I bumped at it during my research to know more. And remember, you can live without distributed transactions if you implement idempotence and downstream failures correctly.</p>
+<ol>
+<li><p><strong>&ldquo;Cassandra vs In-Memory Data Grid in eCommerce&rdquo;</strong> by <strong>Alexander Soloviev  [Grid Dynamics]</strong> was very informative on deep analysis and benchmarking against different cases and their pros and cons.</p></li>
+<li><p><strong>&ldquo;Query Optimizer in MariaDB: now w/o indices&#8221; </strong>by <strong>Sergey Golubchik [Monty Program Ab]</strong></p></li>
+</ol>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/2013/10/07/minhash-algorithm-or-how-to-quickly-find-similarities-among-2-documents/">MinHash Algorithm or How to Quickly Find Similarities Among 2 Documents</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2013-10-07T02:57:48+04:00'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>7</span><span class='date-suffix'>th</span>, <span class='date-year'>2013</span></span> <span class='time'>2:57 am</span></time>
+        
+           | <a href="/2013/10/07/minhash-algorithm-or-how-to-quickly-find-similarities-among-2-documents/#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io/2013/10/07/minhash-algorithm-or-how-to-quickly-find-similarities-among-2-documents/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>MinHash is a technique from <a href="http://en.wikipedia.org/wiki/Locality_sensitive_hashing">Locality Sensitive Hashing</a> allowing to find similarities among 2 sets. This is a  buzzword frequently met in Data Mining  and Data Science fields of CS. What surprising is that this method was invented in 1997 and used in <a href="http://en.wikipedia.org/wiki/AltaVista">AltaVista</a> web-search engine back in the 90s to find similarities among web-documents and it also can be used to:</p>
+
+<ul>
+<li><p>Find duplicates</p></li>
+<li><p>Near duplicate image detection</p></li>
+<li><p>Near neighbor search</p></li>
+</ul>
+
+
+<p>Basically the algorithm can be applied to anything that can be presented by numbers.</p>
+
+<p>Let&rsquo;s start with a bit of math from theory of probability and statistics.</p>
+
+<p>Define a formula of two sets <em>A</em> and <em>B:</em></p>
+
+<p><img src="http://upload.wikimedia.org/math/1/8/6/186c7f4e83da32e889d606140fae25a0.png" alt=" J(A,B) = |A \cap B|\over|A \cup B|." /></p>
+
+<p>This is so-called  a <a href="http://en.wikipedia.org/wiki/Jaccard_index">Jaccard coefficient</a>.</p>
+
+<p>Where: J ∈ [0..1]</p>
+
+<p>j = 0 - if <em><em><em>A</em> ∩ </em>B = 0, that is 2 sets are disjoint meaning there are no similarities</em></p>
+
+<p><em>j = 1 - if __A</em> ∩ <em>B</em> = A = <em>B, that is 2 sets are identical.</em>
+__</p>
+
+<p>A, B are more similar when their <strong>Jaccard coefficient</strong> is closer to 1.</p>
+
+<p>This simple formula is cumbersome if the sets are quite large, e.g. 2 web-documents of more than 1MB in size. Ouch, that&rsquo;s too much. 1MB of text-data is <strong>1,048,576 characters </strong>provided that 1 ASCII char = 8 bits (of course for unicode charset it is greater).</p>
+
+<p>Now that we understand a bit of theory let&rsquo;s try to apply hashing to Jaccard coefficient. Everywhere I hear hashing it always leads to randomized algorithms.</p>
+
+<p>Ok, let&rsquo;s move on. The main idea is that similar objects hash to the same bucket. This follows from the fact that <strong>probability of collision higher for similar objects</strong>.</p>
+
+<p>Here we give an example for 2 sets A and B but the algorithm can be applied to any number of sets.</p>
+
+<ol>
+<li><p>Essentially, we need to construct a set of independent hash functions &lt;h1,h2,h3,&hellip;hk> <strong>randomly</strong>.  <em>k</em> = O(1/ε2), ε > 0 such that the expected error of the estimate is at most ε. For example, 400 hashes would be required to estimate <em>J</em>(<em>A</em>,<em>B</em>) with an expected error less than or equal to .05. So, k can be varied to increase/decrease the likelihood of false negatives.</p></li>
+<li><p>Next we initialize for each set A and B the <img src="http://www.toao.com/equations/49e83e4884bd478aecc7fb7e0a7e9477.png" alt="" /> value to infinity.</p></li>
+<li><p>For each element s in both sets A and B we compute the element&rsquo;s hash:</p></li>
+</ol>
+
+
+<p><img src="http://www.toao.com/equations/8664800335406d60ca14c723421d994c.png" alt="" /> such as: If <img src="http://www.toao.com/equations/d3d634b0636790f7fd707ad50b85b0a5.png" alt="" /> then <img src="http://www.toao.com/equations/f08914f853c4fcd405dafd052d100c5a.png" alt="" />.</p>
+
+<p>Eventually we should have <img src="http://www.toao.com/equations/49e83e4884bd478aecc7fb7e0a7e9477.png" alt="" /> for both sets A and B.</p>
+
+<ol>
+<li><p>If 2 sets A and B are similar then the probability P(  <img src="http://www.toao.com/equations/49e83e4884bd478aecc7fb7e0a7e9477.png" alt="" />A =  <img src="http://www.toao.com/equations/49e83e4884bd478aecc7fb7e0a7e9477.png" alt="" />B) = |<em>A</em> ∩ <em>B</em>| / |A U B|- is high and <strong>it</strong> <strong>is the actual Jaccard coefficient!</strong></p></li>
+<li><p>We calculated  <img src="http://www.toao.com/equations/49e83e4884bd478aecc7fb7e0a7e9477.png" alt="" /> statistics to estimate how similar are these 2 sets. General formula is: Similarity = identical <img src="http://www.toao.com/equations/49e83e4884bd478aecc7fb7e0a7e9477.png" alt="" />s / k</p></li>
+</ol>
+
+
+<p>In real world this requires considering more thoroughly different parameters, hash-functions etc. However, to demonstrate the algorithm I wrote a simple java code:</p>
+
+<p>[sourcecode language=&ldquo;java&rdquo;]
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;</p>
+
+<p>public class LSHMinHash<T> {</p>
+
+<pre><code>private final int hashes[];
+private final int numOfHashes;
+private final int numOfSets;
+private final Set&lt;T&gt; setA;
+private final Set&lt;T&gt; setB;
+private final Map&lt;T, boolean[]&gt; matrix;
+private final int[][] minHashes;
+
+public LSHMinHash(double e, Set&lt;T&gt; setA, Set&lt;T&gt; setB){
+    this.numOfHashes = (int)(1 / (e * e));
+    this.numOfSets = 2;
+    this.setA = setA;
+    this.setB = setB;
+    matrix = buildSetMatrix(setA, setB);
+    minHashes = initMinHashes(numOfSets, numOfHashes);
+    hashes = computeHashes(numOfHashes);
+}
+
+private Map&lt;T,boolean[]&gt; buildSetMatrix(Set&lt;T&gt; setA, Set&lt;T&gt; setB) {
+
+    Map&lt;T,boolean[]&gt; matrix = new HashMap&lt;T,boolean[]&gt;();
+
+    for(T element : setA){
+        matrix.put(element, new boolean[] { true, false } );
+    }
+
+    for(T element : setB){
+        if(matrix.containsKey(element)){
+            matrix.put(element, new boolean[] { true, true } );
+        }else if(!matrix.containsKey(element)){
+            matrix.put(element, new boolean[] { false, true } );
+        }
+    }
+
+    return matrix;
+}
+
+private int[][] initMinHashes(int numOfSets, int numOfHashes) {
+    int[][] minHashes = new int[numOfSets][numOfHashes];
+
+    for (int i = 0; i &lt; numOfSets; i++) {
+        for (int j = 0; j &lt; numOfHashes; j++) {
+            minHashes[i][j] = Integer.MAX_VALUE;
+        }
+    }
+    return minHashes;
+}
+
+private int[] computeHashes(int numOfHashes) {
+    int[] hashes = new int[numOfHashes];
+    Random r = new Random(31);
+
+    for (int i = 0; i &lt; numOfHashes; i++){
+        int a = (int)r.nextInt();
+        int b = (int)r.nextInt();
+        int c = (int)r.nextInt();
+        hashes[i] = (int)((a * (a * b * c &gt;&gt; 4) + a * a * b * c + c) &amp; 0xFFFFFFFF);
+    }
+    return hashes;
+}
+
+private void computeMinHashForSet(Set&lt;T&gt; set, int setIndex){
+    int hashIndex = 0;
+
+    for(T element : matrix.keySet()) {
+        for (int i = 0; i &lt; numOfHashes; i++) {
+            if(set.contains(element)) {
+                int hashValue = hashes[hashIndex];
+                if (hashValue &lt; minHashes[setIndex][hashIndex]) {
+                    minHashes[setIndex][hashIndex] = hashValue;
+                }
+            }
+        }
+        hashIndex++;
+    }
+}
+
+private double computeMinHash(int[][] minHashes, int numOfHashes) {
+    int identicalMinHashes = 0;
+    for (int i = 0; i &lt; numOfHashes; i++){
+        if (minHashes[0][i] == minHashes[1][i]) {
+            identicalMinHashes++;
+        }
+    }
+    return (1.0 * identicalMinHashes) / numOfHashes;
+}
+
+public double findSimilarities() {
+    computeMinHashForSet(setA, 0);
+    computeMinHashForSet(setB, 1);
+    return computeMinHash(minHashes, numOfHashes);
+}
+
+public static void main(String[] args){
+    Set&lt;String&gt; setA = new HashSet&lt;String&gt;();
+    setA.add("THIS");
+    setA.add("IS ");
+    setA.add("THE");
+    setA.add("CASE");
+
+    Set&lt;String&gt; setB = new HashSet&lt;String&gt;();
+    setB.add("THAT");
+    setB.add("IS ");
+    setB.add("THE");
+    setB.add("CASE");
+
+    double errorFactor = 0.001;
+
+    LSHMinHash&lt;String&gt; minHash = new LSHMinHash&lt;String&gt;(errorFactor, setA, setB);
+    System.out.println(minHash.findSimilarities());
+}
+</code></pre>
+
+<p>}
+[/sourcecode]</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/2013/09/11/google-code-jam-qualification-round-2013-problem-d-treasure/">Google Code Jam. Qualification Round 2013. Problem D - Treasure. Solved.</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2013-09-11T18:34:59+04:00'><span class='date'><span class='date-month'>Sep</span> <span class='date-day'>11</span><span class='date-suffix'>th</span>, <span class='date-year'>2013</span></span> <span class='time'>6:34 pm</span></time>
+        
+           | <a href="/2013/09/11/google-code-jam-qualification-round-2013-problem-d-treasure/#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io/2013/09/11/google-code-jam-qualification-round-2013-problem-d-treasure/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="http://ivoroshilin.files.wordpress.com/2013/09/1.jpg"><img src="http://ivoroshilin.files.wordpress.com/2013/09/1.jpg" alt="1" /></a></p>
+
+<p>This was <a href="https://code.google.com/codejam/contest/2270488/dashboard#s=p3&amp;a=3">the problem</a> I wasn&rsquo;t able to optimise with given time constraint in April.  Later I killed half a day to complete it thinking of different algorithms from the graph theory such as Eulerian path
+and Chinese postman problems. I was surprised at that time this problem was put into qualification round as it is really challenging. In order to solve one the graph problem should be refined and modeled properly. During modeling a graph I used to always map only one type of entity to vertices.  As a counter-example a <a href="http://en.wikipedia.org/wiki/Bipartite_graph">Bipartite graph</a> has vertices which are divided into two disjoint sets U and V such that every edge connects a vertex in U to one in V. The solution to this one has nothing to do with Bipartite graph attacking approaches except that there are 2 types of vertices.</p>
+
+<h2><strong>The solution</strong></h2>
+
+<p><strong>1. Check that the number of chests matches the number of corresponding key types</strong>. A simple arithmetic to count. Otherwise there is no solution as we don&rsquo;t have enough keys to open all chests.</p>
+
+<p><strong>2. All vertices in a graph G should be reachable from vertex v0.</strong></p>
+
+<p>Construct a directed graph G=(V,E), where K is a set of all keys and C is a set of all chests:</p>
+
+<ul>
+<li><p>V = {K} U {C} U {0}.</p></li>
+<li><p>{0} = v0 is a starting vertex corresponding to the root vertex. Outgoing edges from it are key(s) given us initially.</p></li>
+<li><p>E = {Set of all directed edges connecting K and C}. (i,j) ∈ E if either {i=chest, j=key} or {i=key, j=chest}</p></li>
+</ul>
+
+
+<p>In simple words we have a directed graph where each vertex is either a chest or a key, directed edges form a  connection in between. We need to check that there&rsquo;s a directed path between vertex v0 and every other vertex ∈ E, otherwise we cannot open all chests and solution is impossible. Note that we need to check directed paths to all key-vertices from v0. This is a standard <a href="http://en.wikipedia.org/wiki/Reachability">single-source reachability</a> and can be done applying a<a href="http://en.wikipedia.org/wiki/Depth-first_search"> Depth-First-Search</a> algorithm:</p>
+
+<p>[sourcecode language=&ldquo;java&rdquo;]
+void dfs(Graph g, int v) {
+marked[v] = true;
+for (int w : g.adj(v)) {
+if (!marked[w]) dfs(G, w);
+}
+ }
+[/sourcecode]</p>
+
+<p>Technically, if there are unmarked vertices, the problem is unsolvable. Time complexity is O(E+V). This check cuts lots of branches saving us time.</p>
+
+<p>Now let&rsquo;s demonstrate the above on a real example. Our treasure trove consists of four chests, and you began with exactly one key of type 1.</p>
+
+<p>See the table with input data:</p>
+
+<pre><code>Chest Number  |  Key Type To Open Chest  |  Key Types Inside
+--------------+--------------------------+------------------
+1             |  1                       |  None
+2             |  1                       |  1, 3
+3             |  2                       |  None
+4             |  3                       |  2
+</code></pre>
+
+<p>Let&rsquo;s draw a graph where v0 is a staring point of traversal (i.e. initial key of type = 1)</p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2013/09/graph.jpg"><img src="http://ivoroshilin.files.wordpress.com/2013/09/graph.jpg" alt="graph" /></a></p>
+
+<p>As depicted there are 2 solvable configurations - &lt;2,1,4,3> and &lt;2,4,3,1>. All paths from v0 to the keys are reachable. The proof of this condition can done by induction and left to the reader.</p>
+
+<p><strong>3. Find a &ldquo;lexicographically smallest&rdquo; solution.</strong> This last condition added real hardness to the problem. If there are multiple solutions then we find a &ldquo;lexicographically smallest&rdquo; way to open the boxes. Each vertex is always traversed from lowest to highest, this can be achieved by constructing a graph using adjacency lists that reflect numbers of keys and chests in increasing order and we subsequently iterate them applying a bit optimized Depth-First-Search. Minimal configuration starts from v0. If we have  >= 1 key initially given, we just have to traverse from all of them increasingly. On each step we always update a number of keys in possession. If we&rsquo;ve run out of keys then we cut the branch and backtrack, starting again where we left off with the next configuration. E.g. opening a chest No. 1 at the very first time will lead to the deadlock (actually this one is a trivial case as it is on step No 1). Such cases are not on critical path and we need backtrack only to the previous calling vertex.</p>
+
+<p><strong>Conclusion:</strong> There are not so many configurations unlike straightforward brute force. Many optimization problems like this one are met in algorithmic contests. Just algorithms and data structures are not sufficient. To pass given time constraint there should be the right strategy to cut unsolvable branches. That&rsquo;s it!</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/2013/07/15/distributed-caching-under-consistent-hashing/">How Automatic Sharding Works or Consistent Hashing Under the Hood</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2013-07-15T12:25:09+04:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>15</span><span class='date-suffix'>th</span>, <span class='date-year'>2013</span></span> <span class='time'>12:25 pm</span></time>
+        
+           | <a href="/2013/07/15/distributed-caching-under-consistent-hashing/#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io/2013/07/15/distributed-caching-under-consistent-hashing/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Preface</h2>
+
+<p>Here we&rsquo;re going to talk primarily about Consistent hashing. This technique involves such concepts as adaptive load balancing, routing, partitioning in distributed computing. There are many articles on the internet on this technique (refer to the list of references for some of them) but I haven&rsquo;t found information about how and where to keep the ring of hashes, thus I&rsquo;ve decided to describe some options with pros and cons. In order to make this post more clear for a wider audience I will first try to write a brief introduction of what this is all about and tell about <strong>the ring storage strategies</strong> at the end of this issue. So if you&rsquo;re already familiar with the algorithm you may want to skip over the main stuff and move on to the last chapter for pros and cons of descibed approaces.</p>
+
+<h3>Distributed cache and straightforward uniform load balancing</h3>
+
+<p>Key-value stores are extremely fast in single search-queries. A very popular one is a distributed hash table (DHT) kept in a fully decentralized manner, and thus particularly adapted to unstable networks where nodes can leave or join at any moment. Note that DHT is not suitable for range-queries albeit and I will probably write a separate post about special data structures responsible for that. Now let&rsquo;s consider a classic case - you have a cluster of cache-servers where you load-balance a huge data set uniformly. To be able to determine on which node a pair &lt;key, value> should be kept we use a simple hash-mapping:</p>
+
+<blockquote>Cache machine = hash(o) mod n where: n - number of machines in a cluster and o is an object to put/lookup.</blockquote>
+
+
+<p>What happens when a number of machines changes at runtime? You might add/remove a number of machines in a cluster for e.g. scalability reasons, a failure or whatever.  The change triggers moving almost all objects to new locations due to rehashing.  Each key-value pair will get reallocated completely across the cluster. You’ll end up moving a fraction<strong> n/(n+1)</strong> of your data to new machines. Indeed, this fact degrades all of the advantages of distributed hash tables. We need somehow to avoid this messy remapping. This is where consistent hashing comes in.</p>
+
+<h2>Consistent hashing</h2>
+
+<p>The main idea is to hash both data ids and cache-machines to a numeric range using the same hash-function. E.g. in Java a primitive type int has a number range of values between -231 to 231-1.  Assume the interval is [0,  231-1] for simplicity (java primitives cannot be unsigned). Now let&rsquo;s join starting and ending points together of this interval to create a ring so the values wrap around. We do not have 231 -1 available servers, the large size of the ring being merely intended to avoid collisions. As a hash function a good choise is either be e.g. MD5 or SHA-1 algorithm. As a machine&rsquo;s number we can take its IP-address and apply that hash function to it. By taking from the result the first 8 bytes we can map it to our ring [0,231-1].</p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2013/07/ring_range1.png"><img src="http://ivoroshilin.files.wordpress.com/2013/07/ring_range1.png" alt="ring_range" /></a></p>
+
+<p>Both the nodes and the keys are mapped to the same range on the ring. Ok, now we need to understand how to identify on this ring which data ids belong to which server&rsquo;s IP. It&rsquo;s really simple, we just move clockwise starting from zero (starting point on the ring) following the main rule of consistent hashing: If IP-n1 and IP-n2 are 2 adjacent nodes on the ring all data ids on the ring between them belong to IP-n1. That&rsquo;s it. <a href="http://ivoroshilin.files.wordpress.com/2013/07/ring_mapping1.png"><img src="http://ivoroshilin.files.wordpress.com/2013/07/ring_mapping1.png" alt="ring_mapping" /></a></p>
+
+<p>As depicted: { Id1, Id2, Id3} ∈ IP-3; {Id4} ∈ IP-1; ∅ ∈ IP-2.</p>
+
+<p><strong>Conclusion:</strong> Using consistent hashing we do not need to rehash the whole data set. Instead, the new server takes place at a position determined by the hash value on the ring, and part of the objects stored on its successor must be moved. The reorganization is local, as all the other nodes remain unaffected. if you add a machine to the cluster, only the data that needs to live on that machine is moved there; all the other data stays where it is. Because the hash function remains unaffected, the scheme maintains its consistency over the successive evolutions of the network configuration. Like naive hashing, consistent hashing spreads the distributed dictionary almost evenly across the cluster. One point to mention is what happens when a node goes down due to some disaster. In this case consistent hashing alone doesn&rsquo;t meet our requirements of reliability due to loss of data. Therefore there should definetely be replication and high availability which is feasible and out of scope of this introduction. You may want to find good references at the end of these article to find out more.</p>
+
+<h3>Problems with pure consistent hashing</h3>
+
+<p>In a nutshell, the basic consistent hashing has the following problems:</p>
+
+<ul>
+<li><p>There is a huge amount of data to be rehashed.</p></li>
+<li><p>A node picking a range of keys results in one node potentially carrying a larger keyspace than others, therefore still creating disbalance.</p></li>
+<li><p>Leaving/Joining a ring leads to disbalance of data.</p></li>
+<li><p>A more powerful machine needs to process more data than others.</p></li>
+<li><p>A fraction of data to be moved is less unpredictable and much higher.</p></li>
+</ul>
+
+
+<p><strong>Virtual nodes </strong>solve these issues.</p>
+
+<h2>Virtual nodes come to the rescue</h2>
+
+<p>Virtual nodes <strong>minimize changes</strong> <strong>to a node&rsquo;s assigned range</strong> by a number of smaller ranges to a single node. In other words, amount of data to be moved from one physical node to others is minimized. Let&rsquo;s split a real node into a number of virtual nodes. The idea is to build equally-sized subintervals (partitions) for each real server on the ring by dividing the hash-space into P evenly sized partitions, and assign P/N partitions per host. When a node joins/leaves all data from partitions of all real servers are uniformly get assigned to a new server and given back to remaining ones respectively. The number of virtual nodes is picked once during building of the ring  and never changes over the lifetime of the cluster. This ensures that each node picks equal size of data from the full data set, that is P/N and thus our data now are distributed more uniformly. This enforces that the number of virtual nodes must be much higher than the number of real ones.</p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2013/07/ring_hashing.png"><img src="http://ivoroshilin.files.wordpress.com/2013/07/ring_hashing.png" alt="ring_hashing" /></a></p>
+
+<p>Here&rsquo;s a pretty simple java-code of consistency ring&rsquo;s  with virtual nodes.</p>
+
+<p>[sourcecode language=&ldquo;java&rdquo;]
+public class Ring {</p>
+
+<pre><code>private SortedMap&lt;Long, T&gt; ring = new TreeMap&lt;Long, T&gt;();
+private HashMap&lt;String, T&gt; nodeMap = new HashMap&lt;String, T&gt;();
+private MD5Hash hash = new MD5Hash();
+private vNodeCount;
+
+public Ring(int vnodeCount, Collection pNodes) {
+
+    this.vnodeCount = vnodeCount;
+
+    for (T pNode : pNodes) {
+        addNode(ring, nodeMap, pNode, vnodeCount);
+    }
+}
+
+private void addNode(T pNode, int vnodeCount) {
+    for (int i = 0; i &lt; vnodeCount; i++) {
+        ring.put(hash.hash(pNode.toString() + i), pNode);
+    }
+}
+
+    public void removeNode(T node, int vnodeCount) {
+      for (int i = 0; i &lt; vnodeCount; i++) {
+        ring.remove(hash.hash(pNode.toString() + i));
+      }
+    }
+
+private T getNodeByObjectId(String objectId) {
+
+    long hashValue = hash.hash(objectId);
+
+    if (!ring.containsKey(hashValue)) {
+        SortedMap&lt;Long, T&gt; tailMap = ring.tailMap(hashValue);
+        hashValue = tailMap.isEmpty() ? ring.firstKey() : tailMap.firstKey();
+    }
+
+    return ring.get(hashValue);
+}
+
+private static class MD5Hash {
+    MessageDigest instance;
+
+    public MD5Hash() {
+        try {
+            instance = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+        }
+    }
+
+    long hash(String key) {
+        instance.reset();
+        instance.update(key.getBytes());
+        byte[] digest = instance.digest();
+
+        long h = 0;
+        for (int i = 0; i &lt; 4; i++) {
+            h &lt;&lt;= 8;
+            h |= ((int) digest[i]) &amp; 0xFF;
+        }
+        return h;
+    }
+};
+</code></pre>
+
+<p>}
+[/sourcecode]</p>
+
+<h2>Strategies to keep a data structure of the ring and their pros and cons</h2>
+
+<p>There are a few options on where to keep ring&rsquo;s data structure:</p>
+
+<ul>
+<li><p><strong>Central point of coordination:</strong> A dedicated machine keeps a ring and works as a <strong>central load-balancer</strong> which routes request to appropriate nodes.</p></li>
+<li><p>Pros: Very simple implementation. This would be a good fit for not a dynamic system having small number of nodes and/or data.</p></li>
+<li><p>Cons: A big drawback of this approach is scalability and reliability. Stable distributed systems don&rsquo;t have a <strong>single poing of failure.</strong></p></li>
+<li><p><strong><strong>No central point of coordination - full duplication:</strong> </strong>Each node keeps a full copy of the ring. Applicable for stable networks. This option is used e.g. in Amazon Dynamo.</p></li>
+<li><p>Pros: Queries are routed in one hop directly to the appropriate cache-server.</p></li>
+<li><p>Cons: Join/Leave of a server from the ring  requires notification/amendment of all cache-servers in the ring.</p></li>
+<li><p><strong>No central point of coordination - partial duplication: </strong>Each node keeps a partial copy of the ring. This option is direct implementation of CHORD algorithm. In terms of DHT each cache-machine has its predessesor and successor and when receiving a query one checks if it has the key or not. If there&rsquo;s no such a key on that machine, a mapping function is used to determine which of its neighbors (successor and predessesor) has the least distance to that key. Then it forwards the query to its neighbor thas has the least distance. The process continues until a current cache-machine finds the key and sends it back.</p></li>
+<li><p>Pros: For highly dynamic changes the previous option is not a fit due to heavy overhead of gossiping among nodes. Thus this option is the choice in this case.</p></li>
+<li><p>Cons: No direct routing of messages. The complexity of routing a message to the destination node in a ring is O(lg N).</p></li>
+</ul>
+
+
+<h3>Current trends in consistent hashing</h3>
+
+<p>There is a huge boom nowadays of new products that implement this technique. Some of them are: Dynamo, Riak, Cassandra, MemCached, Voldemort, CouchDB, Oracle Coherence, Trackerless Bit-Torrent networks, Web-caching frameworks, Content distribution networks.</p>
 
 <h2>References</h2>
 
-<p>1. <a href="http://www.enterpriseintegrationpatterns.com/docs/IEEE_Software_Design_2PC.pdf">Your Coffee Shop Doesn’t Use Two-Phase Commit</a> by Gregor Hohpe.</p>
+<ul>
+<li><p><a href="http://java.dzone.com/articles/simple-magic-consistent">The Simple Magic of Consistent Hashing</a></p></li>
+<li><p><a href="http://michaelnielsen.org/blog/consistent-hashing/">Consistent hashing</a></p></li>
+<li><p><a href="https://weblogs.java.net/blog/tomwhite/archive/2007/11/consistent_hash.html">Consistent hashing by Tom White</a></p></li>
+<li><p><a href="http://techspot.zzzeek.org/2012/07/07/the-absolutely-simplest-consistent-hashing-example">The Absolutely Simplest Consistent Hashing Example</a></p></li>
+<li><p><a href="http://cloudfundoo.wordpress.com/2012/05/28/distributed-hash-tables-and-consistent-hashing/">Distributed Hash Tables and Consistent Hashing</a></p></li>
+<li><p><a href="http://www.acunu.com/2/post/2012/07/virtual-nodes-strategies.html">Virtual Nodes strategies</a> <a href="http://www.tomkleinpeter.com/2008/03/17/programmers-toolbox-part-3-consistent-hashing/">Programmer&rsquo;s toolbox</a></p></li>
+<li><p><a href="http://www.tomkleinpeter.com/2008/03/17/programmers-toolbox-part-3-consistent-hashing/">Programmer&rsquo;s toolbox: consistent hashing</a></p></li>
+<li><p><a href="http://offthelip.org/?p=149">Distributed Hash Tables</a></p></li>
+<li><p><a href="http://www.lastfm.ru/user/RJ/journal/2007/04/10/rz_libketama_-_a_consistent_hashing_algo_for_memcache_clients">libketama - a consistent hashing algo for memcache clients</a></p></li>
+<li><p><a href="http://www.sarmady.com/siamak/papers/dht-soft-300807.pdf">A Peer-to-Peer Dictionary Using Chord DHT</a></p></li>
+<li><p><a href="http://www.read.seas.harvard.edu/~kohler/class/cs239-w08/decandia07dynamo.pdf">Dynamo: Amazon’s Highly Available Key-value Store</a></p></li>
+<li><p><a href="http://greg.brim.net/page/building_a_consistent_hashing_ring.html">Building a Consistent Hashing Ring</a></p></li>
+</ul>
 
-<p>2. <a href="http://queue.acm.org/detail.cfm?id=2187821">Idempotence Is Not a Medical Condition</a> by Pat Helland.</p>
+</div>
+  
+  
 
-<p>3. <a href="http://www.addsimplicity.com/adding_simplicity_an_engi/2006/12/2pc_or_not_2pc_.html">2PC or not 2PC, Wherefore Art Thou XA?</a> by Dan Pritchett.</p>
 
-<p>4. <a href="http://www-db.cs.wisc.edu/cidr/cidr2007/papers/cidr07p15.pdf">Life beyond Distributed Transactions: an Apostate’s Opinion</a> by Pat Helland.</p>
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/2013/04/23/java-one-2013/">Annual Conference Java One 2013</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2013-04-23T18:57:31+04:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>23</span><span class='date-suffix'>rd</span>, <span class='date-year'>2013</span></span> <span class='time'>6:57 pm</span></time>
+        
+           | <a href="/2013/04/23/java-one-2013/#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io/2013/04/23/java-one-2013/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="http://ivoroshilin.files.wordpress.com/2013/04/javaone2013.jpg"><img src="http://ivoroshilin.files.wordpress.com/2013/04/javaone2013.jpg" alt="javaone2013" /></a></p>
+
+<p>Java One 2013, Moscow</p>
+
+<p>Today is the first day of annual conference &ldquo;Java One 2013&rdquo; At Crocus Expo, Moscow Russia. Sponsors are as follows: Deutsche bank, Luxoft, odnoklassniki.ru and several other companies.</p>
+
+<p>Traditionally the conference lasts for 2 days with 94 sessions and 65 speakers around the world. Some of them are from the previous year. On the whole the venue and organizations is better this year and the plan has really interesting sessions on modern buzzwords nowadays like Scala, Cloud space and distributed caches.</p>
+
+<p><a href="http://www.oracle.com/javaone/ru-en/index.html">http://www.oracle.com/javaone/ru-en/index.html</a></p>
 </div>
   
   
