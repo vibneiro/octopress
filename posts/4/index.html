@@ -9,7 +9,7 @@
   <meta name="author" content="Ivan Voroshilin">
 
   
-  <meta name="description" content="  Introduction In the previous post we briefly described what might stand beyond asymptotic analysis of algorithms and data structures when it comes &hellip;">
+  <meta name="description" content="Preface Here we&rsquo;re going to talk primarily about Consistent hashing. This technique involves such concepts as adaptive load balancing, routing &hellip;">
 
   
   <meta name="keywords" content="distributed, algorithm, Ivan, Voroshilin, code, google, jam, software, architecture, geek, blog" />
@@ -82,6 +82,605 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/2013/07/15/distributed-caching-under-consistent-hashing/">How Automatic Sharding Works or Consistent Hashing Under the Hood</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2013-07-15T12:25:09+04:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>15</span><span class='date-suffix'>th</span>, <span class='date-year'>2013</span></span> <span class='time'>12:25 pm</span></time>
+        
+           | <a href="/2013/07/15/distributed-caching-under-consistent-hashing/#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io/2013/07/15/distributed-caching-under-consistent-hashing/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Preface</h2>
+
+<p>Here we&rsquo;re going to talk primarily about Consistent hashing. This technique involves such concepts as adaptive load balancing, routing, partitioning in distributed computing. There are many articles on the internet on this technique (refer to the list of references for some of them) but I haven&rsquo;t found information about how and where to keep the ring of hashes, thus I&rsquo;ve decided to describe some options with pros and cons. In order to make this post more clear for a wider audience I will first try to write a brief introduction of what this is all about and tell about <strong>the ring storage strategies</strong> at the end of this issue. So if you&rsquo;re already familiar with the algorithm you may want to skip over the main stuff and move on to the last chapter for pros and cons of descibed approaces.</p>
+
+<h3>Distributed cache and straightforward uniform load balancing</h3>
+
+<p>Key-value stores are extremely fast in single search-queries. A very popular one is a distributed hash table (DHT) kept in a fully decentralized manner, and thus particularly adapted to unstable networks where nodes can leave or join at any moment. Note that DHT is not suitable for range-queries albeit and I will probably write a separate post about special data structures responsible for that. Now let&rsquo;s consider a classic case - you have a cluster of cache-servers where you load-balance a huge data set uniformly. To be able to determine on which node a pair &lt;key, value> should be kept we use a simple hash-mapping:</p>
+
+<blockquote>Cache machine = hash(o) mod n where: n - number of machines in a cluster and o is an object to put/lookup.</blockquote>
+
+
+<p>What happens when a number of machines changes at runtime? You might add/remove a number of machines in a cluster for e.g. scalability reasons, a failure or whatever.  The change triggers moving almost all objects to new locations due to rehashing.  Each key-value pair will get reallocated completely across the cluster. You’ll end up moving a fraction<strong> n/(n+1)</strong> of your data to new machines. Indeed, this fact degrades all of the advantages of distributed hash tables. We need somehow to avoid this messy remapping. This is where consistent hashing comes in.</p>
+
+<h2>Consistent hashing</h2>
+
+<p>The main idea is to hash both data ids and cache-machines to a numeric range using the same hash-function. E.g. in Java a primitive type int has a number range of values between -231 to 231-1.  Assume the interval is [0,  231-1] for simplicity (java primitives cannot be unsigned). Now let&rsquo;s join starting and ending points together of this interval to create a ring so the values wrap around. We do not have 231 -1 available servers, the large size of the ring being merely intended to avoid collisions. As a hash function a good choise is either be e.g. MD5 or SHA-1 algorithm. As a machine&rsquo;s number we can take its IP-address and apply that hash function to it. By taking from the result the first 8 bytes we can map it to our ring [0,231-1].</p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2013/07/ring_range1.png"><img src="http://ivoroshilin.files.wordpress.com/2013/07/ring_range1.png" alt="ring_range" /></a></p>
+
+<p>Both the nodes and the keys are mapped to the same range on the ring. Ok, now we need to understand how to identify on this ring which data ids belong to which server&rsquo;s IP. It&rsquo;s really simple, we just move clockwise starting from zero (starting point on the ring) following the main rule of consistent hashing: If IP-n1 and IP-n2 are 2 adjacent nodes on the ring all data ids on the ring between them belong to IP-n1. That&rsquo;s it. <a href="http://ivoroshilin.files.wordpress.com/2013/07/ring_mapping1.png"><img src="http://ivoroshilin.files.wordpress.com/2013/07/ring_mapping1.png" alt="ring_mapping" /></a></p>
+
+<p>As depicted: { Id1, Id2, Id3} ∈ IP-3; {Id4} ∈ IP-1; ∅ ∈ IP-2.</p>
+
+<p><strong>Conclusion:</strong> Using consistent hashing we do not need to rehash the whole data set. Instead, the new server takes place at a position determined by the hash value on the ring, and part of the objects stored on its successor must be moved. The reorganization is local, as all the other nodes remain unaffected. if you add a machine to the cluster, only the data that needs to live on that machine is moved there; all the other data stays where it is. Because the hash function remains unaffected, the scheme maintains its consistency over the successive evolutions of the network configuration. Like naive hashing, consistent hashing spreads the distributed dictionary almost evenly across the cluster. One point to mention is what happens when a node goes down due to some disaster. In this case consistent hashing alone doesn&rsquo;t meet our requirements of reliability due to loss of data. Therefore there should definetely be replication and high availability which is feasible and out of scope of this introduction. You may want to find good references at the end of these article to find out more.</p>
+
+<h3>Problems with pure consistent hashing</h3>
+
+<p>In a nutshell, the basic consistent hashing has the following problems:</p>
+
+<ul>
+<li><p>There is a huge amount of data to be rehashed.</p></li>
+<li><p>A node picking a range of keys results in one node potentially carrying a larger keyspace than others, therefore still creating disbalance.</p></li>
+<li><p>Leaving/Joining a ring leads to disbalance of data.</p></li>
+<li><p>A more powerful machine needs to process more data than others.</p></li>
+<li><p>A fraction of data to be moved is less unpredictable and much higher.</p></li>
+</ul>
+
+
+<p><strong>Virtual nodes </strong>solve these issues.</p>
+
+<h2>Virtual nodes come to the rescue</h2>
+
+<p>Virtual nodes <strong>minimize changes</strong> <strong>to a node&rsquo;s assigned range</strong> by a number of smaller ranges to a single node. In other words, amount of data to be moved from one physical node to others is minimized. Let&rsquo;s split a real node into a number of virtual nodes. The idea is to build equally-sized subintervals (partitions) for each real server on the ring by dividing the hash-space into P evenly sized partitions, and assign P/N partitions per host. When a node joins/leaves all data from partitions of all real servers are uniformly get assigned to a new server and given back to remaining ones respectively. The number of virtual nodes is picked once during building of the ring  and never changes over the lifetime of the cluster. This ensures that each node picks equal size of data from the full data set, that is P/N and thus our data now are distributed more uniformly. This enforces that the number of virtual nodes must be much higher than the number of real ones.</p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2013/07/ring_hashing.png"><img src="http://ivoroshilin.files.wordpress.com/2013/07/ring_hashing.png" alt="ring_hashing" /></a></p>
+
+<p>Here&rsquo;s a pretty simple java-code of consistency ring&rsquo;s  with virtual nodes.</p>
+
+<p>[sourcecode language=&ldquo;java&rdquo;]
+public class Ring {</p>
+
+<pre><code>private SortedMap&lt;Long, T&gt; ring = new TreeMap&lt;Long, T&gt;();
+private HashMap&lt;String, T&gt; nodeMap = new HashMap&lt;String, T&gt;();
+private MD5Hash hash = new MD5Hash();
+private vNodeCount;
+
+public Ring(int vnodeCount, Collection pNodes) {
+
+    this.vnodeCount = vnodeCount;
+
+    for (T pNode : pNodes) {
+        addNode(ring, nodeMap, pNode, vnodeCount);
+    }
+}
+
+private void addNode(T pNode, int vnodeCount) {
+    for (int i = 0; i &lt; vnodeCount; i++) {
+        ring.put(hash.hash(pNode.toString() + i), pNode);
+    }
+}
+
+    public void removeNode(T node, int vnodeCount) {
+      for (int i = 0; i &lt; vnodeCount; i++) {
+        ring.remove(hash.hash(pNode.toString() + i));
+      }
+    }
+
+private T getNodeByObjectId(String objectId) {
+
+    long hashValue = hash.hash(objectId);
+
+    if (!ring.containsKey(hashValue)) {
+        SortedMap&lt;Long, T&gt; tailMap = ring.tailMap(hashValue);
+        hashValue = tailMap.isEmpty() ? ring.firstKey() : tailMap.firstKey();
+    }
+
+    return ring.get(hashValue);
+}
+
+private static class MD5Hash {
+    MessageDigest instance;
+
+    public MD5Hash() {
+        try {
+            instance = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+        }
+    }
+
+    long hash(String key) {
+        instance.reset();
+        instance.update(key.getBytes());
+        byte[] digest = instance.digest();
+
+        long h = 0;
+        for (int i = 0; i &lt; 4; i++) {
+            h &lt;&lt;= 8;
+            h |= ((int) digest[i]) &amp; 0xFF;
+        }
+        return h;
+    }
+};
+</code></pre>
+
+<p>}
+[/sourcecode]</p>
+
+<h2>Strategies to keep a data structure of the ring and their pros and cons</h2>
+
+<p>There are a few options on where to keep ring&rsquo;s data structure:</p>
+
+<ul>
+<li><p><strong>Central point of coordination:</strong> A dedicated machine keeps a ring and works as a <strong>central load-balancer</strong> which routes request to appropriate nodes.</p></li>
+<li><p>Pros: Very simple implementation. This would be a good fit for not a dynamic system having small number of nodes and/or data.</p></li>
+<li><p>Cons: A big drawback of this approach is scalability and reliability. Stable distributed systems don&rsquo;t have a <strong>single poing of failure.</strong></p></li>
+<li><p><strong><strong>No central point of coordination - full duplication:</strong> </strong>Each node keeps a full copy of the ring. Applicable for stable networks. This option is used e.g. in Amazon Dynamo.</p></li>
+<li><p>Pros: Queries are routed in one hop directly to the appropriate cache-server.</p></li>
+<li><p>Cons: Join/Leave of a server from the ring  requires notification/amendment of all cache-servers in the ring.</p></li>
+<li><p><strong>No central point of coordination - partial duplication: </strong>Each node keeps a partial copy of the ring. This option is direct implementation of CHORD algorithm. In terms of DHT each cache-machine has its predessesor and successor and when receiving a query one checks if it has the key or not. If there&rsquo;s no such a key on that machine, a mapping function is used to determine which of its neighbors (successor and predessesor) has the least distance to that key. Then it forwards the query to its neighbor thas has the least distance. The process continues until a current cache-machine finds the key and sends it back.</p></li>
+<li><p>Pros: For highly dynamic changes the previous option is not a fit due to heavy overhead of gossiping among nodes. Thus this option is the choice in this case.</p></li>
+<li><p>Cons: No direct routing of messages. The complexity of routing a message to the destination node in a ring is O(lg N).</p></li>
+</ul>
+
+
+<h3>Current trends in consistent hashing</h3>
+
+<p>There is a huge boom nowadays of new products that implement this technique. Some of them are: Dynamo, Riak, Cassandra, MemCached, Voldemort, CouchDB, Oracle Coherence, Trackerless Bit-Torrent networks, Web-caching frameworks, Content distribution networks.</p>
+
+<h2>References</h2>
+
+<ul>
+<li><p><a href="http://java.dzone.com/articles/simple-magic-consistent">The Simple Magic of Consistent Hashing</a></p></li>
+<li><p><a href="http://michaelnielsen.org/blog/consistent-hashing/">Consistent hashing</a></p></li>
+<li><p><a href="https://weblogs.java.net/blog/tomwhite/archive/2007/11/consistent_hash.html">Consistent hashing by Tom White</a></p></li>
+<li><p><a href="http://techspot.zzzeek.org/2012/07/07/the-absolutely-simplest-consistent-hashing-example">The Absolutely Simplest Consistent Hashing Example</a></p></li>
+<li><p><a href="http://cloudfundoo.wordpress.com/2012/05/28/distributed-hash-tables-and-consistent-hashing/">Distributed Hash Tables and Consistent Hashing</a></p></li>
+<li><p><a href="http://www.acunu.com/2/post/2012/07/virtual-nodes-strategies.html">Virtual Nodes strategies</a> <a href="http://www.tomkleinpeter.com/2008/03/17/programmers-toolbox-part-3-consistent-hashing/">Programmer&rsquo;s toolbox</a></p></li>
+<li><p><a href="http://www.tomkleinpeter.com/2008/03/17/programmers-toolbox-part-3-consistent-hashing/">Programmer&rsquo;s toolbox: consistent hashing</a></p></li>
+<li><p><a href="http://offthelip.org/?p=149">Distributed Hash Tables</a></p></li>
+<li><p><a href="http://www.lastfm.ru/user/RJ/journal/2007/04/10/rz_libketama_-_a_consistent_hashing_algo_for_memcache_clients">libketama - a consistent hashing algo for memcache clients</a></p></li>
+<li><p><a href="http://www.sarmady.com/siamak/papers/dht-soft-300807.pdf">A Peer-to-Peer Dictionary Using Chord DHT</a></p></li>
+<li><p><a href="http://www.read.seas.harvard.edu/~kohler/class/cs239-w08/decandia07dynamo.pdf">Dynamo: Amazon’s Highly Available Key-value Store</a></p></li>
+<li><p><a href="http://greg.brim.net/page/building_a_consistent_hashing_ring.html">Building a Consistent Hashing Ring</a></p></li>
+</ul>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/2013/04/23/java-one-2013/">Annual Conference Java One 2013</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2013-04-23T18:57:31+04:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>23</span><span class='date-suffix'>rd</span>, <span class='date-year'>2013</span></span> <span class='time'>6:57 pm</span></time>
+        
+           | <a href="/2013/04/23/java-one-2013/#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io/2013/04/23/java-one-2013/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="http://ivoroshilin.files.wordpress.com/2013/04/javaone2013.jpg"><img src="http://ivoroshilin.files.wordpress.com/2013/04/javaone2013.jpg" alt="javaone2013" /></a></p>
+
+<p>Java One 2013, Moscow</p>
+
+<p>Today is the first day of annual conference &ldquo;Java One 2013&rdquo; At Crocus Expo, Moscow Russia. Sponsors are as follows: Deutsche bank, Luxoft, odnoklassniki.ru and several other companies.</p>
+
+<p>Traditionally the conference lasts for 2 days with 94 sessions and 65 speakers around the world. Some of them are from the previous year. On the whole the venue and organizations is better this year and the plan has really interesting sessions on modern buzzwords nowadays like Scala, Cloud space and distributed caches.</p>
+
+<p><a href="http://www.oracle.com/javaone/ru-en/index.html">http://www.oracle.com/javaone/ru-en/index.html</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/2013/04/14/google-code-jam-2013-qualification-round-i-have-posted-my-solutions/">Google Code Jam 2013 - Qualification Round Finished</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2013-04-14T13:09:16+04:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>14</span><span class='date-suffix'>th</span>, <span class='date-year'>2013</span></span> <span class='time'>1:09 pm</span></time>
+        
+           | <a href="/2013/04/14/google-code-jam-2013-qualification-round-i-have-posted-my-solutions/#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io/2013/04/14/google-code-jam-2013-qualification-round-i-have-posted-my-solutions/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>As many of you know, it&rsquo;s been 10 hours since qualification round finished at Google code jam contest: <a href="http://code.google.com/codejam/">http://code.google.com/codejam/</a></p>
+
+<p>Appx. <strong>21000</strong> participants took part around the world with 25h time available for the round.</p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2013/04/codejam_pic.jpg"><img src="http://ivoroshilin.files.wordpress.com/2013/04/codejam_pic.jpg" alt="codejam_pic" /></a></p>
+
+<p>Here are my solutions to 3 problems given out of 4:</p>
+
+<p><a href="https://github.com/vibneiro/googleJam2013">https://github.com/vibneiro/googleJam2013</a></p>
+
+<p>So, here&rsquo;s the analysis:</p>
+
+<h2>1. Problem A: Tic-Tac-Toe-Tomek</h2>
+
+<p>Works on small and large sets. Just a simple algorithm to implement. The point is to comply with all the conditions. The goal is to find a winner. If there&rsquo;s no winner, it should be draw, otherwise if we have empty cells the game is not completed.</p>
+
+<p>[sourcecode language=&ldquo;java&rdquo;]
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.util.Scanner;</p>
+
+<p>/<em>*
+  @Author: Ivan Voroshilin
+  @Date: April 13 2013
+  Problem A
+  Small and large inputs
+ </em>/
+public class TicTacToeTomek {</p>
+
+<pre><code>private final static char XPLAYER = 'X';
+private final static char OPLAYER = 'O';
+private final static char T = 'T';
+private final static char EMPTY = '.';
+
+private final static String X_WON = "X won";
+private final static String O_WON = "O won";
+private final static String DRAW = "Draw";
+private final static String NOT_COMPLETED = "Game has not completed";
+
+private void solve(Scanner sc, PrintWriter pw) {
+
+    char[][] array = { sc.next().toCharArray(), sc.next().toCharArray(), sc.next().toCharArray(), sc.next().toCharArray() };
+
+    int xXCount = 0;
+    int yXCount = 0;
+    int xOCount = 0;
+    int yOCount = 0;
+
+    int dForwardXCount = 0;
+    int dBackwardXCount = 0;
+    int dForwardOCount = 0;
+    int dBackwardOCount = 0;
+    boolean hasEmptyCells = false;
+    boolean hasWinner = false;
+
+    for(int x = 0; x &lt; array.length; x++) { // 4
+
+        for(int y = 0; y &lt; array.length; y++) { // 4
+
+            //x-X
+            if(array[x][y] == XPLAYER || array[x][y] == T) {
+                xXCount++;
+            }
+
+            //y-X
+            if(array[y][x] == XPLAYER || array[x][y] == T) {
+                yXCount++;
+            }
+
+            //x-O
+            if(array[x][y] == OPLAYER || array[x][y] == T) {
+                xOCount++;
+            }
+
+            //y-O
+            if(array[y][x] == OPLAYER || array[x][y] == T) {
+                yOCount++;
+            }
+
+            if(array[x][y] == EMPTY) {
+                hasEmptyCells = true;
+            }
+        }
+
+        if(!hasWinner &amp;&amp; (xXCount == array.length || yXCount == array.length)) {
+            System.out.println(X_WON);
+            pw.println(X_WON);
+            hasWinner = true;
+        }
+
+        if(!hasWinner &amp;&amp; (xOCount == array.length || yOCount == array.length)) {
+            System.out.println(O_WON);
+            pw.println(O_WON);
+            hasWinner = true;
+        }
+
+        xXCount = yXCount = xOCount = yOCount = 0;
+
+        if(array[x][x] == XPLAYER || array[x][x] == T) {
+            dForwardXCount++;
+        }
+
+        if(array[(array.length - 1 - x)][x] == XPLAYER || array[(array.length - 1 - x)][x] == T) {
+            dBackwardXCount++;
+        }
+
+        if(array[x][x] == OPLAYER || array[x][x] == T) {
+            dForwardOCount++;
+        }
+
+        if(array[(array.length - 1 - x)][x] == OPLAYER || array[(array.length - 1 - x)][x] == T) {
+            dBackwardOCount++;
+        }
+
+    }
+
+    if(!hasWinner &amp;&amp; (dForwardXCount == array.length || dBackwardXCount == array.length)) {
+        System.out.println(X_WON);
+        pw.println(X_WON);
+        hasWinner = true;
+    } else
+    if(!hasWinner &amp;&amp; (dForwardOCount == array.length || dBackwardOCount == array.length)) {
+        System.out.println(O_WON);
+        pw.println(O_WON);
+        hasWinner = true;
+    }
+
+    if(!hasWinner) {
+        if(hasEmptyCells) {
+            System.out.println(NOT_COMPLETED);
+            pw.println(NOT_COMPLETED);
+        } else {
+            System.out.println(DRAW);
+            pw.println(DRAW);
+        }
+    }
+
+}
+
+public static void main(String[] args) throws Exception {
+
+    Scanner sc = new Scanner(new FileReader("A-large.in.txt"));
+    PrintWriter pw = new PrintWriter(new FileWriter("output.txt"));
+
+    int caseCnt = sc.nextInt();
+    sc.nextLine();
+    for (int caseNum = 0; caseNum &lt; caseCnt; caseNum++) {
+        System.out.println("Processing test case " + (caseNum + 1));
+        pw.print("Case #" + (caseNum + 1) + ": ");
+        new TicTacToeTomek().solve(sc, pw);
+
+    }
+
+    pw.flush();
+    pw.close();
+    sc.close();
+}
+</code></pre>
+
+<p>}</p>
+
+<p>[/sourcecode]</p>
+
+<h2>3. Problem C: Fair and Square</h2>
+
+<h3>Small Data Sets</h3>
+
+<p>On small data sets it is a piece of cake - a classical algorithmic task which took me about 10 mins to write the code:</p>
+
+<p>[sourcecode language=&ldquo;java&rdquo;]
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.util.Scanner;</p>
+
+<p>/<em>*
+ @Author: Ivan Voroshilin
+ @Date: April 13 2013
+ Problem C
+ Small inputs
+ </em>/
+public class FairNSquare {</p>
+
+<pre><code>private boolean isPalindrome(long num) {
+    long reversed = 0;
+    long n = num;
+
+    while (n &gt; 0) {
+        reversed = reversed * 10 + n % 10;
+        n /= 10;
+    }
+
+    return num == reversed;
+}
+
+private void solve(Scanner sc, PrintWriter pw) {
+
+    sc.nextLong();
+
+    long a = sc.nextLong();
+    long b = sc.nextLong();
+
+    System.out.println(a);
+    System.out.println(b);
+
+    long number = a;
+    long count = 0;
+
+    while(number &lt;= b) {
+        if(isPalindrome(number)) {
+            double d = Math.sqrt(number);
+            if((d % 1) == 0 &amp;&amp; isPalindrome((long)d)) {
+                count++;
+            }
+        }
+        number++;
+    }
+
+    pw.println(count);
+}
+
+public static void main(String[] args) throws Exception {
+
+    Scanner sc = new Scanner(new FileReader("C-small-attempt0.in.txt"));
+    PrintWriter pw = new PrintWriter(new FileWriter("output.txt"));
+
+    int caseCnt = sc.nextInt();
+    sc.nextLine();
+    for (int caseNum = 0; caseNum &lt; caseCnt; caseNum++) {
+        System.out.println("Processing test case " + (caseNum + 1));
+        pw.print("Case #" + (caseNum + 1) + ": ");
+        new FairNSquare().solve(sc, pw);
+    }
+
+    pw.flush();
+    pw.close();
+    sc.close();
+}
+</code></pre>
+
+<p>}
+[/sourcecode]</p>
+
+<h3>Large Data Sets</h3>
+
+<p>I tried to come up with a solution on large data sets, wrote the code which works using standard Bisection method based on a binary search but struggled to optimize time complexity of square root on BigInteger and palindrome checking on large ranges, I vaguely remember from Euler&rsquo;s project there were some mathematical proofs regarding number 11 and palindromic numbers. There might be some very important facts which would allow to optimize for better performance however I decided not to waste time on it and moved to another problem.</p>
+
+<p>Ok, here&rsquo;s my solution which as been said didn&rsquo;t pass time requirement.</p>
+
+<p>[sourcecode language=&ldquo;java&rdquo;]
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.math.BigInteger;
+import java.util.Scanner;</p>
+
+<p>/<em>*
+ @Author: Ivan Voroshilin
+ @Date: April 13 2013
+ Problem C
+ Large inputs
+ Comment: Poor time complexity
+ </em>/
+public class FairNSquareLarge {</p>
+
+<pre><code>private static boolean isPalindrome(BigInteger num) {
+    BigInteger reversed = BigInteger.ZERO;
+    BigInteger n = num;
+
+    while (n.compareTo(BigInteger.ZERO) &gt; 0) {
+        reversed = reversed.multiply(BigInteger.valueOf(10)).add(n.mod(BigInteger.valueOf(10)));
+        n = n.divide(BigInteger.valueOf(10));
+    }
+
+    return num.compareTo(reversed) == 0;
+}
+
+private static BigInteger sqrt(BigInteger n) {
+    BigInteger a = BigInteger.ONE;
+    BigInteger b = new BigInteger(n.shiftRight(5).add(new BigInteger("8")).toString());
+    while(b.compareTo(a) &gt;= 0) {
+        BigInteger mid = new BigInteger(a.add(b).shiftRight(1).toString());
+        if(mid.multiply(mid).compareTo(n) &gt; 0) b = mid.subtract(BigInteger.ONE);
+        else a = mid.add(BigInteger.ONE);
+    }
+    return a.subtract(BigInteger.ONE);
+}
+
+private void solve(Scanner sc, PrintWriter pw) {
+
+    BigInteger a = sc.nextBigInteger();
+    BigInteger b = sc.nextBigInteger();
+
+    BigInteger number = a;
+    long count = 0;
+
+    while(number.compareTo(b) &lt;= 0) {
+        if(isPalindrome(number)) {
+
+            BigInteger d = sqrt(number);
+
+            if(d.multiply(d).compareTo(number) == 0 &amp;&amp; isPalindrome(d)) {
+                count++;
+            }
+        }
+        number = number.add(BigInteger.ONE);
+        System.out.println(number.toString());
+    }
+
+    pw.println(count);
+}
+
+public static void main(String[] args) throws Exception {
+
+    Scanner sc = new Scanner(new FileReader("C-large-1.in.txt"));
+    PrintWriter pw = new PrintWriter(new FileWriter("output.txt"));
+
+    int caseCnt = sc.nextInt();
+    sc.nextLine();
+    for (int caseNum = 0; caseNum &lt; caseCnt; caseNum++) {
+        System.out.println("Processing test case " + (caseNum + 1));
+        pw.print("Case #" + (caseNum + 1) + ": ");
+        new FairNSquareLarge().solve(sc, pw);
+    }
+
+    pw.flush();
+    pw.close();
+    sc.close();
+}
+</code></pre>
+
+<p>}
+[/sourcecode]</p>
+
+<h2>4. Problem D: Treasure</h2>
+
+<h3>Small Data Sets</h3>
+
+<p>I first did a straightforward BFS with checking for deadlocks and then realized from conditions that there might be several paths to open all chests and the goal is to select minimal path from all sorted lexicographically. Sure, we could make a simple systematic backtracking using all permutations of paths which has a terrible complexity O(n!) and doesn&rsquo;t meet time requirements even on small sets, e.g. N=20 chests where we have 20! distinct permutations (ouch!).</p>
+
+<p>I had time pressure (1h until the end of round) and nixed that idea to proceed but this problem is really challenging. Sorry!</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -215,171 +814,9 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/2013/01/11/when-asymptotic-analysis-of-complexity-doesnt-work/">Asymptotic Complexity: Beware of Hidden Constants</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2013-01-11T15:24:57+04:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>11</span><span class='date-suffix'>th</span>, <span class='date-year'>2013</span></span> <span class='time'>3:24 pm</span></time>
-        
-           | <a href="/2013/01/11/when-asymptotic-analysis-of-complexity-doesnt-work/#disqus_thread"
-             data-disqus-identifier="http://vibneiro.github.io/2013/01/11/when-asymptotic-analysis-of-complexity-doesnt-work/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3><strong>Asymptotic complexity and invisible constant factor</strong></h3>
-
-<p>Today I&rsquo;m going to explain what stands behind asymptotic complexity of algorithms when it comes to measurement of performance on modern computer hardware. Let&rsquo;s recall that asymptotic analysis is based on idealized sequential RAM-model. Complexity shows how good an algorithm scales as N grows from mathematical point of view. Two or more algorithms with different complexity solving the same task DOES NOT mean one will work slower or faster. Computer architecture is more complex than <a href="http://en.wikipedia.org/wiki/Random-access_machine">RAM-model</a>. There are different memory hierarchies, branching strategies, prefetching techniques, pipelining and other hardware factors which are not taken into account in this model. Constant-factors hidden in Big-Oh notation are not fixed, but variable in fact. Popular books on algorithms not always explain clearly this fact. While Big-Oh has many theoretically useful insights, it cannot actually predict performance. Read on, to find out why.</p>
-
-<p><strong>1. Constant hidden even in simple arithmetic operations is not a constant at all:</strong></p>
-
-<p>In terms of sequential Random Access Model and computer hardware we now try to add two numbers without a calculator using our brain: 1+2, 2+10, 34+55. A piece of cake! OK, so far so good. Try again, now: 34523+119987. Feel the difference? It takes you much longer to calculate the latter. This analogy shows the difference in complexity. In the RAM model adding 2 numbers <strong>is always a constant-time</strong>, but in real computer hardware it&rsquo;s not like that as constant-factor is variable. On top of this, some instructions are slower than others. Take addition and division as an example. They are both O(1) but with different constant factors.</p>
-
-<p><strong>2. Some algorithms require more instructions than others</strong></p>
-
-<p>For instance, certain algorithms may make fewer instructions per one pass (e.g. copy, exchange, shift, whatever). This also partly makes up a hidden constant. Due to this fact they tend to work faster in some cases.</p>
-
-<p><strong>3. Computer memory hierarchy gets in the way of analysis</strong></p>
-
-<p>Computer memory in the analysis of complexity is treated as a linear array with uniform access times. In the analysis A superior algorithm is the one that executes fewer instructions. In reality the assumption that every memory access has equal cost is not valid.</p>
-
-<h2><strong>Conclusion</strong></h2>
-
-<p>I didn&rsquo;t mention compilers that make optimizations. All of these factors form a hidden constant in the big-Oh which spoils the analysis. Asymptotic analysis is built upon mathematical model which is machine-independent and thus fragile. Hidden constants might impact algorithm&rsquo;s scalability very heavily. Due to this fact performance benchmarks may yield the opposite results. On some data an algorithm might be much slower then one with better complexity. The most vicious enemy is memory-hierarchy in modern CPUs. Yes, Big-Oh still matters, but you should handle it with care. In the next post I&rsquo;ll try to show this on real examples.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/2012/12/13/brewers-cap-theorem-explained-base-versus-acid/">Brewer&#8217;s CAP Theorem Explained: BASE Versus ACID</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2012-12-13T17:21:22+04:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>13</span><span class='date-suffix'>th</span>, <span class='date-year'>2012</span></span> <span class='time'>5:21 pm</span></time>
-        
-           | <a href="/2012/12/13/brewers-cap-theorem-explained-base-versus-acid/#disqus_thread"
-             data-disqus-identifier="http://vibneiro.github.io/2012/12/13/brewers-cap-theorem-explained-base-versus-acid/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>The goal of this article is to give more clarity to the theorem and show pros and cons of ACID and BASE models that might stand in the way of implementing distributed systems.</p>
-
-<h2>What is CAP about?</h2>
-
-<p>The<em> (CAP) theorem</em> (<strong>C</strong>onsistency, <strong>A</strong>vailability and <strong>P</strong>artitioning tolerance) was given by Eric Brewer, a professor at the University of California, Berkeley and one of the founders of Google, in 2001 in the keynote of Principles of Distributed Computing.</p>
-
-<p>The theorem states:</p>
-
-<blockquote>_**Though its desirable to have Consistency, High-Availability and Partition-tolerance in every system, unfortunately no system can achieve all three at the same time**._</blockquote>
-
-
-<p>In other words a system can have at most two of three desirable properties at the same time <strong>in presence of errors</strong>.</p>
-
-<p>Let&rsquo;s first give definitions to these 3 terms:</p>
-
-<p><strong>Consistency: </strong>A service that is <em>consistent</em> should follow the rule of ordering for updates that spread across all replicas in a cluster - &ldquo;what you write is what you read&rdquo;, regardless of location.<em> </em>For example,  Client A writes 1 then 2 to location X, Client B cannot read 2 followed by 1.  This rule has another name <strong>&ldquo;Strong consistency&rdquo;.</strong><strong>
-</strong></p>
-
-<p><strong>Availability: </strong>A service should be available. There should be a guarantee that every request receives a response about whether it was successful or failed. If the system is not available it can be still consistent. However, <em>consistency</em> and <em>availability </em>cannot be achieved at the same time. This means that one has two choices on what to leave. <em>Relaxing consistency</em> will allow the system to remain highly available under the partitioning conditions (see next definition) and <em>strong consistency</em> means that under certain conditions the system will not be available.</p>
-
-<p><strong>Partition tolerance: </strong>The system continues to operate despite arbitrary message loss or failure of part of the system. A simple example, when we have a cluster of N replicated nodes and for some reason a network is unavailable among some number of  nodes (e.g. a network cable got chopped). This leads to inability to synchronize data. Thus, only some part of the system doesn&rsquo;t work, the other one does. If you have a partition in your network, you lose either <em>consistency</em> (because you allow updates to both sides of the partition) or you lose <em>availability</em> (because you detect the error and shut down the system until the error condition is resolved).</p>
-
-<p>There are lots of articles about this theorem these days around but not many of them reveal real meaning behind this, neither<strong> </strong><em>CAP theorem</em> talks about the normal operation of a distributed system when there are no errors. A simple meaning of this theorem is <strong>&ldquo;It is impossible for a protocol to guarantee both consistency and availability in a partition prone distributed system&rdquo;. </strong>This was mentioned above in examples.</p>
-
-<p>Most of the NoSQL database system architectures favour one factor over the other:</p>
-
-<ul>
-<li><p><a href="http://en.wikipedia.org/wiki/BigTable">BigTable</a>, used by Google App engine, and <a href="http://hadoop.apache.org/hbase/">HBase</a>, which runs over Hadoop, claim to be strongly <em>consistent</em> within a data-center and <em>highly available</em> meaning there&rsquo;s an eventual consistency between data-centers. Updates are propagated to all replicas <em>asynchronously</em>.</p></li>
-<li><p><a href="http://research.google.com/archive/spanner.html">Google Spanner</a>, a new globally-distributed, and synchronously-replicated database - the successor to BigTable. Updates are propagated to all replicas <em>synchronously</em>. Google Spanner supports<em> strong consistenc_y even in the the presence of wide-area replication unlike BigTable which can only support </em>eventual-consistent_ (see below for definitions) replication across data-centers.</p></li>
-<li><p><a href="http://www.allthingsdistributed.com/2007/10/amazons_dynamo.html">Amazon’s Dynamo</a>, <a href="http://www.royans.net/arch/category/cassandra/">Cassandra</a> and<a href="http://wiki.basho.com/"> Riak</a> instead sacrifice <em>consistency</em> in favor of availability and partition tolerance. They achieve a weaker form of consistency known as <em>eventual consistency</em> – updates are propagated to all replicas asynchronously, without guarantees on the order of updates across replicas and when they will be applied.</p></li>
-<li><p><a href="http://www.oracle.com/technetwork/products/nosqldb/overview/index.html">Oracle NoSQL</a> allows to choose a consistency policy which might affect performance depending on a level selected.</p></li>
-<li><p><a href="http://cassandra.apache.org/">Apache Cassandra</a> is similar to BigTable, but it has a <em>tunable consistency model</em>.</p></li>
-</ul>
-
-
-<h2>ACID property</h2>
-
-<p>Let&rsquo;s recall in brief what<em> <a href="http://en.wikipedia.org/wiki/ACID">ACID</a></em> (<strong>A</strong>tomicity, <strong>C</strong>onsistency, <strong>I</strong>solation and <strong>D</strong>urability) means in  traditional RDBMS community before moving to the next topic.</p>
-
-<p>ACID transactions provide 4 properties which must be guaranteed:</p>
-
-<p><strong>Atomicity:</strong> All of the operations in the transaction will complete, or none will. If one part of the transaction fails, the entire transaction fails.</p>
-
-<p><strong>Consistency:</strong> The database will be in a consistent state when the transaction begins and ends. This property ensures that any transaction will bring the database from one valid state to another. In high availability environment this rule must be satisfied for all nodes in a cluster.</p>
-
-<p><strong>Isolation:</strong> The transaction will behave as if it is the only operation being performed upon the database. Each transaction has to execute in total isolation from the rest.</p>
-
-<p><strong>Durability:</strong> Upon completion of the transaction, the operation will not be reversed.</p>
-
-<p>ACID is guaranteed by <a href="http://en.wikipedia.org/wiki/Two-phase_commit_protocol"><em>A Two-phase</em> commit</a> - a distributed algorithm that ensures this across multiple database instances when performing transaction.</p>
-
-<h2>Eventual consistency (BASE) != Strong consistency</h2>
-
-<p><em>Eventual consistency </em>(normally asynchronous transactions) is a form of a weaker consistency which allows to improve speed and availability, because <em>ACID</em> provides <em>strong consistency </em>(synchronous transactions) for partitioned databases and thus gets in the way of availability. A transaction that involves N nodes in a cluster that uses <em>2-phase commit</em> also reduces the<em> availability.</em> The term e_ventual consistency or as it is called <strong>BASE </strong>(<strong>B</strong>asically <strong>A</strong>vailable, <strong>S</strong>oft state, <strong>E</strong>ventual consistency)<em> is the opposite of <strong>ACID</strong> (<strong>A</strong>tomicity, <strong>C</strong>onsistency, <strong>I</strong>solation and <strong>D</strong>urability). Where <strong>ACID</strong> is pessimistic and requires consistency at the end of every operation, <strong>BASE</strong> is optimistic and accepts that the database consistency will be in a state of flux. </em>The e_ventual consistency <em><em>is simply an acknowledgement that there is an unbounded delay in propagating a change made on one machine to all the other copies which might lead to stale data. For instance, a distributed system maintains copies of shared data on multiple machines in a cluster to ensure high availability. When data gets updated in a cluster there might be some interval of time during which some of the copies will be updated, but others won&rsquo;t. </em>Eventually</em> the changes will be propagated to all remaining machines. That&rsquo;s why it is named <em>eventual consistency</em>.  <em>BASE</em> trades consistency for availability and doesn&rsquo;t give any ordering guarantees at all.  Eventual consistency has nothing to do with a single node systems since there’s no need for propagation. If the database system only supports eventual consistency, then the application will need to handle the possibility of reading stale (inconsistent) data. There are different techniques how it can be achieved as well as other forms of weak consistency and out of scope of this article.  Eventual consistency is only one form from the list of <a href="http://en.wikipedia.org/wiki/Consistency_model">consistency-models</a> which are out of scope of this article.</p>
-
-<h2>NRW notation (Read-Your-Writes)</h2>
-
-<p><em>NRW (Node, Read, Write)</em>  allows to analyse and tune how a distributed database will trade off consistency, read / write performance.</p>
-
-<ul>
-<li><p>N = the number of nodes that keep copies of a record distributed to.</p></li>
-<li><p>W = the number of nodes that must successfully acknowledge a write to be successfully committed.</p></li>
-<li><p>R = the number of nodes that must send back the same value of a unit of data for it to be accepted as read by the system.</p></li>
-</ul>
-
-
-<p>The majority of NoSQL databases use N>W>1 - more than one write must complete, but not all nodes need to be updated immediately.</p>
-
-<p>When:</p>
-
-<ul>
-<li><p>W &lt; N - high write availability</p></li>
-<li><p>R &lt; N - high read availability</p></li>
-<li><p>W+R > N - is a strong consistency, read/write are fully overlapped</p></li>
-<li><p>W+R &lt;= N - is an eventual consistency, meaning that there is no overlap in the read and write set;</p></li>
-</ul>
-
-
-<p>You can  set these parameters and see what you will get <a href="http://pbs.cs.berkeley.edu/#demo">online</a>.Thus, varying the parameters we can tune a wide variety of scenarios with different properties of availability, consistency, reliability, and speed.</p>
-
-<h2>Conclusion</h2>
-
-<p>A <em>strongly consistent</em> system gives up <em>availability</em> upon a certain kind of failure, and<em> eventually-consistent</em> system gives up consistency upon a certain kind of failure which improves <em>availability</em>. The bottom line: It is impossible to guarantee consistency while providing high availability and network partition tolerance. This makes ACID databases less powerful for highly distributed environments and led to the emergence of alternate data stores that are target to high availability and high performance. The eventual consistency is one of approaches to achieve this.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
+    
+      <a class="prev" href="/posts/5">&larr; Older</a>
     
     <a href="/blog/archives">Blog Archives</a>
     

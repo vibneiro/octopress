@@ -9,7 +9,7 @@
   <meta name="author" content="Ivan Voroshilin">
 
   
-  <meta name="description" content="MinHash is a technique from Locality Sensitive Hashing allowing to find similarities among 2 sets. This is a  buzzword frequently met in Data Mining &hellip;">
+  <meta name="description" content="After quite a while I&rsquo;ve decided to continue writing my blog. There are always lots of ideas to share with you but as usual a lack of time. &hellip;">
 
   
   <meta name="keywords" content="distributed, algorithm, Ivan, Voroshilin, code, google, jam, software, architecture, geek, blog" />
@@ -82,6 +82,177 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/2014/02/17/service-discovery-in-distributed-systems/">Service Discovery in Distributed Systems</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2014-02-17T15:28:01+04:00'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>17</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>3:28 pm</span></time>
+        
+           | <a href="/2014/02/17/service-discovery-in-distributed-systems/#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io/2014/02/17/service-discovery-in-distributed-systems/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>After quite a while I&rsquo;ve decided to continue writing my blog. There are always lots of ideas to share with you but as usual a lack of time.</p>
+
+<h1><strong>Introduction</strong></h1>
+
+<p>Service Discovery is an architectural pattern and a key component of most distributed systems and service oriented architectures.</p>
+
+<p> In simple terms it is a central gateway for all client applications that want to use other services. A client application doesn&rsquo;t have to know where a particular service is located (usually IP:port), moreover a service can be moved/redeployed to arbitrary boxes for any reasons. There&rsquo;s no need to change connection details, update configs or whatever - Service Discovery will take care of that. You as a client-app just need to ask it to get access to other services. The pattern yields a good benefit especially when there are hundreds of client applications and/or dozens of services.</p>
+
+<p>Most of the work in this article was made relying on trials and errors as well some research. I urge you to read also a great survey from Jason Wilder&rsquo;s blog on <a href="http://jasonwilder.com/blog/2014/02/04/service-discovery-in-the-cloud/">Open Source Service Discovery</a> frameworks.</p>
+
+<p>In this particular section I won&rsquo;t mention CAP-properties as they can vary depending on implementation. But CAP is important. If you want to know more about it I recommend moving to <a href="http://ivoroshilin.com/2012/12/13/brewers-cap-theorem-explained-base-versus-acid/">this article</a> devoted to the CAP-theorem.</p>
+
+<h2>High level components</h2>
+
+<p>Service Discovery is the process of finding a suitable Service and its location for a given task that asked a service consumer.  Let&rsquo;s break down Service Discovery into 3 main components:</p>
+
+<p><strong>Service Requestor</strong></p>
+
+<p>Any consuming application that want to use some service,  that is a client application or a consumer, user, etc.</p>
+
+<p><strong>Service Provider</strong></p>
+
+<p>In the most basic scenario there is a Service Provider that finds this service and talks to Service Requestor.</p>
+
+<p><strong>Service Registry</strong></p>
+
+<p>Service Registry stores information about all services. It can be either static or dynamic. This can be IP:port, access rights and so forth.</p>
+
+<p>This model comes directly from SOA but can be adapted to your needs. Conversation among 3 above entities might differ depending on implementation. As a quick example of such segregation refer to <a href="http://en.wikipedia.org/wiki/Web_Services_Discovery">Web Service Discovery</a>.</p>
+
+<h2>Discovery options</h2>
+
+<h3>1. Static service registry</h3>
+
+<p>This one is a very basic and easy option. A big drawback - it is static. Every time a service moves to another box, static repo should be updated manually. We won&rsquo;t go further here as it is quite obvious and have little benefit for flexibility.</p>
+
+<h3>2. Announcement</h3>
+
+<p>This pattern implies that as soon as a service is up, it registers itself in the <strong>Service Registry - </strong>sometimes such a notification is called<strong> Announcement. </strong>This simple approach greatly simplifies maintenance of service registry. It&rsquo;s worth mentioning  also that in distributed world we always care about <strong>No Single Point Of Failure</strong> principle<strong> </strong>where we have at least 2 redundant nodes for a service. Service Registry is usually implemented as a separate  independent component to be self-sufficient. Just for simplicity the registry can be a simple replicated memCached, ehCache or another storage, not necessarily cache.</p>
+
+<h3>A few words about ZooKeeper as a solution for Service Discovery.</h3>
+
+<p>A counterexample is ZooKeeper that does&rsquo;t follow <strong>Shared Nothing architectural </strong>pattern. Service Registry is coupled with the Service Provider. In ZooKeeper&rsquo;s world coordination-nodes in ensemble are NOT independent of each other because they share Service Registry and there&rsquo;s a write-contention due to the order of messages. The last word leads to ZooKeeper&rsquo;s poor write-scalability due to its synchronous replication among nodes. But in terms of requirements most applications involved into configuration management including Service Discovery don&rsquo;t require frequent writes but rather reads not blocking overall scalability.</p>
+
+<p>Let&rsquo;s pick up where we left off -  announcement.</p>
+
+<p>The process of announcement is depicted below:</p>
+
+<h3></h3>
+
+<h3><a href="http://ivoroshilin.files.wordpress.com/2014/02/announcement_pb.png"><img src="http://ivoroshilin.files.wordpress.com/2014/02/announcement_pb.png" alt="Announcement_pb" /></a></h3>
+
+<h3></h3>
+
+<h3></h3>
+
+<h3></h3>
+
+<h3>3. Multicasting</h3>
+
+<p>Using IGMP-protocol, a Service provider subscribes to a particular group, all services send a multicast message to this group. The downside of this approach is that IGMP is optional for IPv4 and not every hardware supports it.</p>
+
+<h3>Health checking</h3>
+
+<p>Once a service is registered in Service Registry a Service Provider needs to know if it&rsquo;s alive and healthy (that is, 100% of service is available).</p>
+
+<p><strong>Option 1 - on reconnect:</strong> As soon as a Service Requestor understands that there&rsquo;s no connection to the service it worked with, it reverts back to the Service Provider to get a new one. Each time a Service Requestor accesses Service Provider, one does health-checking (let&rsquo;s say it is almost the same as heartbeats plus probably some other stuff) to make sure that the service is alive, maintaining the Service Registry and returning response to the client containing information about a healthy service.</p>
+
+<p><strong>Option 2 - heartbeating:</strong> Service Provider receives heartbeats within equal time-slices from registered services. Once heartbeat is lost, the Service Provider removes corresponding record from the Service Registry. This is a good option to get a more real-time information though it is more difficult to implement. This way works ZooKeeper and other distributed systems.</p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2014/02/service-down_pn.png"><img src="http://ivoroshilin.files.wordpress.com/2014/02/service-down_pn.png" alt="Service Down_pn" /></a></p>
+
+<p>In both options if some service goes down clients get back to Service Provider. What strategy to use is up to the developer but option 1 is more complex but a better one in most scenarios.</p>
+
+<h3>Load Balancing</h3>
+
+<p>Load balancing can be easily implemented inside Service Provider as one becomes a central gateway of access for all Service Requestors to other services. For the sake of simplicity a very simple variation is round-robin. I won&rsquo;t go into details as it is a different topic and you can find on the internet.</p>
+
+<h3>Authentication</h3>
+
+<p>Again as with load balancing you might want to apply tokens with expiration or cryptographic keys.</p>
+
+<h2>Cooperation of all components</h2>
+
+<p>On a very high level the communication of components can happend as on the following picture:</p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2014/02/service-request_pb.png"><img src="http://ivoroshilin.files.wordpress.com/2014/02/service-request_pb.png" alt="Service Request_pb" /></a></p>
+
+<h3>Summary</h3>
+
+<p>We have defined what a Service Discovery is, broke it down into 3 components and described a few basic approaches.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/2013/10/29/highload-conference-2013/">HighLoad Conference 2013</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2013-10-29T21:24:32+04:00'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>29</span><span class='date-suffix'>th</span>, <span class='date-year'>2013</span></span> <span class='time'>9:24 pm</span></time>
+        
+           | <a href="/2013/10/29/highload-conference-2013/#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io/2013/10/29/highload-conference-2013/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Today I was lucky to have attended the annual developers conference <a href="http://www.highload.ru">HighLoad++</a> 2013. This is the 7-th time. Some conference sessions are translated into English and available here: <a href="http://www.highload.co/freeonline/">http://www.highload.co/freeonline/</a></p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2013/10/pa293662.jpg"><img src="http://ivoroshilin.files.wordpress.com/2013/10/pa293662.jpg?w=300" alt="OLYMPUS DIGITAL CAMERA" /></a></p>
+
+<p>Listeners heard many buzzwords like horizontal scalability, replication, sharding and NoSql. Despite that I missed the first day of the conference what I really liked was not just new trends in technology but invaluable speakers&#8217; experience  on real projects with pros and cons, especially:</p>
+
+<ol>
+<li> <strong>&ldquo;MySql versus something else&rdquo;</strong> by <strong>Mark Callaghan [FaceBook]</strong> on storage efficiency, framework for analysis and benchmarking and database algorithms: <a href="https://www.facebook.com/MySQLatFacebook">https://www.facebook.com/MySQLatFacebook</a></li>
+</ol>
+
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2013/10/pa293677.jpg"><img src="http://ivoroshilin.files.wordpress.com/2013/10/pa293677.jpg" alt="PA293677" /></a></p>
+
+<ol>
+<li><p><strong>&ldquo;Cassandra vs In-Memory Data Grid in eCommerce&rdquo;</strong> by <strong>Alexander Soloviev  [Grid Dynamics]</strong> was very informative on deep analysis and benchmarking against different cases and their pros and cons.</p></li>
+<li><p><strong>&ldquo;Query Optimizer in MariaDB: now w/o indices&#8221; </strong>by <strong>Sergey Golubchik [Monty Program Ab]</strong></p></li>
+</ol>
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -371,605 +542,6 @@ if (!marked[w]) dfs(G, w);
 <p><strong>3. Find a &ldquo;lexicographically smallest&rdquo; solution.</strong> This last condition added real hardness to the problem. If there are multiple solutions then we find a &ldquo;lexicographically smallest&rdquo; way to open the boxes. Each vertex is always traversed from lowest to highest, this can be achieved by constructing a graph using adjacency lists that reflect numbers of keys and chests in increasing order and we subsequently iterate them applying a bit optimized Depth-First-Search. Minimal configuration starts from v0. If we have  >= 1 key initially given, we just have to traverse from all of them increasingly. On each step we always update a number of keys in possession. If we&rsquo;ve run out of keys then we cut the branch and backtrack, starting again where we left off with the next configuration. E.g. opening a chest No. 1 at the very first time will lead to the deadlock (actually this one is a trivial case as it is on step No 1). Such cases are not on critical path and we need backtrack only to the previous calling vertex.</p>
 
 <p><strong>Conclusion:</strong> There are not so many configurations unlike straightforward brute force. Many optimization problems like this one are met in algorithmic contests. Just algorithms and data structures are not sufficient. To pass given time constraint there should be the right strategy to cut unsolvable branches. That&rsquo;s it!</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/2013/07/15/distributed-caching-under-consistent-hashing/">How Automatic Sharding Works or Consistent Hashing Under the Hood</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2013-07-15T12:25:09+04:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>15</span><span class='date-suffix'>th</span>, <span class='date-year'>2013</span></span> <span class='time'>12:25 pm</span></time>
-        
-           | <a href="/2013/07/15/distributed-caching-under-consistent-hashing/#disqus_thread"
-             data-disqus-identifier="http://vibneiro.github.io/2013/07/15/distributed-caching-under-consistent-hashing/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Preface</h2>
-
-<p>Here we&rsquo;re going to talk primarily about Consistent hashing. This technique involves such concepts as adaptive load balancing, routing, partitioning in distributed computing. There are many articles on the internet on this technique (refer to the list of references for some of them) but I haven&rsquo;t found information about how and where to keep the ring of hashes, thus I&rsquo;ve decided to describe some options with pros and cons. In order to make this post more clear for a wider audience I will first try to write a brief introduction of what this is all about and tell about <strong>the ring storage strategies</strong> at the end of this issue. So if you&rsquo;re already familiar with the algorithm you may want to skip over the main stuff and move on to the last chapter for pros and cons of descibed approaces.</p>
-
-<h3>Distributed cache and straightforward uniform load balancing</h3>
-
-<p>Key-value stores are extremely fast in single search-queries. A very popular one is a distributed hash table (DHT) kept in a fully decentralized manner, and thus particularly adapted to unstable networks where nodes can leave or join at any moment. Note that DHT is not suitable for range-queries albeit and I will probably write a separate post about special data structures responsible for that. Now let&rsquo;s consider a classic case - you have a cluster of cache-servers where you load-balance a huge data set uniformly. To be able to determine on which node a pair &lt;key, value> should be kept we use a simple hash-mapping:</p>
-
-<blockquote>Cache machine = hash(o) mod n where: n - number of machines in a cluster and o is an object to put/lookup.</blockquote>
-
-
-<p>What happens when a number of machines changes at runtime? You might add/remove a number of machines in a cluster for e.g. scalability reasons, a failure or whatever.  The change triggers moving almost all objects to new locations due to rehashing.  Each key-value pair will get reallocated completely across the cluster. You’ll end up moving a fraction<strong> n/(n+1)</strong> of your data to new machines. Indeed, this fact degrades all of the advantages of distributed hash tables. We need somehow to avoid this messy remapping. This is where consistent hashing comes in.</p>
-
-<h2>Consistent hashing</h2>
-
-<p>The main idea is to hash both data ids and cache-machines to a numeric range using the same hash-function. E.g. in Java a primitive type int has a number range of values between -231 to 231-1.  Assume the interval is [0,  231-1] for simplicity (java primitives cannot be unsigned). Now let&rsquo;s join starting and ending points together of this interval to create a ring so the values wrap around. We do not have 231 -1 available servers, the large size of the ring being merely intended to avoid collisions. As a hash function a good choise is either be e.g. MD5 or SHA-1 algorithm. As a machine&rsquo;s number we can take its IP-address and apply that hash function to it. By taking from the result the first 8 bytes we can map it to our ring [0,231-1].</p>
-
-<p><a href="http://ivoroshilin.files.wordpress.com/2013/07/ring_range1.png"><img src="http://ivoroshilin.files.wordpress.com/2013/07/ring_range1.png" alt="ring_range" /></a></p>
-
-<p>Both the nodes and the keys are mapped to the same range on the ring. Ok, now we need to understand how to identify on this ring which data ids belong to which server&rsquo;s IP. It&rsquo;s really simple, we just move clockwise starting from zero (starting point on the ring) following the main rule of consistent hashing: If IP-n1 and IP-n2 are 2 adjacent nodes on the ring all data ids on the ring between them belong to IP-n1. That&rsquo;s it. <a href="http://ivoroshilin.files.wordpress.com/2013/07/ring_mapping1.png"><img src="http://ivoroshilin.files.wordpress.com/2013/07/ring_mapping1.png" alt="ring_mapping" /></a></p>
-
-<p>As depicted: { Id1, Id2, Id3} ∈ IP-3; {Id4} ∈ IP-1; ∅ ∈ IP-2.</p>
-
-<p><strong>Conclusion:</strong> Using consistent hashing we do not need to rehash the whole data set. Instead, the new server takes place at a position determined by the hash value on the ring, and part of the objects stored on its successor must be moved. The reorganization is local, as all the other nodes remain unaffected. if you add a machine to the cluster, only the data that needs to live on that machine is moved there; all the other data stays where it is. Because the hash function remains unaffected, the scheme maintains its consistency over the successive evolutions of the network configuration. Like naive hashing, consistent hashing spreads the distributed dictionary almost evenly across the cluster. One point to mention is what happens when a node goes down due to some disaster. In this case consistent hashing alone doesn&rsquo;t meet our requirements of reliability due to loss of data. Therefore there should definetely be replication and high availability which is feasible and out of scope of this introduction. You may want to find good references at the end of these article to find out more.</p>
-
-<h3>Problems with pure consistent hashing</h3>
-
-<p>In a nutshell, the basic consistent hashing has the following problems:</p>
-
-<ul>
-<li><p>There is a huge amount of data to be rehashed.</p></li>
-<li><p>A node picking a range of keys results in one node potentially carrying a larger keyspace than others, therefore still creating disbalance.</p></li>
-<li><p>Leaving/Joining a ring leads to disbalance of data.</p></li>
-<li><p>A more powerful machine needs to process more data than others.</p></li>
-<li><p>A fraction of data to be moved is less unpredictable and much higher.</p></li>
-</ul>
-
-
-<p><strong>Virtual nodes </strong>solve these issues.</p>
-
-<h2>Virtual nodes come to the rescue</h2>
-
-<p>Virtual nodes <strong>minimize changes</strong> <strong>to a node&rsquo;s assigned range</strong> by a number of smaller ranges to a single node. In other words, amount of data to be moved from one physical node to others is minimized. Let&rsquo;s split a real node into a number of virtual nodes. The idea is to build equally-sized subintervals (partitions) for each real server on the ring by dividing the hash-space into P evenly sized partitions, and assign P/N partitions per host. When a node joins/leaves all data from partitions of all real servers are uniformly get assigned to a new server and given back to remaining ones respectively. The number of virtual nodes is picked once during building of the ring  and never changes over the lifetime of the cluster. This ensures that each node picks equal size of data from the full data set, that is P/N and thus our data now are distributed more uniformly. This enforces that the number of virtual nodes must be much higher than the number of real ones.</p>
-
-<p><a href="http://ivoroshilin.files.wordpress.com/2013/07/ring_hashing.png"><img src="http://ivoroshilin.files.wordpress.com/2013/07/ring_hashing.png" alt="ring_hashing" /></a></p>
-
-<p>Here&rsquo;s a pretty simple java-code of consistency ring&rsquo;s  with virtual nodes.</p>
-
-<p>[sourcecode language=&ldquo;java&rdquo;]
-public class Ring {</p>
-
-<pre><code>private SortedMap&lt;Long, T&gt; ring = new TreeMap&lt;Long, T&gt;();
-private HashMap&lt;String, T&gt; nodeMap = new HashMap&lt;String, T&gt;();
-private MD5Hash hash = new MD5Hash();
-private vNodeCount;
-
-public Ring(int vnodeCount, Collection pNodes) {
-
-    this.vnodeCount = vnodeCount;
-
-    for (T pNode : pNodes) {
-        addNode(ring, nodeMap, pNode, vnodeCount);
-    }
-}
-
-private void addNode(T pNode, int vnodeCount) {
-    for (int i = 0; i &lt; vnodeCount; i++) {
-        ring.put(hash.hash(pNode.toString() + i), pNode);
-    }
-}
-
-    public void removeNode(T node, int vnodeCount) {
-      for (int i = 0; i &lt; vnodeCount; i++) {
-        ring.remove(hash.hash(pNode.toString() + i));
-      }
-    }
-
-private T getNodeByObjectId(String objectId) {
-
-    long hashValue = hash.hash(objectId);
-
-    if (!ring.containsKey(hashValue)) {
-        SortedMap&lt;Long, T&gt; tailMap = ring.tailMap(hashValue);
-        hashValue = tailMap.isEmpty() ? ring.firstKey() : tailMap.firstKey();
-    }
-
-    return ring.get(hashValue);
-}
-
-private static class MD5Hash {
-    MessageDigest instance;
-
-    public MD5Hash() {
-        try {
-            instance = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
-        }
-    }
-
-    long hash(String key) {
-        instance.reset();
-        instance.update(key.getBytes());
-        byte[] digest = instance.digest();
-
-        long h = 0;
-        for (int i = 0; i &lt; 4; i++) {
-            h &lt;&lt;= 8;
-            h |= ((int) digest[i]) &amp; 0xFF;
-        }
-        return h;
-    }
-};
-</code></pre>
-
-<p>}
-[/sourcecode]</p>
-
-<h2>Strategies to keep a data structure of the ring and their pros and cons</h2>
-
-<p>There are a few options on where to keep ring&rsquo;s data structure:</p>
-
-<ul>
-<li><p><strong>Central point of coordination:</strong> A dedicated machine keeps a ring and works as a <strong>central load-balancer</strong> which routes request to appropriate nodes.</p></li>
-<li><p>Pros: Very simple implementation. This would be a good fit for not a dynamic system having small number of nodes and/or data.</p></li>
-<li><p>Cons: A big drawback of this approach is scalability and reliability. Stable distributed systems don&rsquo;t have a <strong>single poing of failure.</strong></p></li>
-<li><p><strong><strong>No central point of coordination - full duplication:</strong> </strong>Each node keeps a full copy of the ring. Applicable for stable networks. This option is used e.g. in Amazon Dynamo.</p></li>
-<li><p>Pros: Queries are routed in one hop directly to the appropriate cache-server.</p></li>
-<li><p>Cons: Join/Leave of a server from the ring  requires notification/amendment of all cache-servers in the ring.</p></li>
-<li><p><strong>No central point of coordination - partial duplication: </strong>Each node keeps a partial copy of the ring. This option is direct implementation of CHORD algorithm. In terms of DHT each cache-machine has its predessesor and successor and when receiving a query one checks if it has the key or not. If there&rsquo;s no such a key on that machine, a mapping function is used to determine which of its neighbors (successor and predessesor) has the least distance to that key. Then it forwards the query to its neighbor thas has the least distance. The process continues until a current cache-machine finds the key and sends it back.</p></li>
-<li><p>Pros: For highly dynamic changes the previous option is not a fit due to heavy overhead of gossiping among nodes. Thus this option is the choice in this case.</p></li>
-<li><p>Cons: No direct routing of messages. The complexity of routing a message to the destination node in a ring is O(lg N).</p></li>
-</ul>
-
-
-<h3>Current trends in consistent hashing</h3>
-
-<p>There is a huge boom nowadays of new products that implement this technique. Some of them are: Dynamo, Riak, Cassandra, MemCached, Voldemort, CouchDB, Oracle Coherence, Trackerless Bit-Torrent networks, Web-caching frameworks, Content distribution networks.</p>
-
-<h2>References</h2>
-
-<ul>
-<li><p><a href="http://java.dzone.com/articles/simple-magic-consistent">The Simple Magic of Consistent Hashing</a></p></li>
-<li><p><a href="http://michaelnielsen.org/blog/consistent-hashing/">Consistent hashing</a></p></li>
-<li><p><a href="https://weblogs.java.net/blog/tomwhite/archive/2007/11/consistent_hash.html">Consistent hashing by Tom White</a></p></li>
-<li><p><a href="http://techspot.zzzeek.org/2012/07/07/the-absolutely-simplest-consistent-hashing-example">The Absolutely Simplest Consistent Hashing Example</a></p></li>
-<li><p><a href="http://cloudfundoo.wordpress.com/2012/05/28/distributed-hash-tables-and-consistent-hashing/">Distributed Hash Tables and Consistent Hashing</a></p></li>
-<li><p><a href="http://www.acunu.com/2/post/2012/07/virtual-nodes-strategies.html">Virtual Nodes strategies</a> <a href="http://www.tomkleinpeter.com/2008/03/17/programmers-toolbox-part-3-consistent-hashing/">Programmer&rsquo;s toolbox</a></p></li>
-<li><p><a href="http://www.tomkleinpeter.com/2008/03/17/programmers-toolbox-part-3-consistent-hashing/">Programmer&rsquo;s toolbox: consistent hashing</a></p></li>
-<li><p><a href="http://offthelip.org/?p=149">Distributed Hash Tables</a></p></li>
-<li><p><a href="http://www.lastfm.ru/user/RJ/journal/2007/04/10/rz_libketama_-_a_consistent_hashing_algo_for_memcache_clients">libketama - a consistent hashing algo for memcache clients</a></p></li>
-<li><p><a href="http://www.sarmady.com/siamak/papers/dht-soft-300807.pdf">A Peer-to-Peer Dictionary Using Chord DHT</a></p></li>
-<li><p><a href="http://www.read.seas.harvard.edu/~kohler/class/cs239-w08/decandia07dynamo.pdf">Dynamo: Amazon’s Highly Available Key-value Store</a></p></li>
-<li><p><a href="http://greg.brim.net/page/building_a_consistent_hashing_ring.html">Building a Consistent Hashing Ring</a></p></li>
-</ul>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/2013/04/23/java-one-2013/">Annual Conference Java One 2013</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2013-04-23T18:57:31+04:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>23</span><span class='date-suffix'>rd</span>, <span class='date-year'>2013</span></span> <span class='time'>6:57 pm</span></time>
-        
-           | <a href="/2013/04/23/java-one-2013/#disqus_thread"
-             data-disqus-identifier="http://vibneiro.github.io/2013/04/23/java-one-2013/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><a href="http://ivoroshilin.files.wordpress.com/2013/04/javaone2013.jpg"><img src="http://ivoroshilin.files.wordpress.com/2013/04/javaone2013.jpg" alt="javaone2013" /></a></p>
-
-<p>Java One 2013, Moscow</p>
-
-<p>Today is the first day of annual conference &ldquo;Java One 2013&rdquo; At Crocus Expo, Moscow Russia. Sponsors are as follows: Deutsche bank, Luxoft, odnoklassniki.ru and several other companies.</p>
-
-<p>Traditionally the conference lasts for 2 days with 94 sessions and 65 speakers around the world. Some of them are from the previous year. On the whole the venue and organizations is better this year and the plan has really interesting sessions on modern buzzwords nowadays like Scala, Cloud space and distributed caches.</p>
-
-<p><a href="http://www.oracle.com/javaone/ru-en/index.html">http://www.oracle.com/javaone/ru-en/index.html</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/2013/04/14/google-code-jam-2013-qualification-round-i-have-posted-my-solutions/">Google Code Jam 2013 - Qualification Round Finished</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2013-04-14T13:09:16+04:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>14</span><span class='date-suffix'>th</span>, <span class='date-year'>2013</span></span> <span class='time'>1:09 pm</span></time>
-        
-           | <a href="/2013/04/14/google-code-jam-2013-qualification-round-i-have-posted-my-solutions/#disqus_thread"
-             data-disqus-identifier="http://vibneiro.github.io/2013/04/14/google-code-jam-2013-qualification-round-i-have-posted-my-solutions/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>As many of you know, it&rsquo;s been 10 hours since qualification round finished at Google code jam contest: <a href="http://code.google.com/codejam/">http://code.google.com/codejam/</a></p>
-
-<p>Appx. <strong>21000</strong> participants took part around the world with 25h time available for the round.</p>
-
-<p><a href="http://ivoroshilin.files.wordpress.com/2013/04/codejam_pic.jpg"><img src="http://ivoroshilin.files.wordpress.com/2013/04/codejam_pic.jpg" alt="codejam_pic" /></a></p>
-
-<p>Here are my solutions to 3 problems given out of 4:</p>
-
-<p><a href="https://github.com/vibneiro/googleJam2013">https://github.com/vibneiro/googleJam2013</a></p>
-
-<p>So, here&rsquo;s the analysis:</p>
-
-<h2>1. Problem A: Tic-Tac-Toe-Tomek</h2>
-
-<p>Works on small and large sets. Just a simple algorithm to implement. The point is to comply with all the conditions. The goal is to find a winner. If there&rsquo;s no winner, it should be draw, otherwise if we have empty cells the game is not completed.</p>
-
-<p>[sourcecode language=&ldquo;java&rdquo;]
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.PrintWriter;
-import java.util.Scanner;</p>
-
-<p>/<em>*
-  @Author: Ivan Voroshilin
-  @Date: April 13 2013
-  Problem A
-  Small and large inputs
- </em>/
-public class TicTacToeTomek {</p>
-
-<pre><code>private final static char XPLAYER = 'X';
-private final static char OPLAYER = 'O';
-private final static char T = 'T';
-private final static char EMPTY = '.';
-
-private final static String X_WON = "X won";
-private final static String O_WON = "O won";
-private final static String DRAW = "Draw";
-private final static String NOT_COMPLETED = "Game has not completed";
-
-private void solve(Scanner sc, PrintWriter pw) {
-
-    char[][] array = { sc.next().toCharArray(), sc.next().toCharArray(), sc.next().toCharArray(), sc.next().toCharArray() };
-
-    int xXCount = 0;
-    int yXCount = 0;
-    int xOCount = 0;
-    int yOCount = 0;
-
-    int dForwardXCount = 0;
-    int dBackwardXCount = 0;
-    int dForwardOCount = 0;
-    int dBackwardOCount = 0;
-    boolean hasEmptyCells = false;
-    boolean hasWinner = false;
-
-    for(int x = 0; x &lt; array.length; x++) { // 4
-
-        for(int y = 0; y &lt; array.length; y++) { // 4
-
-            //x-X
-            if(array[x][y] == XPLAYER || array[x][y] == T) {
-                xXCount++;
-            }
-
-            //y-X
-            if(array[y][x] == XPLAYER || array[x][y] == T) {
-                yXCount++;
-            }
-
-            //x-O
-            if(array[x][y] == OPLAYER || array[x][y] == T) {
-                xOCount++;
-            }
-
-            //y-O
-            if(array[y][x] == OPLAYER || array[x][y] == T) {
-                yOCount++;
-            }
-
-            if(array[x][y] == EMPTY) {
-                hasEmptyCells = true;
-            }
-        }
-
-        if(!hasWinner &amp;&amp; (xXCount == array.length || yXCount == array.length)) {
-            System.out.println(X_WON);
-            pw.println(X_WON);
-            hasWinner = true;
-        }
-
-        if(!hasWinner &amp;&amp; (xOCount == array.length || yOCount == array.length)) {
-            System.out.println(O_WON);
-            pw.println(O_WON);
-            hasWinner = true;
-        }
-
-        xXCount = yXCount = xOCount = yOCount = 0;
-
-        if(array[x][x] == XPLAYER || array[x][x] == T) {
-            dForwardXCount++;
-        }
-
-        if(array[(array.length - 1 - x)][x] == XPLAYER || array[(array.length - 1 - x)][x] == T) {
-            dBackwardXCount++;
-        }
-
-        if(array[x][x] == OPLAYER || array[x][x] == T) {
-            dForwardOCount++;
-        }
-
-        if(array[(array.length - 1 - x)][x] == OPLAYER || array[(array.length - 1 - x)][x] == T) {
-            dBackwardOCount++;
-        }
-
-    }
-
-    if(!hasWinner &amp;&amp; (dForwardXCount == array.length || dBackwardXCount == array.length)) {
-        System.out.println(X_WON);
-        pw.println(X_WON);
-        hasWinner = true;
-    } else
-    if(!hasWinner &amp;&amp; (dForwardOCount == array.length || dBackwardOCount == array.length)) {
-        System.out.println(O_WON);
-        pw.println(O_WON);
-        hasWinner = true;
-    }
-
-    if(!hasWinner) {
-        if(hasEmptyCells) {
-            System.out.println(NOT_COMPLETED);
-            pw.println(NOT_COMPLETED);
-        } else {
-            System.out.println(DRAW);
-            pw.println(DRAW);
-        }
-    }
-
-}
-
-public static void main(String[] args) throws Exception {
-
-    Scanner sc = new Scanner(new FileReader("A-large.in.txt"));
-    PrintWriter pw = new PrintWriter(new FileWriter("output.txt"));
-
-    int caseCnt = sc.nextInt();
-    sc.nextLine();
-    for (int caseNum = 0; caseNum &lt; caseCnt; caseNum++) {
-        System.out.println("Processing test case " + (caseNum + 1));
-        pw.print("Case #" + (caseNum + 1) + ": ");
-        new TicTacToeTomek().solve(sc, pw);
-
-    }
-
-    pw.flush();
-    pw.close();
-    sc.close();
-}
-</code></pre>
-
-<p>}</p>
-
-<p>[/sourcecode]</p>
-
-<h2>3. Problem C: Fair and Square</h2>
-
-<h3>Small Data Sets</h3>
-
-<p>On small data sets it is a piece of cake - a classical algorithmic task which took me about 10 mins to write the code:</p>
-
-<p>[sourcecode language=&ldquo;java&rdquo;]
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.PrintWriter;
-import java.util.Scanner;</p>
-
-<p>/<em>*
- @Author: Ivan Voroshilin
- @Date: April 13 2013
- Problem C
- Small inputs
- </em>/
-public class FairNSquare {</p>
-
-<pre><code>private boolean isPalindrome(long num) {
-    long reversed = 0;
-    long n = num;
-
-    while (n &gt; 0) {
-        reversed = reversed * 10 + n % 10;
-        n /= 10;
-    }
-
-    return num == reversed;
-}
-
-private void solve(Scanner sc, PrintWriter pw) {
-
-    sc.nextLong();
-
-    long a = sc.nextLong();
-    long b = sc.nextLong();
-
-    System.out.println(a);
-    System.out.println(b);
-
-    long number = a;
-    long count = 0;
-
-    while(number &lt;= b) {
-        if(isPalindrome(number)) {
-            double d = Math.sqrt(number);
-            if((d % 1) == 0 &amp;&amp; isPalindrome((long)d)) {
-                count++;
-            }
-        }
-        number++;
-    }
-
-    pw.println(count);
-}
-
-public static void main(String[] args) throws Exception {
-
-    Scanner sc = new Scanner(new FileReader("C-small-attempt0.in.txt"));
-    PrintWriter pw = new PrintWriter(new FileWriter("output.txt"));
-
-    int caseCnt = sc.nextInt();
-    sc.nextLine();
-    for (int caseNum = 0; caseNum &lt; caseCnt; caseNum++) {
-        System.out.println("Processing test case " + (caseNum + 1));
-        pw.print("Case #" + (caseNum + 1) + ": ");
-        new FairNSquare().solve(sc, pw);
-    }
-
-    pw.flush();
-    pw.close();
-    sc.close();
-}
-</code></pre>
-
-<p>}
-[/sourcecode]</p>
-
-<h3>Large Data Sets</h3>
-
-<p>I tried to come up with a solution on large data sets, wrote the code which works using standard Bisection method based on a binary search but struggled to optimize time complexity of square root on BigInteger and palindrome checking on large ranges, I vaguely remember from Euler&rsquo;s project there were some mathematical proofs regarding number 11 and palindromic numbers. There might be some very important facts which would allow to optimize for better performance however I decided not to waste time on it and moved to another problem.</p>
-
-<p>Ok, here&rsquo;s my solution which as been said didn&rsquo;t pass time requirement.</p>
-
-<p>[sourcecode language=&ldquo;java&rdquo;]
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.PrintWriter;
-import java.math.BigInteger;
-import java.util.Scanner;</p>
-
-<p>/<em>*
- @Author: Ivan Voroshilin
- @Date: April 13 2013
- Problem C
- Large inputs
- Comment: Poor time complexity
- </em>/
-public class FairNSquareLarge {</p>
-
-<pre><code>private static boolean isPalindrome(BigInteger num) {
-    BigInteger reversed = BigInteger.ZERO;
-    BigInteger n = num;
-
-    while (n.compareTo(BigInteger.ZERO) &gt; 0) {
-        reversed = reversed.multiply(BigInteger.valueOf(10)).add(n.mod(BigInteger.valueOf(10)));
-        n = n.divide(BigInteger.valueOf(10));
-    }
-
-    return num.compareTo(reversed) == 0;
-}
-
-private static BigInteger sqrt(BigInteger n) {
-    BigInteger a = BigInteger.ONE;
-    BigInteger b = new BigInteger(n.shiftRight(5).add(new BigInteger("8")).toString());
-    while(b.compareTo(a) &gt;= 0) {
-        BigInteger mid = new BigInteger(a.add(b).shiftRight(1).toString());
-        if(mid.multiply(mid).compareTo(n) &gt; 0) b = mid.subtract(BigInteger.ONE);
-        else a = mid.add(BigInteger.ONE);
-    }
-    return a.subtract(BigInteger.ONE);
-}
-
-private void solve(Scanner sc, PrintWriter pw) {
-
-    BigInteger a = sc.nextBigInteger();
-    BigInteger b = sc.nextBigInteger();
-
-    BigInteger number = a;
-    long count = 0;
-
-    while(number.compareTo(b) &lt;= 0) {
-        if(isPalindrome(number)) {
-
-            BigInteger d = sqrt(number);
-
-            if(d.multiply(d).compareTo(number) == 0 &amp;&amp; isPalindrome(d)) {
-                count++;
-            }
-        }
-        number = number.add(BigInteger.ONE);
-        System.out.println(number.toString());
-    }
-
-    pw.println(count);
-}
-
-public static void main(String[] args) throws Exception {
-
-    Scanner sc = new Scanner(new FileReader("C-large-1.in.txt"));
-    PrintWriter pw = new PrintWriter(new FileWriter("output.txt"));
-
-    int caseCnt = sc.nextInt();
-    sc.nextLine();
-    for (int caseNum = 0; caseNum &lt; caseCnt; caseNum++) {
-        System.out.println("Processing test case " + (caseNum + 1));
-        pw.print("Case #" + (caseNum + 1) + ": ");
-        new FairNSquareLarge().solve(sc, pw);
-    }
-
-    pw.flush();
-    pw.close();
-    sc.close();
-}
-</code></pre>
-
-<p>}
-[/sourcecode]</p>
-
-<h2>4. Problem D: Treasure</h2>
-
-<h3>Small Data Sets</h3>
-
-<p>I first did a straightforward BFS with checking for deadlocks and then realized from conditions that there might be several paths to open all chests and the goal is to select minimal path from all sorted lexicographically. Sure, we could make a simple systematic backtracking using all permutations of paths which has a terrible complexity O(n!) and doesn&rsquo;t meet time requirements even on small sets, e.g. N=20 chests where we have 20! distinct permutations (ouch!).</p>
-
-<p>I had time pressure (1h until the end of round) and nixed that idea to proceed but this problem is really challenging. Sorry!</p>
 </div>
   
   
