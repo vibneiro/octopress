@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Command and Query Responsibility Segregation and Event Sourcing: What You Should Think About in Advance - Ivan Voroshilin&#8217;s Blog.</title>
+  <title>Ivan Voroshilin&#8217;s Blog.</title>
   <meta name="author" content="Ivan Voroshilin">
 
   
-  <meta name="description" content="After quite a while this article has finally come out! I started to write it about 6 months ago but because of many factors in my life I &hellip;">
+  <meta name="description" content="If you are not aware a website called Project Euler has hundreds of algorithmic problems. Despite that most of them are related to math it&rsquo;s a &hellip;">
 
   
   <meta name="keywords" content="distributed, algorithm, Ivan, Voroshilin, code, google, jam, software, architecture, geek, blog" />
@@ -21,7 +21,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://vibneiro.github.io/2014/08/14/command-and-query-responsibility-segregation-and-event-sourcing-what-you-should-think-about-in-advance/">
+  <link rel="canonical" href="http://vibneiro.github.io/posts/3/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/octopress/atom.xml" rel="alternate" title="Ivan Voroshilin's Blog." type="application/atom+xml">
@@ -79,12 +79,92 @@
 </nav>
   <div id="main">
     <div id="content">
-      <div>
-<article class="hentry" role="article">
+      <div class="blog-index">
   
+  
+  
+    <article>
+      
   <header>
     
-      <h1 class="entry-title">Command and Query Responsibility Segregation and Event Sourcing: What You Should Think About in Advance</h1>
+      <h1 class="entry-title"><a href="/2014/09/15/project-euler-a-list-of-interesting-problems/">Project Euler: A List of Interesting Problems</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2014-09-15T10:17:39+04:00'><span class='date'><span class='date-month'>Sep</span> <span class='date-day'>15</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>10:17 am</span></time>
+        
+           | <a href="/2014/09/15/project-euler-a-list-of-interesting-problems/#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io/2014/09/15/project-euler-a-list-of-interesting-problems/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="https://ivoroshilin.files.wordpress.com/2014/09/euler.jpg"><img src="http://ivoroshilin.files.wordpress.com/2014/09/euler.jpg" alt="Euler" /></a></p>
+
+<p>If you are not aware a website called <a href="http://projecteuler.net/">Project Euler</a> has hundreds of algorithmic problems. Despite that most of them are related to math it&rsquo;s a good resource to warm up/train your brain in coding. You can use any programming language that you want and track progress.</p>
+
+<p>Here&rsquo;s a list of interesting Euler&rsquo;s problems in terms of diversity from my point of view with the aim to improve not only math but also programming skils (No/ Problem Titile):</p>
+
+<p>11 - Largest product in a grid
+12 - Highly divisible triangular number
+15 - Lattice paths
+24 - Lexicographic permutations
+54 - Poker hands
+59 - XOR decryption
+62 - Cubic permutations
+67 - Maximum path sum II
+68 - Magic 5-gon ring
+78 - Coin partitions
+79 - Passcode derivation
+81 - Path sum: two ways
+86 - Cuboid route
+94 - Almost equilateral triangles
+96 - Sudoku
+100 - Arranged probability
+107 - Minimal network
+109 - Darts
+114 - Counting block combinations I
+115 - Counting block combinations II
+116 - Red, green or blue tiles
+117 - Red, green, and blue tiles
+145 - How many reversible numbers are there below one-billion?
+148 - Exploring Pascal&rsquo;s triangle
+150 - Searching a triangular array for a sub-triangle having minimum-sum
+154 - Exploring Pascal&rsquo;s pyramid
+165 - Intersections
+166 - Criss Cross
+181 - Investigating in how many ways objects of two different colours can be grouped
+182 - RSA encryption
+186 - Connectedness of a network
+194 - Coloured Configurations
+208 - Robot Walks
+209 - Circular Logic
+232 - The Race
+267 - Billionaire
+275 - Balanced Sculptures
+280 - Ant and seeds</p>
+
+<p>Note that it is highly recommended to solve all Euler&rsquo;s problems one by one because solving a previous problem has a clue to the next ones.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/2014/08/14/command-and-query-responsibility-segregation-and-event-sourcing-what-you-should-think-about-in-advance/">Command and Query Responsibility Segregation and Event Sourcing: What You Should Think About in Advance</a></h1>
     
     
       <p class="meta">
@@ -95,15 +175,15 @@
 
 <time class='entry-date' datetime='2014-08-14T22:35:09+04:00'><span class='date'><span class='date-month'>Aug</span> <span class='date-day'>14</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>10:35 pm</span></time>
         
-           | <a href="#disqus_thread"
-             data-disqus-identifier="http://vibneiro.github.io">Comments</a>
+           | <a href="/2014/08/14/command-and-query-responsibility-segregation-and-event-sourcing-what-you-should-think-about-in-advance/#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io/2014/08/14/command-and-query-responsibility-segregation-and-event-sourcing-what-you-should-think-about-in-advance/">Comments</a>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>After quite a while this article has finally come out! I started to write it about 6 months ago but because of many factors in my life I procrastinated. This text is mainly devoted to those who want to see major pros and cons of this model. You won&rsquo;t find here the nuts and bolts however. For this, move to the reference section where listed really cool URLs for the start. Further the pattern will be named as CQRS/ES for simplicity.</p>
+  <div class="entry-content"><p>After quite a while this article has finally come out! I started to write it about 6 months ago but because of many factors in my life I procrastinated. This text is mainly devoted to those who want to see major pros and cons of this model. You won&rsquo;t find here the nuts and bolts however. For this, move to the reference section where listed really cool URLs for the start. Further the pattern will be named as CQRS/ES for simplicity.</p>
 
 <h1>2 main goals of the pattern</h1>
 
@@ -203,58 +283,116 @@
 
 <p> </p>
 </div>
-
-
-  <footer>
-    <p class="meta">
-      
+  
   
 
-<span class="byline author vcard">Posted by <span class="fn">vibneiro</span></span>
 
-      
-
-
-
-
-<time class='entry-date' datetime='2014-08-14T22:35:09+04:00'><span class='date'><span class='date-month'>Aug</span> <span class='date-day'>14</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>10:35 pm</span></time>
-      
-
-<span class="categories">
+    </article>
   
-    <a class='category' href='/categories/patterns/'>patterns</a>
   
-</span>
-
-
-    </p>
+    <article>
+      
+  <header>
     
-      <div class="sharing">
-  
-  
-  
-</div>
-
+      <h1 class="entry-title"><a href="/2014/03/18/distributed-transactions-and-scalability-issues-in-large-scale-distributed-systems/">Distributed Transactions and Scalability Issues in Large-scale Distributed Systems</a></h1>
     
-    <p class="meta">
-      
-        <a class="basic-alignment left" href="/2014/03/18/distributed-transactions-and-scalability-issues-in-large-scale-distributed-systems/" title="Previous Post: Distributed transactions and scalability issues in large-scale distributed systems">&laquo; Distributed transactions and scalability issues in large-scale distributed systems</a>
-      
-      
-        <a class="basic-alignment right" href="/2014/09/15/project-euler-a-list-of-interesting-problems/" title="Next Post: Project Euler: a list of interesting problems">Project Euler: a list of interesting problems &raquo;</a>
-      
-    </p>
-  </footer>
-</article>
+    
+      <p class="meta">
+        
 
-  <section>
-    <h1>Comments</h1>
-    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+
+<time class='entry-date' datetime='2014-03-18T18:08:58+04:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>18</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>6:08 pm</span></time>
+        
+           | <a href="/2014/03/18/distributed-transactions-and-scalability-issues-in-large-scale-distributed-systems/#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io/2014/03/18/distributed-transactions-and-scalability-issues-in-large-scale-distributed-systems/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Distributed transactions is the main evil of scalability</h2>
+
+<p>It is very hard to scale distributed transactions to an extremely high level, moreover they reduce throughput. Unlike a transaction on a local database, a distributed transaction involves altering data on multiple nodes. It can be a database + JMS broker or just a set of different databases. As an example let&rsquo;s recall a classical 2-phase commit (2PC later) - a type of <a href="http://en.wikipedia.org/wiki/Atomic_commit">atomic commitment protocol</a> in a back-end service with high volume of transactions. This protocol provides ACID-like properties for global transaction processing. I won&rsquo;t go into details how it works under the hood, I&rsquo;ll just tell you that C (Consistency) from ACID is the main evil of  scalability in distributed systems. It puts a great burden due to its complex coordination algorithm.  Overall throughput can drop up to a few times. Locks in all of the data sources are being held during 2PC. The longer duration locks create the risk of higher contention. The 2PC coordinator also represents a Single Point of Failure, which is unacceptable for critical systems.  For systems that have reasonably high volume of messages, or sensitive SLAs, it’s worth giving up strong consistency for throughput.</p>
+
+<h2>But how can I live without distributed transactions to achieve higher scalability?</h2>
+
+<p>Algorithms such as 2PC use <strong>&ldquo;Exactly Once&rdquo;</strong> technique whereas we will use <strong>&ldquo;At least Once&rdquo;</strong> technique. The difference is that a developer should take care of that in his application code to cope with it. Most queueing technologies provide acknowledgements that a message has been accepted (handling is a separate deal). Databases use local transactions. We can deal with downstream failures without coordination. Read on!</p>
+
+<h3>Idempotence and fault tolerance</h3>
+
+<p>From math, <a href="http://en.wikipedia.org/wiki/Idempotence">idempotence</a> is as simple as that:</p>
+
+<h2><a href="http://ivoroshilin.files.wordpress.com/2014/03/idempotence.png"><img src="http://ivoroshilin.files.wordpress.com/2014/03/idempotence.png" alt="idempotence" /></a></h2>
+
+<p>That is, the result stays the same, no matter how many times a function gets called on the same argument. In distributed world<em> Idempotence</em> implies that an operation can be invoked repeatedly without changing the result. Why do I need one? Because we should somehow resolve processing duplicate requests in case of a system failure. Let&rsquo;s make it clear by considering an example. A client-appliction sends a financial transaction to a server (there might be a cluster of them load-balanced or just one) and waits for acknowledgment. For some reason, at this particular time:</p>
+
+<ul>
+<li><p>A server goes down or</p></li>
+<li><p>Client goes down or</p></li>
+<li><p>Network failure happens</p></li>
+</ul>
+
+
+<p>In all of these 3 cases, a client-app didn&rsquo;t get an acknowledgment message (reply) from the server about a transaction status. Of course, the client then should retry this transaction. The server must ensure that this financial transaction is accomplished &ldquo;<strong>At least Once&rdquo;</strong>. Here comes to the rescue <em>idempotence</em>. The server must remember a state - that a transaction with this Id has already been processed including saved acknowledgement message in order to check that it exists and reply with its acknowledgement message in case it does. We don&rsquo;t have expensive distributed transactions anymore - <strong>&ldquo;At least Once&rdquo;</strong> is a more relaxed and scalable approach. That is, instead of locking resources everywhere, we can assume that messages will arrive at least once.</p>
+
+<h3>Optimistic locking</h3>
+
+<p>Even though this technique is quite old, one goes well with <em>idempotence. </em>If two people are trying to affect change to the same entity at the same time we don&rsquo;t lock database records, rather we use a concept of versioning and optionally uniqueness. The idea is to save a version of each entity record in the database but to make sure before saving it wasn&rsquo;t changed. A simple example is a self-service kiosk where people check-in before boarding at the airport. They can select a vacant seat from the seat map.<a href="http://en.wikipedia.org/wiki/Check-in">
+</a></p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2014/03/seatmap.jpg"><img src="http://ivoroshilin.files.wordpress.com/2014/03/seatmap.jpg" alt="seatmap" /></a></p>
+
+<p>Each seat has a version = 1. When multiple people make their choice in parallel before proceeding the system simply checks if a seat-version hasn&rsquo;t changed. If it has a user is notified that the seat already been taken while she was thinking. This is a very simple example where version either can be 1 or 2. A more difficult situation could be in order-management systems where an order might have many versions but that doesn&rsquo;t change the point how optimistic locking works.  The idea again yields great trade-off in terms of speed because we don&rsquo;t use locking-mechanism.</p>
+
+<h3>Local atomic transactions and unique constraints</h3>
+
+<p>Local atomic transactions are usually restricted to a single store. Local transactions are primarily needed to apply a set of operations atomically to a single resource (e.g. relational database) as well as ensure correct ordering of operations within a transaction. In some cases, we can do away with transactions, particularly if we don&rsquo;t care about the order of operations within a transaction. In that case we can process operations asynchronously leading to a better throughput again. Sometimes, a model requiring the order can be redesigned for  asynchronicity of operations.</p>
+
+<h3>Putting it all together</h3>
+
+<p>In order to achieve greater throughput a system should correspond to the following principles:</p>
+
+<ol>
+<li><p>You can retry the operation if there is a failure down the stream based on idempotence.</p></li>
+<li><p>Don&rsquo;t use transactions and use optimistic locking if possible - it&rsquo;s much cheaper.</p></li>
+<li><p>Local transactions based on a single phase commit for each resource are more scalable than distributed ones increasing overall application availability.</p></li>
+<li><p>Messages may be reordered.</p></li>
+</ol>
+
+
+<h2>Wrapping up</h2>
+
+<p>Such great systems as Google&rsquo;s Bigtable or Spanner don&rsquo;t support traditional ACID transactions because they have a heavy overhead on a highly distributed data storage model. I was lucky to use all above techniques in my applications too involving mission-critical financial transactions and must say that a few years ago not so many people knew about the techniques but now I can hear about them more and more often. Oh yeah, I almost forgot! I urge you to read <a href="http://queue.acm.org/detail.cfm?id=2187821">this great article</a> written by Pat Helland that has even more use-cases. I bumped at it during my research to know more. And remember, you can live without distributed transactions if you implement idempotence and downstream failures correctly.</p>
+
+<h2>References</h2>
+
+<p>1. <a href="http://www.enterpriseintegrationpatterns.com/docs/IEEE_Software_Design_2PC.pdf">Your Coffee Shop Doesn’t Use Two-Phase Commit</a> by Gregor Hohpe.</p>
+
+<p>2. <a href="http://queue.acm.org/detail.cfm?id=2187821">Idempotence Is Not a Medical Condition</a> by Pat Helland.</p>
+
+<p>3. <a href="http://www.addsimplicity.com/adding_simplicity_an_engi/2006/12/2pc_or_not_2pc_.html">2PC or not 2PC, Wherefore Art Thou XA?</a> by Dan Pritchett.</p>
+
+<p>4. <a href="http://www-db.cs.wisc.edu/cidr/cidr2007/papers/cidr07p15.pdf">Life beyond Distributed Transactions: an Apostate’s Opinion</a> by Pat Helland.</p>
 </div>
-  </section>
+  
+  
 
+
+    </article>
+  
+  <div class="pagination">
+    
+      <a class="prev" href="/posts/4">&larr; Older</a>
+    
+    <a href="/blog/archives">Blog Archives</a>
+    
+    <a class="next" href="/posts/2">Newer &rarr;</a>
+    
+  </div>
 </div>
-
 <aside class="sidebar">
   
     <section>
@@ -345,7 +483,6 @@ Included file &#8216;custom/asides/twitter2.html&#8217; not found in _includes d
   
 </aside>
 
-
     </div>
   </div>
   <footer role="contentinfo"><p>
@@ -374,10 +511,7 @@ Included file &#8216;custom/asides/twitter2.html&#8217; not found in _includes d
       var disqus_shortname = 'vibneiro';
       
         
-        // var disqus_developer = 1;
-        var disqus_identifier = 'http://vibneiro.github.io/2014/08/14/command-and-query-responsibility-segregation-and-event-sourcing-what-you-should-think-about-in-advance/';
-        var disqus_url = 'http://vibneiro.github.io/2014/08/14/command-and-query-responsibility-segregation-and-event-sourcing-what-you-should-think-about-in-advance/';
-        var disqus_script = 'embed.js';
+        var disqus_script = 'count.js';
       
     (function () {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;

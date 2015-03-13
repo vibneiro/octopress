@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Brewer&#8217;s CAP Theorem Explained: BASE Versus ACID - Ivan Voroshilin&#8217;s Blog.</title>
+  <title>Ivan Voroshilin&#8217;s Blog.</title>
   <meta name="author" content="Ivan Voroshilin">
 
   
@@ -21,7 +21,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://vibneiro.github.io/2012/12/13/brewers-cap-theorem-explained-base-versus-acid/">
+  <link rel="canonical" href="http://vibneiro.github.io/posts/7/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/octopress/atom.xml" rel="alternate" title="Ivan Voroshilin's Blog." type="application/atom+xml">
@@ -79,12 +79,15 @@
 </nav>
   <div id="main">
     <div id="content">
-      <div>
-<article class="hentry" role="article">
+      <div class="blog-index">
   
+  
+  
+    <article>
+      
   <header>
     
-      <h1 class="entry-title">Brewer&#8217;s CAP Theorem Explained: BASE Versus ACID</h1>
+      <h1 class="entry-title"><a href="/2012/12/13/brewers-cap-theorem-explained-base-versus-acid/">Brewer&#8217;s CAP Theorem Explained: BASE Versus ACID</a></h1>
     
     
       <p class="meta">
@@ -95,15 +98,15 @@
 
 <time class='entry-date' datetime='2012-12-13T17:21:22+04:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>13</span><span class='date-suffix'>th</span>, <span class='date-year'>2012</span></span> <span class='time'>5:21 pm</span></time>
         
-           | <a href="#disqus_thread"
-             data-disqus-identifier="http://vibneiro.github.io">Comments</a>
+           | <a href="/2012/12/13/brewers-cap-theorem-explained-base-versus-acid/#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io/2012/12/13/brewers-cap-theorem-explained-base-versus-acid/">Comments</a>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>The goal of this article is to give more clarity to the theorem and show pros and cons of ACID and BASE models that might stand in the way of implementing distributed systems.</p>
+  <div class="entry-content"><p>The goal of this article is to give more clarity to the theorem and show pros and cons of ACID and BASE models that might stand in the way of implementing distributed systems.</p>
 
 <h2>What is CAP about?</h2>
 
@@ -187,56 +190,20 @@
 
 <p>A <em>strongly consistent</em> system gives up <em>availability</em> upon a certain kind of failure, and<em> eventually-consistent</em> system gives up consistency upon a certain kind of failure which improves <em>availability</em>. The bottom line: It is impossible to guarantee consistency while providing high availability and network partition tolerance. This makes ACID databases less powerful for highly distributed environments and led to the emergence of alternate data stores that are target to high availability and high performance. The eventual consistency is one of approaches to achieve this.</p>
 </div>
-
-
-  <footer>
-    <p class="meta">
-      
+  
   
 
-<span class="byline author vcard">Posted by <span class="fn">vibneiro</span></span>
 
-      
-
-
-
-
-<time class='entry-date' datetime='2012-12-13T17:21:22+04:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>13</span><span class='date-suffix'>th</span>, <span class='date-year'>2012</span></span> <span class='time'>5:21 pm</span></time>
-      
-
-<span class="categories">
+    </article>
   
-    <a class='category' href='/categories/scalability/'>scalability</a>
-  
-</span>
-
-
-    </p>
+  <div class="pagination">
     
-      <div class="sharing">
-  
-  
-  
-</div>
-
+    <a href="/blog/archives">Blog Archives</a>
     
-    <p class="meta">
-      
-      
-        <a class="basic-alignment right" href="/2013/01/11/when-asymptotic-analysis-of-complexity-doesnt-work/" title="Next Post: Asymptotic complexity: beware of hidden constants">Asymptotic complexity: beware of hidden constants &raquo;</a>
-      
-    </p>
-  </footer>
-</article>
-
-  <section>
-    <h1>Comments</h1>
-    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a class="next" href="/posts/6">Newer &rarr;</a>
+    
+  </div>
 </div>
-  </section>
-
-</div>
-
 <aside class="sidebar">
   
     <section>
@@ -327,7 +294,6 @@ Included file &#8216;custom/asides/twitter2.html&#8217; not found in _includes d
   
 </aside>
 
-
     </div>
   </div>
   <footer role="contentinfo"><p>
@@ -356,10 +322,7 @@ Included file &#8216;custom/asides/twitter2.html&#8217; not found in _includes d
       var disqus_shortname = 'vibneiro';
       
         
-        // var disqus_developer = 1;
-        var disqus_identifier = 'http://vibneiro.github.io/2012/12/13/brewers-cap-theorem-explained-base-versus-acid/';
-        var disqus_url = 'http://vibneiro.github.io/2012/12/13/brewers-cap-theorem-explained-base-versus-acid/';
-        var disqus_script = 'embed.js';
+        var disqus_script = 'count.js';
       
     (function () {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
