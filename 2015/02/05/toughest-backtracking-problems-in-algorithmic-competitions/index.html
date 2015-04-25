@@ -109,7 +109,7 @@
 
 <p>In algorithmic competitions there are frequently problems that can be attacked with <a href="//en.wikipedia.org/wiki/Maze_generation_algorithm">recursive backtracking algorithms</a>) - a well-known approach to traverse <a href="//en.wikipedia.org/wiki/Depth-first_search">a search tree</a>). Usually, it is good smell, if there&rsquo;s a goal to analyze all existing combinations of a problem. And, of course, there needs to be the right strategy to meet time limits (e.g. prune it). Here, I&rsquo;ve decided to talk about a few very interesting backtracking problems I came across. I touch on a backtracking approach to develop in competitors, but bear in mind that, not trying to solve a problem by yourself, seeing the answer up front is a waste of time. Furthermore, this is an advanced level, if you haven&rsquo;t practiced a recursive backtracking or DFS, please spend some time on basic backtracking problems and come back.</p>
 
-<p><strong><em>1. Chess Puzzler</em></strong>
+<p><strong>1. Chess Puzzler</strong>
 <a href="https://ivoroshilin.files.wordpress.com/2015/02/chess.jpg"><img src="https://ivoroshilin.files.wordpress.com/2015/02/chess.jpg?w=300" alt="chess" /></a></p>
 
 <p>This is quite an interesting problem I&rsquo;ve ever come across, solving it you realize some very important uses cases to consider like memory limits, recursion, combinatorics and optimization techniques. I&rsquo;ve seen a chess problem in Skiena&rsquo;s  algorithmic book some time ago, but as turned out, this one is very different.</p>
@@ -120,8 +120,9 @@
 
 <p>Write a program which takes as input:</p>
 
-<p>•The dimensions of the board: M, N.
-•The number of pieces of each type (King, Queen, Bishop, Rook and Knight) to try and place on the board.</p>
+<p>•The dimensions of the board: M, N.</p>
+
+<p>•The number of pieces of each type (King, Queen, Bishop, Rook and Knight) to try and place on the board.</p>
 
 <p>As output, the program should yield the number of distinct layouts for which all of the pieces can be placed on the board without threatening each other.</p>
 
