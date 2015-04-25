@@ -4,7 +4,7 @@
   <title><![CDATA[Ivan Voroshilin's Blog.]]></title>
   <link href="http://vibneiro.github.io/atom.xml" rel="self"/>
   <link href="http://vibneiro.github.io/"/>
-  <updated>2015-04-26T01:10:06+03:00</updated>
+  <updated>2015-04-26T01:15:12+03:00</updated>
   <id>http://vibneiro.github.io/</id>
   <author>
     <name><![CDATA[Ivan Voroshilin]]></name>
@@ -40,7 +40,7 @@ My apologies for inconvenience.</p>
 
 <p>This is quite an interesting problem I&rsquo;ve ever come across, solving it you realize some very important uses cases to consider like memory limits, recursion, combinatorics and optimization techniques. I&rsquo;ve seen a chess problem in Skiena&rsquo;s  algorithmic book some time ago, but as turned out, this one is very different.</p>
 
-<p><strong>Problem Statement:</strong></p>
+<h4><strong>Problem Statement:</strong></h4>
 
 <p>The problem is to find all distinct layouts of a set of normal chess pieces on a chess board with dimensions MxN where none of the pieces is in a position to take any of the others. Assume the color of the piece does not matter, and that there are no pawns among the pieces.</p>
 
@@ -52,7 +52,7 @@ My apologies for inconvenience.</p>
 
 <p>As output, the program should yield the number of distinct layouts for which all of the pieces can be placed on the board without threatening each other.</p>
 
-<p><strong>Solution:</strong></p>
+<h4><strong>Solution:</strong></h4>
 
 <p>We represent each piece as: &ldquo;K&rdquo; - King &ldquo;N&rdquo; - Knight &ldquo;Q&rdquo; - Queen &ldquo;R&rdquo; - Rook &ldquo;B&rdquo; - Bishop M - Horizontal size of the board N - Vertical size of the board S - is a set of remaining pieces. For example: Input: 3×3 board containing 2 Kings and 1 Rook, that is S = [K,K,R]. Answer: 4 layouts.</p>
 
@@ -62,7 +62,7 @@ My apologies for inconvenience.</p>
 
 <p>Finishing touch, namely what to do about duplicated pieces like 3 queens or 2 knights etc. Honestly, I spent a great deal of time on this while solving. The thing is that, duplicates are interchangeable in terms of different combinations on the chessboard. For instance, for a board of 1x2 length with free squares [x:1,y:1][x:1,y:2], 2 queens can be placed as [Q1][Q2] or [Q2][Q1] yielding 2 different combinations. A simple solution is to put at once all pieces of one type inside a loop-step. From combinatorics, we can enumerate all C(n, k) unique combinations (aka n choose k) in a single loop. Because we recurse, I created a <a href="https://github.com/vibneiro/Combinatorics/blob/master/Combinations.groovy">utility function</a> wrapped around with a standard java iterator which doesn&rsquo;t have to calculate all combinations up front, rather it traverses them lazily by calculating the next one on the fly. The reason for this was a memory taken on each level of the recursion stack to keep an array of all combinations. E.g. C(n, k) = C(1000,5) results into 8,250,291,250,200 elements. There were also some minor issues with Groovy not being able to correctly calculate a difference between 2 lists of coordinate-pairs. Thanks to guys on <a href="http://stackoverflow.com/">stackoverflow </a>who quickly replied with a <a href="http://stackoverflow.com/questions/27216832/groovy-language-how-to-get-difference-between-two-lists-of-pairs">workaround</a>. The full working code  is now available on <a href="https://github.com/vibneiro/ChessBoardSolver">GitHub</a>. If somebody of you have an idea to optimize it somehow, please comment one at the end of this post!</p>
 
-<h4><strong>2. To backtrack or not, that&rsquo;s the question: Meet &ldquo;Mine Sweeper Master&rdquo; from Google code jam 2014</strong></h4>
+<h3><strong>2. To backtrack or not, that&rsquo;s the question: Meet &ldquo;Mine Sweeper Master&rdquo; from Google code jam 2014</strong></h3>
 
 <p><a href="https://ivoroshilin.files.wordpress.com/2015/02/minesweeper.png"><img src="https://ivoroshilin.files.wordpress.com/2015/02/minesweeper.png" alt="minesweeper" /></a></p>
 
@@ -83,26 +83,15 @@ My apologies for inconvenience.</p>
 
 <p><strong>Too few non-mines</strong></p>
 
-<pre><code>If &lt;code&gt;N&lt;/code&gt; is even, it must be &gt;= 4.
-
-
-
-
+<pre><code>If &lt;code&gt;N&lt;/code&gt; is even, it must be &gt;= 4. 
 If &lt;code&gt;N&lt;/code&gt; is odd, it must be &gt;= 9. Also, &lt;code&gt;R&lt;/code&gt; and &lt;code&gt;C&lt;/code&gt; must be &gt;= 3.
-
-
-
 
 Otherwise there's no solution.
 </code></pre>
 
 <p><strong>Can&rsquo;t fill first two rows</strong></p>
 
-<pre><code>If &lt;code&gt;N&lt;/code&gt; is even and you can't fill at least two rows with non-mines, then fill the first two rows with &lt;code&gt;N / 2&lt;/code&gt; non-mines.
-
-
-
-
+<pre><code>If &lt;code&gt;N&lt;/code&gt; is even and you can't fill at least two rows with non-mines, then fill the first two rows with &lt;code&gt;N / 2&lt;/code&gt; non-mines.   
 If &lt;code&gt;N&lt;/code&gt; is odd and you can't fill at least two rows with non-mines and a third row with 3 non-mines, then fill the first two rows with &lt;code&gt;(N - 3) / 2&lt;/code&gt; non-mines and the third row with 3 non-mines.
 </code></pre>
 
@@ -113,7 +102,7 @@ If &lt;code&gt;N&lt;/code&gt; is odd and you can't fill at least two rows with
 
 <p>I was lazy to depict each one. As can be seen, there is bunch of special cases to consider to make this solution pass.</p>
 
-<h4><strong>3. Another Chess Board Puzzler: &ldquo;King&rdquo; from Google Code Jam 2008</strong></h4>
+<h3><strong>3. Another Chess Board Puzzler: &ldquo;King&rdquo; from Google Code Jam 2008</strong></h3>
 
 <p>This is one of the toughest<a href="http://code.google.com/codejam/contest/32008/dashboard#s=p3"> problem</a>s from Google Code Jam. It differs in that <strong>no one solved it</strong> in global Code Jam rounds during the round in which it was posed. Algorithmic competitions is like sports, if you feel you can solve easier problems faster - go for it. Otherwise you&rsquo;re at risk of loosing the competition. Some day next time I will try to attack it too, and for now I say goodbye to  all of you.</p>
 ]]></content>
