@@ -149,42 +149,26 @@ My apologies for inconvenience.</p>
 
 <h4><strong>1. Chess Puzzler</strong></h4>
 
-<p><a href="https://ivoroshilin.files.wordpress.com/2015/02/chess.jpg"><img src="https://ivoroshilin.files.wordpress.com/2015/02/chess.jpg?w=300" alt="chess" /></a>
-This is quite an interesting problem I&rsquo;ve ever come across, solving it you realize some very important uses cases to consider like memory limits, recursion, combinatorics and optimization techniques. I&rsquo;ve seen a chess problem in Skiena&rsquo;s  algorithmic book some time ago, but as turned out, this one is very different.</p>
+<p><a href="https://ivoroshilin.files.wordpress.com/2015/02/chess.jpg"><img src="https://ivoroshilin.files.wordpress.com/2015/02/chess.jpg?w=300" alt="chess" /></a></p>
 
-<p><strong>Problem Statement:</strong>
-The problem is to find all distinct layouts of a set of normal chess pieces on a chess board with dimensions MxN where none of the pieces is in a position to take any of the others. Assume the color of the piece does not matter, and that there are no pawns among the pieces.</p>
+<p>This is quite an interesting problem I&rsquo;ve ever come across, solving it you realize some very important uses cases to consider like memory limits, recursion, combinatorics and optimization techniques. I&rsquo;ve seen a chess problem in Skiena&rsquo;s  algorithmic book some time ago, but as turned out, this one is very different.</p>
 
-<blockquote>Write a program which takes as input:</blockquote>
+<p><strong>Problem Statement:</strong></p>
 
+<p>The problem is to find all distinct layouts of a set of normal chess pieces on a chess board with dimensions MxN where none of the pieces is in a position to take any of the others. Assume the color of the piece does not matter, and that there are no pawns among the pieces.</p>
 
+<p>Write a program which takes as input:</p>
 
+<p>•The dimensions of the board: M, N.
+•The number of pieces of each type (King, Queen, Bishop, Rook and Knight) to try and place on the board.</p>
 
-<blockquote>•The dimensions of the board: M, N.</blockquote>
-
-
-
-
-<blockquote>•The number of pieces of each type (King, Queen, Bishop, Rook and Knight) to try and place on the board.</blockquote>
-
-
-
-
-<blockquote>
-
-> 
-> As output, the program should yield the number of distinct layouts for which all of the pieces can be placed on the board without threatening each other.
-> 
-> 
-</blockquote>
-
+<p>As output, the program should yield the number of distinct layouts for which all of the pieces can be placed on the board without threatening each other.</p>
 
 <p><strong>Solution:</strong></p>
 
 <p>We represent each piece as: &ldquo;K&rdquo; - King &ldquo;N&rdquo; - Knight &ldquo;Q&rdquo; - Queen &ldquo;R&rdquo; - Rook &ldquo;B&rdquo; - Bishop M - Horizontal size of the board N - Vertical size of the board S - is a set of remaining pieces. For example: Input: 3×3 board containing 2 Kings and 1 Rook, that is S = [K,K,R]. Answer: 4 layouts.</p>
 
-<blockquote>[![layouts](https://ivoroshilin.files.wordpress.com/2015/02/layouts.png?w=300)](https://ivoroshilin.files.wordpress.com/2015/02/layouts.png)</blockquote>
-
+<p><a href="https://ivoroshilin.files.wordpress.com/2015/02/layouts.png"><img src="https://ivoroshilin.files.wordpress.com/2015/02/layouts.png?w=300" alt="layouts" /></a></p>
 
 <p>Since we need to find all possible layouts of a chessboard, it can be solved with a recursive backtracking as follows. We take the next piece from S and calculate for it all possible freeSquares on the chess board. Next, by iterating in a loop over freeSquares for current piece, we try to put it in all possible freeSquares. Each loop-step is a potential solution (layout) calls itself recursively by trying to put the next piece for current chess board and so forth until there are no pieces left or freeSquares is empty. Once a piece is placed on the board, we update the set of the free squares by subtracting a set of squares threatened by this piece. In case the set of free squares is empty and there are still any remaining pieces not on the board, there&rsquo;s no solution to this combination and the recursive function backtracks to the upper level in the recursive tree trying the next loop-step. Thereby, we loop over all steps and stop traversing by pruning impossible configuration in advance - as simple as this. There could be some arithmetic optimization with a number of threatened squares for each piece type by taking into account all remaining pieces to be put on the board and number of free squares, calculated in one go. Since the time limit in this problem was 20 mins to solve, I ditched an optimization. Undoubtedly, my solution can be drastically improved by cutting the search tree even more, and hence I leave this to the reader. Moreover you might want to parallelize this recursive task.</p>
 
@@ -202,8 +186,7 @@ The problem is to find all distinct layouts of a set of normal chess pieces on a
 
 <p><strong>Single non-mine</strong></p>
 
-<pre><code>If &lt;code&gt;N=1&lt;/code&gt;, any configuration is a correct solution.
-</code></pre>
+<p>If <code>N=1</code>, any configuration is a correct solution.</p>
 
 <p><strong>Single row or single column</strong></p>
 
