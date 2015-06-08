@@ -160,6 +160,8 @@ This leads, as per the above model, to the stall of some threads which is very i
 
 <p>I derived the idea from Guava to prune the map in a separate thread, right after some threshold was hit, via exclusive tryLock – so we want block progress of other threads – neat!</p>
 
+<p><img src="https://ivoroshilin.files.wordpress.com/2014/10/weakvalue1.png" alt="" /></p>
+
 <p>Why not SoftReferene values? <a href="http://jeremymanson.blogspot.ru/2009/07/how-hotspot-decides-to-clear_07.html">Soft references require two major GCs</a> in order to be collected, are costly to track, and if abused can fill up the heap to cause GC thrashing. I’ve left out some details, but this is the gist of it!</p>
 
 <p>See <a href="https://github.com/vibneiro/dispatching">the code on Github</a>.</p>
