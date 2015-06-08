@@ -180,12 +180,11 @@ Tasks are already small and needn&rsquo;t a recursive decomposition. Work-steali
 
 <h2><strong>A few words about Caffeine</strong></h2>
 
-<p>I chatted with Ben Maine via email regarding Caffeine&rsquo;s cache design under the hood. There are advanced mechanics (e.g. eventually-consistent multithreaded datastructures, Stripe64 and full rewrite of ConcurrentHashMap proves to be very efficient)! It was fun to make some research&hellip;</p>
-
-<h2><strong>Conclusion</strong></h2>
+<p>I chatted with Ben Maine via email regarding Caffeine&rsquo;s cache design under the hood. There are advanced mechanics (e.g. eventually-consistent multithreaded datastructures, Stripe64 and full rewrite of ConcurrentHashMap proves to be very efficient)! It was fun to make some research&hellip; Guys made it slick, covering
+many different cases.</p>
 
 <p>Later, I decided to use the Caffeine in my Dispatcher, because it yielded very good results on the majority of <a href="https://github.com/vibneiro/dispatching">JMH performance benchmarks</a> compared to my implementations under similar parameters, including weak-values.
-I decided not to remove ![ThreadBoundHashDispatcher](<a href="https://github.com/vibneiro/dispatching/blob/master/dispatch-java-8/src/main/java/vibneiro/dispatchers/ThreadBoundHashDispatcher.java">https://github.com/vibneiro/dispatching/blob/master/dispatch-java-8/src/main/java/vibneiro/dispatchers/ThreadBoundHashDispatcher.java</a>( from the code though, as one might potentially have some benefits for some rare cases.</p>
+I decided not to remove <a href="https://github.com/vibneiro/dispatching/blob/master/dispatch-java-8/src/main/java/vibneiro/dispatchers/ThreadBoundHashDispatcher.java">ThreadBoundHashDispatcher</a> from the code though, as one might potentially have some benefits for some rare cases.</p>
 </div>
   
   
