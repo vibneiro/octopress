@@ -9,7 +9,7 @@
   <meta name="author" content="Ivan Voroshilin">
 
   
-  <meta name="description" content="Preface Here we&rsquo;re going to talk primarily about Consistent hashing. This technique involves such concepts as adaptive load balancing, routing &hellip;">
+  <meta name="description" content="This was the problem I wasn&rsquo;t able to optimise with given time constraint in April.  Later I killed half a day to complete it thinking of &hellip;">
 
   
   <meta name="keywords" content="distributed, algorithm, Ivan, Voroshilin, code, google, jam, software, architecture, geek, blog, java, scala, groovy, scalability" />
@@ -81,6 +81,91 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/2013/09/11/google-code-jam-qualification-round-2013-problem-d-treasure/">Google Code Jam. Qualification Round 2013. Problem D - Treasure. Solved.</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2013-09-11T18:34:59+04:00'><span class='date'><span class='date-month'>Sep</span> <span class='date-day'>11</span><span class='date-suffix'>th</span>, <span class='date-year'>2013</span></span> <span class='time'>6:34 pm</span></time>
+        
+           | <a href="/2013/09/11/google-code-jam-qualification-round-2013-problem-d-treasure/#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io/2013/09/11/google-code-jam-qualification-round-2013-problem-d-treasure/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="http://ivoroshilin.files.wordpress.com/2013/09/1.jpg"><img src="http://ivoroshilin.files.wordpress.com/2013/09/1.jpg" alt="1" /></a></p>
+
+<p>This was <a href="https://code.google.com/codejam/contest/2270488/dashboard#s=p3&amp;a=3">the problem</a> I wasn&rsquo;t able to optimise with given time constraint in April.  Later I killed half a day to complete it thinking of different algorithms from the graph theory such as Eulerian path
+and Chinese postman problems. I was surprised at that time this problem was put into qualification round as it is really challenging. In order to solve one the graph problem should be refined and modeled properly. During modeling a graph I used to always map only one type of entity to vertices.  As a counter-example a <a href="http://en.wikipedia.org/wiki/Bipartite_graph">Bipartite graph</a> has vertices which are divided into two disjoint sets U and V such that every edge connects a vertex in U to one in V. The solution to this one has nothing to do with Bipartite graph attacking approaches except that there are 2 types of vertices.</p>
+
+<h2><strong>The solution</strong></h2>
+
+<p><strong>1. Check that the number of chests matches the number of corresponding key types</strong>. A simple arithmetic to count. Otherwise there is no solution as we don&rsquo;t have enough keys to open all chests.</p>
+
+<p><strong>2. All vertices in a graph G should be reachable from vertex v0.</strong></p>
+
+<p>Construct a directed graph G=(V,E), where K is a set of all keys and C is a set of all chests:</p>
+
+<ul>
+<li><p>V = {K} U {C} U {0}.</p></li>
+<li><p>{0} = v0 is a starting vertex corresponding to the root vertex. Outgoing edges from it are key(s) given us initially.</p></li>
+<li><p>E = {Set of all directed edges connecting K and C}. (i,j) ∈ E if either {i=chest, j=key} or {i=key, j=chest}</p></li>
+</ul>
+
+
+<p>In simple words we have a directed graph where each vertex is either a chest or a key, directed edges form a  connection in between. We need to check that there&rsquo;s a directed path between vertex v0 and every other vertex ∈ E, otherwise we cannot open all chests and solution is impossible. Note that we need to check directed paths to all key-vertices from v0. This is a standard <a href="http://en.wikipedia.org/wiki/Reachability">single-source reachability</a> and can be done applying a<a href="http://en.wikipedia.org/wiki/Depth-first_search"> Depth-First-Search</a> algorithm:</p>
+
+<p>[sourcecode language=&ldquo;java&rdquo;]
+void dfs(Graph g, int v) {
+marked[v] = true;
+for (int w : g.adj(v)) {
+if (!marked[w]) dfs(G, w);
+}
+ }
+[/sourcecode]</p>
+
+<p>Technically, if there are unmarked vertices, the problem is unsolvable. Time complexity is O(E+V). This check cuts lots of branches saving us time.</p>
+
+<p>Now let&rsquo;s demonstrate the above on a real example. Our treasure trove consists of four chests, and you began with exactly one key of type 1.</p>
+
+<p>See the table with input data:</p>
+
+<pre><code>Chest Number  |  Key Type To Open Chest  |  Key Types Inside
+--------------+--------------------------+------------------
+1             |  1                       |  None
+2             |  1                       |  1, 3
+3             |  2                       |  None
+4             |  3                       |  2
+</code></pre>
+
+<p>Let&rsquo;s draw a graph where v0 is a staring point of traversal (i.e. initial key of type = 1)</p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2013/09/graph.jpg"><img src="http://ivoroshilin.files.wordpress.com/2013/09/graph.jpg" alt="graph" /></a></p>
+
+<p>As depicted there are 2 solvable configurations - &lt;2,1,4,3> and &lt;2,4,3,1>. All paths from v0 to the keys are reachable. The proof of this condition can done by induction and left to the reader.</p>
+
+<p><strong>3. Find a &ldquo;lexicographically smallest&rdquo; solution.</strong> This last condition added real hardness to the problem. If there are multiple solutions then we find a &ldquo;lexicographically smallest&rdquo; way to open the boxes. Each vertex is always traversed from lowest to highest, this can be achieved by constructing a graph using adjacency lists that reflect numbers of keys and chests in increasing order and we subsequently iterate them applying a bit optimized Depth-First-Search. Minimal configuration starts from v0. If we have  >= 1 key initially given, we just have to traverse from all of them increasingly. On each step we always update a number of keys in possession. If we&rsquo;ve run out of keys then we cut the branch and backtrack, starting again where we left off with the next configuration. E.g. opening a chest No. 1 at the very first time will lead to the deadlock (actually this one is a trivial case as it is on step No 1). Such cases are not on critical path and we need backtrack only to the previous calling vertex.</p>
+
+<p><strong>Conclusion:</strong> There are not so many configurations unlike straightforward brute force. Many optimization problems like this one are met in algorithmic contests. Just algorithms and data structures are not sufficient. To pass given time constraint there should be the right strategy to cut unsolvable branches. That&rsquo;s it!</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -681,138 +766,6 @@ public static void main(String[] args) throws Exception {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/2013/02/06/know-your-locality-of-reference-some-techniques-for-keeping-data-in-the-cpu-cache/">What You Should Know About Locality of Reference</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2013-02-06T17:18:51+04:00'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>6</span><span class='date-suffix'>th</span>, <span class='date-year'>2013</span></span> <span class='time'>5:18 pm</span></time>
-        
-           | <a href="/2013/02/06/know-your-locality-of-reference-some-techniques-for-keeping-data-in-the-cpu-cache/#disqus_thread"
-             data-disqus-identifier="http://vibneiro.github.io/2013/02/06/know-your-locality-of-reference-some-techniques-for-keeping-data-in-the-cpu-cache/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2><a href="http://ivoroshilin.com/2013/02/06/know-your-locality-of-reference-some-techniques-for-keeping-data-in-the-cpu-cache/"> </a></h2>
-
-<h2><strong>Introduction</strong></h2>
-
-<p>In the previous post we briefly described what might stand beyond asymptotic analysis of algorithms and data structures when it comes to empirical measurements of performance. In this post I continue talking about latter considering more closely the impact of memory hierarchies of modern computer architectures. A few basic data structures are taken for comparison of locality utilization with short explanations. Further, we&rsquo;re going to touch on effective utilization of CPU-cache by showing some techniques to improve performance.  All benchmarks are done on JVM HotSpot 6. Due to different algorithms of GC and memory allocation, the techniques might not / partly work on other platforms, but the idea to improve locality should work on the majority of modern CPU-architectures. I advice that every software developer should read <a href="http://t.co/nTxQAgzB">this excellent article</a> (especially &ldquo;sections 3 and 6) to better understand CPU-caches and memory and then come back to this post.</p>
-
-<h2><strong>Memory hierarchies and difference in speed</strong></h2>
-
-<p>There&rsquo;s a huge gap between the speed of CPUs and the latency of DRAM-memory. CPU&rsquo;s cache-memory is roughly 100 times faster than main memory which in turn 10k times faster than secondary storage. Thus, the processor will have to wait more than 100 cycles every time the memory is needed to deliver data. This problem is solved by sticking smaller, faster memory chips in between the processor and the main memory. These chips are called CPU-caches. Techniques in which cache is heavily utilized during the execution of a program can dramatically impact the performance of algorithms. Caches improve performance when memory accesses exhibit locality.</p>
-
-<h2>**Locality of reference</h2>
-
-<p>**</p>
-
-<p>Hierarchical memory is a hardware optimization that takes the benefits of spatial and temporal locality and can be used on several levels of the memory hierarchy. <a href="http://en.wikipedia.org/wiki/Locality_of_reference">Locality</a> describes the same value or related <a href="http://www.wikipedia.org/wiki/Computer_storage">storage</a> locations being frequently accessed from memory. There are two basic types of locality:</p>
-
-<ul>
-<li><p>Temporal locality refers to the reuse of specific data and/or resources within relatively small time durations. Access latency can be avoided by reusing the data fetched previously. With poor temporal locality, data that could have been reused is lost from a working area and must be fetched again. Loops over the same small amount of data result in excellent temporal locality.</p></li>
-<li><p>Spatial locality refers to the use of data elements within relatively close storage locations. The concept that likelihood of referencing a resource is higher if a resource near it was just referenced. With this type of locality, access latency can be amortized by retrieving multiple data items in a single fetch cycle and using good spatial locality to ensure that all the data fetched is useful. If the data is not useful, because of poor spatial locality, then more fetch cycles will be required to process the same data. A simple array is a good candidate for this type of locality.</p></li>
-</ul>
-
-
-<p>When high speed is needed it is very important to understand what data structures exhibit better locality of CPU-caches and how to improve one. Good locality is a good speed of data access affecting both throughput and latency. For CPU-caches the most common replacement policy is to fetch blocks from slower memory (DRAM) into fast memory (SRAM) 1 cache-line at a time when block of memory is touched by a program which doesn&rsquo;t reside in the cache, a kind of LRU that might differ not significantly from pure LRU-policy. Note that how the program-level locality is mapped onto memory-level depends on the compiler&rsquo;s layout of objects and on the allocator&rsquo;s placement of those objects in memory in the operating system. Most compilers layout data in consecutive areas of memory. Normally, compilers preserve the order of variables which helps to achieve a good locality on a program-level. The conventional wisdom is that programs spend 90% of their time executing 10% of the code.  By placing the most common instructions and data in the fast-but-small storage, while leaving the rest in the slow-but-large storage, we can lower the average memory-access time of a program significantly.  Next, we consider locality effects on classic algorithms and data structures with techniques.</p>
-
-<h2><strong>Arrays, linked lists and locality</strong></h2>
-
-<p>Now let&rsquo;s consider a simple analysis by example exhibiting poor locality of reference.</p>
-
-<p>I run the benchmark on an Intel Core 2 Duo CPU 3GHz using:</p>
-
-<ul>
-<li><p>JDK: 1.6.0_27</p></li>
-<li><p>JVM-params: -Xms512m -Xmx512m -XX:CompileThreshold=1 -XX:newRatio=128                                      -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode</p></li>
-</ul>
-
-
-<p>The benchmark was taken 100 times in a row to calculate average values. I performed a simple test by appending a single element in a loop N times to the end of a LinkedList and then did the same for an ArrayList. Mind you, the complexity of the operation on both collections is equal O(1).</p>
-
-<p><img src="http://ivoroshilin.files.wordpress.com/2013/02/graph.png" alt="graph" /></p>
-
-<p>As can be seen on the graph ArrayList is a winner.  In this benchmark I tried to do the same test with preallocated array for the first test and by default for the second one. Of course, for non-preallocated ArrayList total time grew higher, but nevertheless one has beaten LinkedList with the above figures.</p>
-
-<p>The thing is that <em>a dynamic array</em> allocates all elements contiguously in memory usually in a single continuous block of memory whereas a linked list contains its elements fragmentally. That is, nodes of a linked list can be scattered in arbitrary areas of memory. As have been said in the beginning caches of modern processors don&rsquo;t like random access to memory. Therefore, sequential access in arrays is faster than on linked lists on many machines, because they have a very good <a href="http://en.wikipedia.org/wiki/Locality_of_reference">locality of reference</a> and thus make good use of data caching.</p>
-
-<p>Recall that LinkedList will have to do additionally a memory allocation on each insertion of a new element. But, wait, access to elements in the memory takes longer than from CPU-cache. You can check this using a bit different test by iterating these two data structures from left to right with the exact parameters as above and see. Again, the iteration time is slower in LinkedList due to locality of reference. The ArrayList<code> </code>elements are closer together, so there are fewer <a href="https://secure.wikimedia.org/wikipedia/en/wiki/CPU_cache">cache misses</a> indeed. Even when the linked list does not include any cache-misses at all, the traversal will be slower. This is because visiting each item incurs the cost of two dereference operations instead of the single one that the array list needs, taking double the amount of time. Cache-misses are major selling point of the array backed up structures. Linked structures are potentially a cache miss on each node making the O(n) iteration actually significantly slower. The append (insert at end) time for ArrayList is <em>amortized</em> O(1), meaning that it&rsquo;s O(1) on average when doing a long series of appends. Any one of them may be O(n), but that one doubles the capacity so the next <em>n</em> of them can use pre-allocated space.  Of course, periodically the ArrayList&rsquo;s backing array may need to be resized (which won&rsquo;t be the case if it was chosen with a large enough initial capacity), but since the array grows exponentially the amortized cost will be low, and is bounded by O(lg n) complexity.</p>
-
-<p>Further optimizations:</p>
-
-<ul>
-<li><p><a href="http://en.wikipedia.org/wiki/Unrolled_linked_list">Unrolled LinkedList</a> - it can dramatically increase <a href="http://en.wikipedia.org/wiki/CPU_cache">cache</a> performance, while decreasing the memory.</p></li>
-<li><p><a href="http://java.dzone.com/articles/false-sharing">False sharing</a> - cache-optimization for arrays in SMP CPU-architecture - another technique used in multithreading.</p></li>
-</ul>
-
-
-<p><strong>The bottom line: </strong>Arrays are superior at exploiting CPU-cache in a sequential access unlike linked data structures. Thanks to spatial locality! The problem of linked lists is when the node is accessed, the whole cache line is fetched from main memory, yet it is mostly not used.</p>
-
-<h3>Large array and better cache utilization</h3>
-
-<p>Large Arrays in Hot Spot JVM are placed in contiguous memory as many other memory allocators try to do. However, all their elements might not fit into cache. An alternative is to split the array up into smaller ones so that each one fits into CPU-cache. The size of such a small array depends on many factors. I&rsquo;ll try to explain how to tune array-sizes in later posts.</p>
-
-<h2>**Hash tables</h2>
-
-<p>**</p>
-
-<p>Hash tables exhibit poor locality of reference, because they cause access patterns that jump around, this can trigger <a href="http://en.wikipedia.org/wiki/CPU_cache">microprocessor cache</a> misses that cause long delays. Randomization causes bad locality. Compact data structures such as arrays searched with <a href="http://en.wikipedia.org/wiki/Linear_search">linear search</a> may be faster in some cases. An interesting article <a href="http://www.siam.org/meetings/alenex05/papers/13gheileman.pdf">&ldquo;How caching affects hashing&rdquo;</a> reveals the fact that the number of collisions a hash table produces, may lead to superior performance. In this paper three basic approaches were analyzed: linear probing, linear double hashing and exponential double hashing. All three make up so called <strong>Open addressing</strong> or <strong>closed hashing</strong> method of collision resolution. Open addressing can lead to more concise tables yielding a better cache performance than classing bucketing. But as the load factor starts to get high its performance might downgrade. The experimental analysis provided that, assuming a nearly uniform distribution, linear probing outperforms double hashing due to the fact that the percentage of the cache hits per probe is higher in the case of linear probing provided that its data set is not very large. However, If data doesn&rsquo;t fit into memory, linear probing may work slower. A great minus of this type of implementation is that the operation of deletion in open addressing is very expensive because of its O(n) worst time complexity on the array.</p>
-
-<p>If a hash table tends to have many collisions, we can apply &ldquo;Unrolled linked list&rdquo; described above. Ideally each linked list&rsquo;s element should occupy one cache line on the appropriate cache level.  A great minus is that the size of a cache line is CPU-architecture-bound.</p>
-
-<h2><strong>Binary Search Trees</strong></h2>
-
-<p>Here I consider classic unbalanced Binary Searh trees (aka BST), Red-Black trees, AVL-trees and Splay-trees (aka The splay tree of Sleator and Tarjan) in terms of locality. Each tree should be applied in a different situation. All of these are linked data structures made up of nodes. Each node have 3 pointers: parent, left child and right child. Locality in trees is a tendency to look for the same element multiple times. Note that a set of operations exhibits no locality if every element is equally likely to be accessed at each point. Therefore, we&rsquo;re going to consider here only those cases where elements are accessed multiple times.</p>
-
-<h3>Splay-trees</h3>
-
-<p><a href="http://en.wikipedia.org/wiki/Splay_tree">Splay-trees</a> are the most intriguing due to the fact that they simply have the ability to optimize themselves for better locality of reference. The tree performs rotations of nodes to the root every time an access is made. Also note that they are not balanced trees as BST. Despite the fact that a worst case bound on the Splay-operation is O(n) for n nodes the amortized time for a set of operations is quite efficient (O(lg n)) which is compensated by these rotations and locality. Here we are talking about &ldquo;top-down splay-tree&rdquo; variation. Splay trees are the winner of locality among these ones when insertions happen quite frequently in sorted order and later accesses are sequential. Frequently used nodes are located near the root. In almost all other cases, because of the high cost of maintaining self-adjustment. Random insertion is the worst among all 4 data structures due to splay-overhear. On the contrary, the AVL-tree outperforms a Splay-trees when the search-key distribution is uniform and very frequent.</p>
-
-<h3>AVL-trees</h3>
-
-<p>If insertions happen quite frequently in sorted order the locality of <a href="http://en.wikipedia.org/wiki/AVL_tree">AVL-trees</a> is quite good provided that later accesses are more random. In other cases it may carry out far more comparisons than other trees which deteriorates its performance and therefore may stand behind others. The search performance of the AVL-tree is almost always better than that of Splay-trees.</p>
-
-<h3>Red-Black trees</h3>
-
-<p>If input is randomly ordered but sequential traversal happen frequently then <a href="http://en.wikipedia.org/wiki/Red%E2%80%93black_tree">red-black trees</a> should be used. Random insertions perform better over AVL-trees. However, for pathological inputs AVL-operations work faster than in Red-Black tree due to the stricter rule of rebalancing.</p>
-
-<h3>Unbalanced BSTs</h3>
-
-<p>When randomly ordered input can be relied upon it is best to use this basic kind of <a href="http://en.wikipedia.org/wiki/Binary_search_tree">binary search trees</a> over others. It requires the least extra overhead unlike the other tree-structures.</p>
-
-<p><strong>The bottom line:  </strong>Input set and distribution of data both matter. In addition to locality, sometimes other factors are much more important for performance.</p>
-
-<p>For random input set: BST - is the fastest among 4 remaining ones, then goes Red-Black tree, then goes the AVL-tree and the slowest one is a Splay-tree.</p>
-
-<p>Splay trees take much of the CPU-time mostly on rotations where they lose in speed. There are some optimizations towards fewer splay-operations for certain cases, but they are not discussed in this blog. Unbalanced BSTs are simpler in implementation and have lighter operations and only best work against random data.</p>
-
-<p>For pathological input set the picture is the opposite - from fastest to slowest: Splay-tree due to high locality, AVL-tree, Red-Black tree, BST - is extremely slow as it is unbalanced.</p>
-
-<p>As this series is devoted solely to locality and some facts mentioned are not directly related to it, in later series I&rsquo;ll try to give some empirical benchmarks on overall performance of these structures to make the picture more clear.</p>
-
-<h2><strong>Conclusion</strong></h2>
-
-<p>it is worth noting that <em>hidden constants</em> caused by locality of reference might differ depending on computer architecture and implementation. Multiple operations on data structures with non-sequential access to elements cause poor performance. Asymptotic comparison of cache-friendly data structures with others is meaningless because in reality the result can be quite the contrary. Defragmented location of related elements in memory causes CPU cache-losses which can drastically degrade overall performance. Especially It is sensible on large data volumes where low latency is at premium. Mind you, algorithm with good locality is not sufficient for better performance. A number of operations, their cost including CPU-time do matter too.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/5">&larr; Older</a>
@@ -833,6 +786,10 @@ public static void main(String[] args) throws Exception {
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2015/06/08/researching-work-execution-with-dispatchers-in-java-8-from-naive-to-akka-like-design/">Researching Work Execution With Dispatchers in Java 8: From Naive to Akka-like Design</a>
+      </li>
     
       <li class="post">
         <a href="/2015/03/13/migrated-to-octopress/">The Blog Has Migrated to a New Platform</a>
@@ -868,10 +825,6 @@ public static void main(String[] args) throws Exception {
     
       <li class="post">
         <a href="/2014/02/17/service-discovery-in-distributed-systems/">Service Discovery in Distributed Systems</a>
-      </li>
-    
-      <li class="post">
-        <a href="/2013/10/29/highload-conference-2013/">HighLoad Conference 2013</a>
       </li>
     
   </ul>

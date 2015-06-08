@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>http://vibneiro.github.io/2015/06/08/researching-work-execution-with-dispatchers-in-java-8-from-naive-to-akka-like-design/</loc>
+    <lastmod>2015-06-08T22:39:12+03:00</lastmod>
+  </url>
+  <url>
     <loc>http://vibneiro.github.io/2015/03/13/migrated-to-octopress/</loc>
     <lastmod>2015-03-13T02:25:26+03:00</lastmod>
   </url>
@@ -74,18 +78,18 @@
   </url>
   <url>
     <loc>http://vibneiro.github.io/blog/archives/</loc>
-    <lastmod>2015-04-26T01:32:44+03:00</lastmod>
+    <lastmod>2015-06-09T00:02:40+03:00</lastmod>
   </url>
   <url>
     <loc>http://vibneiro.github.io/</loc>
-    <lastmod>2015-04-26T01:32:44+03:00</lastmod>
+    <lastmod>2015-06-09T00:02:40+03:00</lastmod>
   </url>
   <url>
     <loc>http://vibneiro.github.io/talks/</loc>
-    <lastmod>2015-04-26T01:32:44+03:00</lastmod>
+    <lastmod>2015-06-09T00:02:40+03:00</lastmod>
   </url>
   <url>
     <loc>http://vibneiro.github.io/about/</loc>
-    <lastmod>2015-04-26T01:32:44+03:00</lastmod>
+    <lastmod>2015-06-09T00:02:40+03:00</lastmod>
   </url>
 </urlset>

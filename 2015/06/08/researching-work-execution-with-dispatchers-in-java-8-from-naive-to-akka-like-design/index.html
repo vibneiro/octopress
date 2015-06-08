@@ -1,0 +1,389 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Researching Work Execution With Dispatchers in Java 8: From Naive to Akka-like Design - Ivan Voroshilin&#8217;s Blog.</title>
+  <meta name="author" content="Ivan Voroshilin">
+
+  
+  <meta name="description" content="Highly-concurrent dispatchers">
+
+  
+  <meta name="keywords" content="Akka, dispatchers, CompletableFuture, Guava, Caffeine, CLHM, cache, ForkJoinPool" />
+
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://vibneiro.github.io/2015/06/08/researching-work-execution-with-dispatchers-in-java-8-from-naive-to-akka-like-design/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/octopress/atom.xml" rel="alternate" title="Ivan Voroshilin's Blog." type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-37693662-1', 'ivoroshilin.com');
+  ga('send', 'pageview');
+
+</script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Ivan Voroshilin&#8217;s Blog.</a></h1>
+  
+    <h2>Algorithmic contests, distributed systems and software architecture</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/octopress/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="vibneiro.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Main page</a></li>
+  <li><a href="/blog/archives">All posts</a></li>
+  <li><a href="/talks">Talks</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Researching Work Execution With Dispatchers in Java 8: From Naive to Akka-like Design</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-06-08T22:39:12+03:00'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>8</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>10:39 pm</span></time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Been to long since I last blogged…</p>
+
+<p>Since today, I am changing the format of blogging due to these 2 reasons:</p>
+
+<ol>
+<li><p>The blog has moved to the new platform.</p></li>
+<li><p>I want to make it more lively and plausible, that is not just writing a problem statement with solutions, but describing chalenges, and the way I came up with smth. So, the text is going to be more hilarious, and easy to follow.. Will see.. ;-)</p></li>
+</ol>
+
+
+<p>Ok, let&rsquo;s catch up.. I’ve been wrestling with concurrent algorithms and some advanced techniques to reduce contention lately.
+E.g. last month, I was researching design of <a href="https://github.com/akka/akka/tree/master/akka-actor/src/main/scala/akka/dispatch">Akka Dispatchers</a>,
+advanced caching in java (in particular, a java 8 rewrite of Guava&rsquo;s <a href="https://code.google.com/p/concurrentlinkedhashmap/">ConcurrentLinkedHashMap</a> - <a href="https://github.com/ben-manes/caffeine">«Caffeine»</a>, kudos to Ben Maine for his constant help, he designed both of them btw), did some <a href="https://github.com/vibneiro/dispatching/tree/master/benchmarks-java-8">JMH benchmarks</a>.</p>
+
+<p>My goal was to execute multiple Runnable tasks in java, coming in under a high load. Tasks with the same dispatchId should form a FIFO queue (very much like Actors in Scala and their mailboxeis) for further scheduling by a dispatcher.</p>
+
+<p>This post came about as a small research towards squeezing out more performance from concurrent dispatching.</p>
+
+<h2><strong>TL;DR</strong></h2>
+
+<p>The post has a quick rundown with the main isssues and solutions for dispathcing Runnable tasks in a higly concurrent environment.. We&rsquo;re going to touch on some techniques in caching such as WeakReference-Values (I&rsquo;m going to explain below why WeakRerefence and on values, odd?), some contention reduction tricks, at lasat ending up with an Akka-like event dispatcher.</p>
+
+<h3><strong>Intro</strong></h3>
+
+<p>I originally started exploring hashed dispatching, but then struggled with an overall performance bottleneck..
+The <a href="https://github.com/vibneiro/dispatching/blob/master/dispatch-java-8/src/main/java/vibneiro/dispatchers/ThreadBoundHashDispatcher.java">Dispatcher</a> was implemented by computing a thread of execution as a hash(dispatchId) mod threadsNumber. That is, each thread has a separate ConcurrentLinkedQueue as a FIFO buffer for scheduling. See the picture for clarity.</p>
+
+<p><img src="https://ivoroshilin.files.wordpress.com/2014/10/threadboundhashdispatcher1.png" alt="" /></p>
+
+<p>As turned out, the algorithm heavily degrades as a number of tasks increases due to the fact that hashing is not ideal (is not 100% uniform).</p>
+
+<h2><strong>Unbalanced work</strong></h2>
+
+<p>What if tasks differ in their run-time complexity? Some threads can be busy, while others are free, not helping others.
+This leads, as per the above model, to the stall of some threads which is very inefficient causing unbalanced execution and performance degradation. Even though, if tasks were equal in execution time, that would be a lot less scalable  under a high contention. Such things as CPU context-switches, memory-page faults, and most importantly, thread contention on the same lock kills the overall performance.</p>
+
+<h2><strong>Redesign</strong></h2>
+
+<p>Some dispatchId queues may be more active than the others and unfairly balanced among workers. Thus, we need to somehow decouple taskId FIFO Queues from corresponding workers, but maintain the FIFO order for the same dispatchId. By separating the queue from the worker, we retain FIFO property and more evenly spread out the work.</p>
+
+<p>Let&rsquo;s use a CompletableFuture (It is our FIFO-based everywhere below in the text) as a queuing mechanism backed by a ConcurrentMap&lt;dispatchId, CompletableFuture> as a simple cache. CompletableFuture refers to the next future for completion holding a FIFO property.</p>
+
+<p><img src="https://ivoroshilin.files.wordpress.com/2014/10/wsdispatcher.png" alt="" /></p>
+
+<h2><strong>Prunning the map</strong></h2>
+
+<p>However, If a dispatcher always executes new unique dispatchIds, then we need to prune the cache, avoiding OutOfMem.</p>
+
+<p>We can use WeakReference values to automatically evict, based on the observation that the execution chain provides the strong reference and completed futures become garbage. Why value, but not a key? The key isn&rsquo;t appropriate because it doesn&rsquo;t tells us when its chained CompletedFuture is done. Weak-reference values do! The value has a strong reference through the executor chaining down to the last enqueued future. When the last future completes and is idle, it becomes eligible for garbage collection and the map may evict the entry.</p>
+
+<p>The churn rate of tasks is low in most cases. However there is a small GC penalty by delegating the tracking to WeakReference, but can be performed in a minor GC (yes, copying young GC) and aggressively cleared.</p>
+
+<p>I derived the idea from Guava to prune the map in a separate thread, right after some threshold was hit, via exclusive tryLock – so we want block progress of other threads – neat!</p>
+
+<p>Why not SoftReferene values? <a href="http://jeremymanson.blogspot.ru/2009/07/how-hotspot-decides-to-clear_07.html">Soft references require two major GCs</a> in order to be collected, are costly to track, and if abused can fill up the heap to cause GC thrashing. I’ve left out some details, but this is the gist of it!</p>
+
+<p>See <a href="https://github.com/vibneiro/dispatching">the code on Github</a>.</p>
+
+<h2><strong>Thread Pool - a big deal</strong></h2>
+
+<p>A few words about <a href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ForkJoinPool.html">ForkJoinPool</a> and non-recursive tasks. Many people still tend to think that ForkJoinPool is efficient only for Recursive tasks. I <a href="http://stackoverflow.com/questions/30047122/java-forkjoinpool-with-non-recursive-tasks-does-work-stealing-work">asked this question</a> a while ago on stackoverflow and even had to ask Alexey Shipilev to step in. :-) Why does <a href="http://akka.io/">Akka</a> use ForkJoinPool as the main engine of task execution? Or why does JDK 8 takes advantage of a commonPool() in its Streaming and CompletedFuture implementations?
+Becasuse, for highly-intensive short tasks, which don&rsquo;t involve heavy I/O, they are way more scalable, unlike e.g. FixedThreadPool!</p>
+
+<p>Here&rsquo;s <a href="https://github.com/vibneiro/dispatching">the difference</a> in these performance JMH benchmarks of ThreadPoolExecutor and ForkJoinPool.
+Tasks are already small and needn&rsquo;t a recursive decomposition. Work-stealing works (read the design of ForkJoinPool if confused), regardless whether it is a big or small task - tasks can be grabbed by another free worker from the Deque&rsquo;s tail of a busy worker, reducing contention.</p>
+
+<h2><strong>Actor-like dispatchers</strong></h2>
+
+<p>I was reluctant to write my own, as the Caffeine has already <a href="https://github.com/ben-manes/caffeine/blob/master/jcache/src/main/java/com/github/benmanes/caffeine/jcache/event/EventDispatcher.java">one</a>.</p>
+
+<p>By the way! Here&rsquo;s <a href="https://github.com/vibneiro/dispatching/blob/master/dispatch-java-7/src/main/java/vibneiro/dispatchers/WorkStealingDispatcher.java">a backport of the java 8 Dispatcher to JDK 7</a> translated with Guava&rsquo;s ListenableFuture into Java 7 code.</p>
+
+<h2><strong>A few words about Caffeine</strong></h2>
+
+<p>I chatted with Ben Maine via email regarding Caffeine&rsquo;s cache design under the hood. There are advanced mechanics (e.g. eventually-consistent multithreaded datastructures, Stripe64 and full rewrite of ConcurrentHashMap proves to be very efficient)! It was fun to make some research&hellip;</p>
+
+<h2><strong>Conclusion</strong></h2>
+
+<p>Later, I decided to use the Caffeine in my Dispatcher, because it yielded very good results on the majority of <a href="https://github.com/vibneiro/dispatching">JMH performance benchmarks</a> compared to my implementations under similar parameters, including weak-values.
+I decided not to remove ![ThreadBoundHashDispatcher](<a href="https://github.com/vibneiro/dispatching/blob/master/dispatch-java-8/src/main/java/vibneiro/dispatchers/ThreadBoundHashDispatcher.java">https://github.com/vibneiro/dispatching/blob/master/dispatch-java-8/src/main/java/vibneiro/dispatchers/ThreadBoundHashDispatcher.java</a>( from the code though, as one might potentially have some benefits for some rare cases.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">vibneiro</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2015-06-08T22:39:12+03:00'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>8</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>10:39 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/categories/algorithms/'>algorithms</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/2015/03/13/migrated-to-octopress/" title="Previous Post: The blog has migrated to a new platform">&laquo; The blog has migrated to a new platform</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Welcome to my blog</h1>
+  <script src="//about.me/embed/ivan_voroshilin?headline=0"></script>
+
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2015/06/08/researching-work-execution-with-dispatchers-in-java-8-from-naive-to-akka-like-design/">Researching Work Execution With Dispatchers in Java 8: From Naive to Akka-like Design</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2015/03/13/migrated-to-octopress/">The Blog Has Migrated to a New Platform</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2015/02/05/toughest-backtracking-problems-in-algorithmic-competitions/">Toughest Backtracking Problems in Algorithmic Competitions</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2014/12/16/docker-creating-and-testing-httprest-server-on-top-of-akkaspray/">Dockerizing Spray HTTP Server</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2014/10/30/docker-a-birds-eye-view/">Docker: A Bird&#8217;s-eye View</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2014/10/12/the-flip-side-of-rule-engines-and-some-tips-on-when-not-use-ones/">The Flip Side of Rule Engines on Example of Drools and Some Valuable Tips</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2014/09/15/project-euler-a-list-of-interesting-problems/">Project Euler: A List of Interesting Problems</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2014/08/14/command-and-query-responsibility-segregation-and-event-sourcing-what-you-should-think-about-in-advance/">Command and Query Responsibility Segregation and Event Sourcing: What You Should Think About in Advance</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2014/03/18/distributed-transactions-and-scalability-issues-in-large-scale-distributed-systems/">Distributed Transactions and Scalability Issues in Large-scale Distributed Systems</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2014/02/17/service-discovery-in-distributed-systems/">Service Discovery in Distributed Systems</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'vibneiro',
+            count: 10,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Ivan Voroshilin
+</p>
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-37693662-1', 'ivoroshilin.com');
+  ga('send', 'pageview');
+
+</script>
+
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'vibneiro';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://vibneiro.github.io/2015/06/08/researching-work-execution-with-dispatchers-in-java-8-from-naive-to-akka-like-design/';
+        var disqus_url = 'http://vibneiro.github.io/2015/06/08/researching-work-execution-with-dispatchers-in-java-8-from-naive-to-akka-like-design/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-37693662-1', 'ivoroshilin.com');
+  ga('send', 'pageview');
+
+</script>
+
+
+
+
+
+
+</body>
+</html>
