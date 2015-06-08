@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Algorithms | Ivan Voroshilin's Blog.]]></title>
   <link href="http://vibneiro.github.io/categories/algorithms/atom.xml" rel="self"/>
   <link href="http://vibneiro.github.io/"/>
-  <updated>2015-06-09T00:53:37+03:00</updated>
+  <updated>2015-06-09T00:58:10+03:00</updated>
   <id>http://vibneiro.github.io/</id>
   <author>
     <name><![CDATA[Ivan Voroshilin]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Researching Work Execution With Dispatchers in Java 8: From Naive to Akka-like Design]]></title>
+    <title type="html"><![CDATA[Work Scheduling With Dispatchers in Java 8: From Naive to Akka-like Design]]></title>
     <link href="http://vibneiro.github.io/2015/06/08/researching-work-execution-with-dispatchers-in-java-8-from-naive-to-akka-like-design/"/>
     <updated>2015-06-08T22:39:12+03:00</updated>
     <id>http://vibneiro.github.io/2015/06/08/researching-work-execution-with-dispatchers-in-java-8-from-naive-to-akka-like-design</id>
@@ -94,7 +94,7 @@ Tasks are already small and needn&rsquo;t a recursive decomposition. Work-steali
 
 <h2><strong>A few words about Caffeine</strong></h2>
 
-<p>I chatted with Ben Maine via email regarding Caffeine&rsquo;s cache design under the hood. There are advanced mechanics (e.g. eventually-consistent multithreaded datastructures, Stripe64 and full rewrite of ConcurrentHashMap proves to be very efficient)! It was fun to make some research&hellip; Guys made it slick, covering
+<p>I studied some parts Caffeine&rsquo;s cache design under the hood. There are advanced techniques (e.g. eventually-consistent multithreaded datastructures, Stripe64 and full rewrite of ConcurrentHashMap proves to be very efficient)! It was fun to make some research&hellip; Guys made it slick, covering
 many different cases.</p>
 
 <p>Later, I decided to use the Caffeine in my Dispatcher, because it yielded very good results on the majority of <a href="https://github.com/vibneiro/dispatching">JMH performance benchmarks</a> compared to my implementations under similar parameters, including weak-values.
