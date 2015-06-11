@@ -4,7 +4,7 @@
   <title><![CDATA[Ivan Voroshilin's Blog.]]></title>
   <link href="http://vibneiro.github.io/atom.xml" rel="self"/>
   <link href="http://vibneiro.github.io/"/>
-  <updated>2015-06-12T00:48:14+03:00</updated>
+  <updated>2015-06-12T01:05:27+03:00</updated>
   <id>http://vibneiro.github.io/</id>
   <author>
     <name><![CDATA[Ivan Voroshilin]]></name>
@@ -90,14 +90,14 @@ If a dispatcher always executes a huge number of incoming tasks, eventually we n
 
 <h2><strong>Thread Pool - a big deal</strong></h2>
 
-<p>≈A few words about <a href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ForkJoinPool.html">ForkJoinPool</a> and non-recursive tasks. Many people still tend to think that ForkJoinPool is efficient only for Recursive tasks. I <a href="http://stackoverflow.com/questions/30047122/java-forkjoinpool-with-non-recursive-tasks-does-work-stealing-work">asked this question</a> a while ago on stackoverflow and even had to ask Alexey Shipilev for help. Why does <a href="http://akka.io/">Akka</a> use ForkJoinPool as the main engine of task execution? Or why does JDK 8 takes advantage of a commonPool() in its Streaming and CompletedFuture implementations?
-Fork/Join is the default parallel computation framework in Java 8. For short tasks, which don&rsquo;t involve heavy I/O, ForkJoinPool is a way more scalable, unlike e.g. FixedThreadPool!
-JMH benchmarks depict this <a href="https://github.com/vibneiro/dispatching">very clearly</a>. Tasks are already small and needn&rsquo;t a recursive decomposition. Work-stealing works (read the design of ForkJoinPool if confused), regardless whether it is a big or small task - tasks can be grabbed by another free worker from the Deque&rsquo;s tail of a busy worker, reducing contention drastically.</p>
+<p>≈A few words about <a href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ForkJoinPool.html">ForkJoinPool</a> and non-recursive tasks. Many people still tend to think that ForkJoinPool is efficient only for Recursive tasks. I <a href="http://stackoverflow.com/questions/30047122/java-forkjoinpool-with-non-recursive-tasks-does-work-stealing-work">asked this question</a> a while ago on stackoverflow and even had to ask Alexey Shipilev for help. Why does <a href="http://akka.io/">Akka</a> use ForkJoinPool as the main engine of task execution? Or why does JDK 8 take advantage of a commonPool() in its Streaming and CompletedFuture implementations?
+Fork/Join is the default parallel computation framework since Java 8. For short tasks, which don&rsquo;t involve heavy I/O, ForkJoinPool is a way more scalable, unlike e.g. FixedThreadPool!
+JMH benchmarks depict this <a href="https://github.com/vibneiro/dispatching">very clearly</a>. Tasks are already small and needn&rsquo;t a recursive decomposition. Work-stealing works (read the design of ForkJoinPool, if confused), regardless whether it is a big or small task - tasks can be grabbed by another free worker from the Deque&rsquo;s tail of a busy worker, reducing contention drastically.</p>
 
 <p>Don&rsquo;t be surprised that in the graphs below for JDK 7/8 results are very different. <a href="http://openjdk.java.net/jeps/155">These are the changes</a> targetted at JDK 8, thus the difference. Both improvements for ForkJoinPool (up to 60x speedup!) and cache-oriented enhancements to the ConcurrentHashMap made this possible.
-The idea is to treat external submitters in a similar way as workers — using randomized queuing and stealing. This also greatly improves throughput when all tasks are async and submitted to the pool rather than forked, which becomes a reasonable way to structure actor frameworks, as well as many plain services that you might otherwise use ThreadPoolExecutor for.</p>
+The idea is to treat external submitters in a similar way as workers — using randomized queuing and stealing. This also greatly improves throughput when all tasks are async and submitted to the pool rather than forked, which becomes a reasonable way to structure actor frameworks, as well as many plain services that you might otherwise use ThreadPoolExecutor for. This was not true in JDK 8, where I observed a lot of overhead in many cases with FJ.</p>
 
-<p>ForkJoinPool matcher dispatcher&rsquo;s needs very much, being able of accepting asynchronous tasks returning you a Future object. Moreover, new features include support for completion-based designs that are often most appropriate for IO-bound usages, among others.</p>
+<p>As a result, ForkJoinPool matches dispatcher&rsquo;s requirements perfrectly, being able of accepting asynchronous tasks returning you a Future object. Moreover <a href="https://jcp.org/en/jsr/detail?id=166">JSR-166</a> says that new features include support for completion-based designs that are often most appropriate for IO-bound usages, among others. But, I didn&rsquo;t check with the I/O..</p>
 
 <h2><strong>Actor-like dispatchers</strong></h2>
 
@@ -112,6 +112,13 @@ many different cases.</p>
 
 <p>Later, I decided to use the Caffeine in my Dispatcher, because it yielded very good results on the majority of <a href="https://github.com/vibneiro/dispatching">JMH performance benchmarks</a> compared to my implementations under similar parameters, including weak-values.
 I decided not to remove <a href="https://github.com/vibneiro/dispatching/blob/master/dispatch-java-8/src/main/java/vibneiro/dispatchers/ThreadBoundHashDispatcher.java">ThreadBoundHashDispatcher</a> from the code though, as one might potentially have some benefits for some rare cases.</p>
+
+<h2>Conclusion</h2>
+
+<p>I wish JDK implementors would add this feature to the ForkJoinPool: submission-queue cooperation with CompletableFuture and FIFO stuff. As a result, dispatching would more performant! For now, we have to use intermidiate caching as shown in this post. If you have some clever ideas, don&rsquo;t hesitate to contact me.</p>
+
+<p>Hope this helps,
+Ivan</p>
 ]]></content>
   </entry>
   
