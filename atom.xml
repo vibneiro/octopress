@@ -4,7 +4,7 @@
   <title><![CDATA[Ivan Voroshilin's Blog.]]></title>
   <link href="http://vibneiro.github.io/atom.xml" rel="self"/>
   <link href="http://vibneiro.github.io/"/>
-  <updated>2015-06-10T23:39:40+03:00</updated>
+  <updated>2015-06-12T00:48:14+03:00</updated>
   <id>http://vibneiro.github.io/</id>
   <author>
     <name><![CDATA[Ivan Voroshilin]]></name>
@@ -57,7 +57,7 @@ This leads, as per the above model, to the stall of some threads which is very i
 
 <h2><strong>Redesign</strong></h2>
 
-<p>Some dispatchId queues may be more active than the others and unfairly balanced among workers. Thus, we need to somehow decouple a queue from its corresponding thread, but maintain the FIFO order for the same dispatchId. By separating the queue from the worker-thread, we retain FIFO property and more evenly spread out the work - better throughput!</p>
+<p>Some dispatchId queues may be more active than the others and unfairly balanced among workers. Thus, we need to somehow decouple a queue from its corresponding thread, but maintain the FIFO order for the same dispatchId. By separating the queue from the worker-thread, we retain FIFO property and more evenly spread out the work - a better throughput!</p>
 
 <p>Let&rsquo;s apply a chained CompletableFuture<task> (It is our FIFO-queue everywhere below in the text) as a queuing mechanism as a value of ConcurrentMap&lt;dispatchId, CompletableFuture>. CompletableFuture-object can have a reference to the next future for completion, thereby holding a FIFO property.</p>
 
@@ -65,16 +65,24 @@ This leads, as per the above model, to the stall of some threads which is very i
 
 <h2><strong>Prunning the cache</strong></h2>
 
-<p>In some usecases, each Runnable task has a truly unique dispatchId (simply, this might be a long counter).
+<p>In some usecases, each Runnable task has a truly unique dispatchId (e.g. just a global counter).
 If a dispatcher always executes a huge number of incoming tasks, eventually we need to prune the cache(our ConcurrentMap), to avoid OutOfMemory.</p>
 
 <p>WeakReference values can automatically evict CompletabeFuture, based on the observation that the execution chain provides the strong reference and completed futures become a garbage. Why value, but not a key? The key isn&rsquo;t appropriate because it doesn&rsquo;t tells us when its chained CompletedFuture is done. Weak-reference values do! The value has a strong reference through the executor chaining down to the last enqueued future. When the last future completes and is idle, it becomes eligible for garbage collection and the map may evict the entry.</p>
 
-<p>The churn rate of tasks is low in most cases. However there is a small GC penalty by delegating the tracking to WeakReference, but can be performed in a minor GC (yes, copying young GC) and aggressively cleared.</p>
-
 <p>I derived the idea from Guava to prune the map in a separate thread, right after a cache capacity was reached. This is done with an exclusive tryLock, so shat we don&rsquo;t want to block progress of other threads – neat! A thread not being able to capture the lock immediately jumps over to do another work. This amortizes the total cost of cache maintenance during dispatching.</p>
 
 <p><img src="https://ivoroshilin.files.wordpress.com/2014/12/weakvaluecorrect.png" alt="" /></p>
+
+<h2>On the cost of Weak-References</h2>
+
+<p>Object allcation is very cheap ~10 cycles compared to ~30 cycles for malloc and reclaiming short-lived objects is very cheap.</p>
+
+<p>A lifespan of tasks have an ephemeral nature, so this shouldn&rsquo;t be an issue, as they die in the young space, not being promoted to the old space. The proof for this is that GC only visits live objects.</p>
+
+<p>The churn rate of tasks is low in most cases, however there is a small GC penalty by delegating the tracking to WeakReference, but can be performed in a minor GC (yes, copying young GC) and aggressively cleared. Because, for most of the applications, the length of the pauses is negligible latency-wise, this is true if most of the objects in Eden can be considered garbage and are never copied to Survivor/Old spaces. If the opposite is true and most of the newborn objects are not eligible for GC, Minor GC pauses start taking considerably more time. In this case, tune you GC appropriately.</p>
+
+<h2>Soft-References - be careful</h2>
 
 <p>Why not SoftReferene values? <a href="http://jeremymanson.blogspot.ru/2009/07/how-hotspot-decides-to-clear_07.html">Soft references require two major GCs</a> in order to be collected, are costly to track, and if abused can fill up the heap to cause GC thrashing.</p>
 
@@ -82,7 +90,7 @@ If a dispatcher always executes a huge number of incoming tasks, eventually we n
 
 <h2><strong>Thread Pool - a big deal</strong></h2>
 
-<p>A few words about <a href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ForkJoinPool.html">ForkJoinPool</a> and non-recursive tasks. Many people still tend to think that ForkJoinPool is efficient only for Recursive tasks. I <a href="http://stackoverflow.com/questions/30047122/java-forkjoinpool-with-non-recursive-tasks-does-work-stealing-work">asked this question</a> a while ago on stackoverflow and even had to ask Alexey Shipilev for help. Why does <a href="http://akka.io/">Akka</a> use ForkJoinPool as the main engine of task execution? Or why does JDK 8 takes advantage of a commonPool() in its Streaming and CompletedFuture implementations?
+<p>≈A few words about <a href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ForkJoinPool.html">ForkJoinPool</a> and non-recursive tasks. Many people still tend to think that ForkJoinPool is efficient only for Recursive tasks. I <a href="http://stackoverflow.com/questions/30047122/java-forkjoinpool-with-non-recursive-tasks-does-work-stealing-work">asked this question</a> a while ago on stackoverflow and even had to ask Alexey Shipilev for help. Why does <a href="http://akka.io/">Akka</a> use ForkJoinPool as the main engine of task execution? Or why does JDK 8 takes advantage of a commonPool() in its Streaming and CompletedFuture implementations?
 Fork/Join is the default parallel computation framework in Java 8. For short tasks, which don&rsquo;t involve heavy I/O, ForkJoinPool is a way more scalable, unlike e.g. FixedThreadPool!
 JMH benchmarks depict this <a href="https://github.com/vibneiro/dispatching">very clearly</a>. Tasks are already small and needn&rsquo;t a recursive decomposition. Work-stealing works (read the design of ForkJoinPool if confused), regardless whether it is a big or small task - tasks can be grabbed by another free worker from the Deque&rsquo;s tail of a busy worker, reducing contention drastically.</p>
 
