@@ -4,7 +4,7 @@
   <title><![CDATA[Ivan Voroshilin's Blog.]]></title>
   <link href="http://vibneiro.github.io/atom.xml" rel="self"/>
   <link href="http://vibneiro.github.io/"/>
-  <updated>2015-06-12T02:13:32+03:00</updated>
+  <updated>2015-06-12T02:18:06+03:00</updated>
   <id>http://vibneiro.github.io/</id>
   <author>
     <name><![CDATA[Ivan Voroshilin]]></name>
@@ -112,10 +112,10 @@ The idea is to treat external submitters in a similar way as workers — using r
 <p>I&rsquo;ve attached here 2 graphs for comparison of performance of JDK 7 and JDK 8 algorithms, respectively, based on random dispatchIds over a finite set.
 For more thorough analysis, see <a href="https://github.com/vibneiro/dispatching/blob/master/README.md">the Dispatch Benchmarks on Github</a>. The trends don&rsquo;t differ much from test to test within a single Java-version, which proves eviction overhead (Bounded caching) of Weak-values to be neglible for these tests.</p>
 
+<p><img src="https://cloud.githubusercontent.com/assets/3040823/8034389/e25c08fc-0def-11e5-84dd-b95140376a46.png" alt="1. Java Version: 1.8.0_45" /></p>
+
 <ol>
-<li><p>Java Version: 1.8.0_45
-!(<a href="https://cloud.githubusercontent.com/assets/3040823/8034389/e25c08fc-0def-11e5-84dd-b95140376a46.png">https://cloud.githubusercontent.com/assets/3040823/8034389/e25c08fc-0def-11e5-84dd-b95140376a46.png</a>)</p></li>
-<li><p>Java Version: 1.7.0_71</p></li>
+<li>Java Version: 1.7.0_71</li>
 </ol>
 
 
@@ -130,7 +130,7 @@ I decided not to remove <a href="https://github.com/vibneiro/dispatching/blob/ma
 
 <p>Hope this helps,</p>
 
-<p>Ivan</p>
+<p>iIvan</p>
 ]]></content>
   </entry>
   
