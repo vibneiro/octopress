@@ -12,7 +12,7 @@
   <meta name="description" content="Highly-concurrent dispatchers">
 
   
-  <meta name="keywords" content="Akka, dispatchers, CompletableFuture, Guava, Caffeine, CLHM, cache, ForkJoinPool" />
+  <meta name="keywords" content="Akka, dispatchers, CompletableFuture, Guava, Caffeine, CLHM, cache, ForkJoinPool, WeakReference, Queue, concurrency" />
 
 
   <!-- http://t.co/dKP3o1e -->
@@ -192,18 +192,20 @@ The idea is to treat external submitters in a similar way as workers — using r
 
 <h2><strong>A few words about Caffeine</strong></h2>
 
-<p>I studied some parts Caffeine&rsquo;s cache design under the hood. There are advanced techniques (e.g. eventually-consistent multithreaded datastructures, Stripe64 and full rewrite of ConcurrentHashMap proves to be very efficient)! It was fun to make some research&hellip; Guys made it slick, covering
-many different cases.</p>
+<p>I studied some parts of Caffeine&rsquo;s cache design under the hood. There are advanced techniques (e.g. eventually-consistent multithreaded datastructures, Stripe64 and full rewrite of ConcurrentHashMap proves to be very efficient)! It was fun to make some research, I believe it definetely deserves another post or more&hellip; Ben made the cache a way more scalable!</p>
 
-<p>Later, I decided to use the Caffeine in my Dispatcher, because it yielded very good results on the majority of <a href="https://github.com/vibneiro/dispatching">JMH performance benchmarks</a> compared to my implementations under similar parameters, including weak-values.
-I decided not to remove <a href="https://github.com/vibneiro/dispatching/blob/master/dispatch-java-8/src/main/java/vibneiro/dispatchers/ThreadBoundHashDispatcher.java">ThreadBoundHashDispatcher</a> from the code though, as one might potentially have some benefits for some rare cases.</p>
+<h2><strong>Ok, here are the benchmarks</strong></h2>
 
 <h2>Conclusion</h2>
 
+<p>Later, I decided to use the Caffeine in my Dispatcher, because it yielded very good results on the majority of <a href="https://github.com/vibneiro/dispatching">JMH performance benchmarks</a> compared to my implementations under similar parameters, considering working weak-values.
+I decided not to remove <a href="https://github.com/vibneiro/dispatching/blob/master/dispatch-java-8/src/main/java/vibneiro/dispatchers/ThreadBoundHashDispatcher.java">ThreadBoundHashDispatcher</a> from the code though, as one might potentially have some benefits for some rare cases.</p>
+
 <p>I wish JDK implementors would add this feature to the ForkJoinPool: submission-queue cooperation with CompletableFuture and FIFO stuff. As a result, dispatching would more performant! For now, we have to use intermidiate caching as shown in this post. If you have some clever ideas, don&rsquo;t hesitate to contact me.</p>
 
-<p>Hope this helps,
-Ivan</p>
+<p>Hope this helps,</p>
+
+<p>Ivan</p>
 </div>
 
 
