@@ -198,25 +198,27 @@ The idea is to treat external submitters in a similar way as workers — using r
 <p>I&rsquo;ve attached here 2 graphs for comparison of performance of JDK 7 and JDK 8 algorithms, respectively, based on random dispatchIds over a finite set.
 For more thorough analysis, see <a href="https://github.com/vibneiro/dispatching/blob/master/README.md">the Dispatch Benchmarks on Github</a>. The trends don&rsquo;t differ much from test to test within a single Java-version, which proves eviction overhead (Bounded caching) of Weak-values to be neglible for these tests.</p>
 
-<p>Benchmark tests:</p>
+<p><strong>Tests for Benchmarking:</strong></p>
 
 <ol>
 <li>A single dispatch-queue: putting new tasks always to the same dispatchId.</li>
-<li>Counting dispatchId: one-off queue of size = 1 per task, since dispatchId is always incremented by 1.</li>
-<li>Randomly filled set of queues with a size = 32768. TODO: try 1024</li>
+<li>Counting dispatchId: one-off queue of size = 1 per task, that is dispatchId is incremented by 1 for new task.</li>
+<li>Randomly filled set of queues with a size = 32768.</li>
 </ol>
 
 
-<p>Benchmark details:</p>
+<p><strong>Benchmarking details:</strong></p>
 
 <ul>
-<li>Measuring a throughput (ops/s)</li>
-<li>32 user threads for all 3 tests;
- Purpose: analyze contention impact on concurrent data-structures.</li>
-<li>2 types of ExecutorService { ThreadPoolExecutor, ForkJoinPool };
-Purpose: analyze the impact of 2 different executors on throughput.</li>
+<li> Measuring a throughput (ops/s)</li>
+<li><p> 32 user threads for all 3 tests;</p>
+
+<p>Purpose: analyze contention impact on concurrent data-structures.</p></li>
+<li> 2 types of ExecutorService { ThreadPoolExecutor, ForkJoinPool };</li>
 </ul>
 
+
+<p>   Purpose: analyze the impact of 2 different executors on throughput.</p>
 
 <p>JDK 8: 1.8.0_45
 <img src="https://cloud.githubusercontent.com/assets/3040823/8034389/e25c08fc-0def-11e5-84dd-b95140376a46.png" alt="1. Java Version: 1.8.0_45" /></p>
