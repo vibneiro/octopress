@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Algorithms | Ivan Voroshilin's Blog.]]></title>
   <link href="http://vibneiro.github.io/categories/algorithms/atom.xml" rel="self"/>
   <link href="http://vibneiro.github.io/"/>
-  <updated>2015-06-17T00:48:27+03:00</updated>
+  <updated>2015-06-17T01:18:42+03:00</updated>
   <id>http://vibneiro.github.io/</id>
   <author>
     <name><![CDATA[Ivan Voroshilin]]></name>
@@ -89,6 +89,18 @@ This leads, as per the above model, to the stall of some threads which is very i
 
 <p>Why not SoftReferene values? <a href="http://jeremymanson.blogspot.ru/2009/07/how-hotspot-decides-to-clear_07.html">Soft references require two major GCs</a> in order to be collected, are costly to track, and if abused can fill up the heap to cause GC thrashing. So, they are not appropriate for dispatching.</p>
 
+<h2>Integrating cache with a CompletableFuture</h2>
+
+<p>Here&rsquo;s a simple mechanism that allows to run asyncrhonously tasks via a ConcurrentMap. Please note that for ConcurrentHashMap a new method &ldquo;compute&rdquo; is atomic
+and dead-lock-prone, which should be handled with care:</p>
+
+<p><div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">MyConcurrentCache</span><span class="o">.</span><span class="na">compute</span><span class="o">(</span><span class="n">queueName</span><span class="o">,</span> <span class="o">(</span><span class="n">k</span><span class="o">,</span> <span class="n">queue</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="o">(</span><span class="n">queue</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span>
+        <span class="o">?</span> <span class="n">CompletableFuture</span><span class="o">.</span><span class="na">runAsync</span><span class="o">(</span><span class="n">task</span><span class="o">)</span>
+        <span class="o">:</span> <span class="n">queue</span><span class="o">.</span><span class="na">thenRunAsync</span><span class="o">(</span><span class="n">task</span><span class="o">);</span></code></pre></div></p>
+
+<p>This is a gist!</p>
+
 <h2><strong>Thread Pool - a big deal</strong></h2>
 
 <p>≈A few words about <a href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ForkJoinPool.html">ForkJoinPool</a> and non-recursive tasks. Many people still tend to think that ForkJoinPool is efficient only for Recursive tasks. I <a href="http://stackoverflow.com/questions/30047122/java-forkjoinpool-with-non-recursive-tasks-does-work-stealing-work">asked this question</a> a while ago on stackoverflow and even had to ask Alexey Shipilev for help. Why does <a href="http://akka.io/">Akka</a> use ForkJoinPool as the main engine of task execution? Or why does JDK 8 take advantage of a commonPool() in its Streaming and CompletedFuture implementations?
@@ -128,13 +140,13 @@ For more thorough analysis, see <a href="https://github.com/vibneiro/dispatching
 
 <ul>
 <li> Measuring a throughput (ops/s)</li>
-<li><p> 32 user threads for all 3 tests;</p>
+<li> 32 user threads for all 3 tests;
 
 <ul>
 <li>Purpose: analyze contention impact on concurrent data-structures.</li>
 </ul>
 </li>
-<li><p> 2 types of ExecutorService { ThreadPoolExecutor, ForkJoinPool };</p>
+<li> 2 types of ExecutorService { ThreadPoolExecutor, ForkJoinPool };
 
 <ul>
 <li>Purpose: analyze the impact of 2 different executors on throughput.</li>
