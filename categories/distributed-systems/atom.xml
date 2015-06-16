@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Distributed Systems | Ivan Voroshilin's Blog.]]></title>
   <link href="http://vibneiro.github.io/categories/distributed-systems/atom.xml" rel="self"/>
   <link href="http://vibneiro.github.io/"/>
-  <updated>2015-06-17T01:18:42+03:00</updated>
+  <updated>2015-06-17T01:24:09+03:00</updated>
   <id>http://vibneiro.github.io/</id>
   <author>
     <name><![CDATA[Ivan Voroshilin]]></name>
@@ -28,53 +28,51 @@
 
 <p>Ok, let&rsquo;s get started.</p>
 
-<p>[code language=&ldquo;scala&rdquo;]
-import akka.actor.{ActorSystem}
-import spray.routing.<em>
-import akka.util.Timeout
-import scala.concurrent.duration.</em>
-import scala.util.{Failure, Success}</p>
+<p><div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">import</span> <span class="nn">akka.actor.</span><span class="o">{</span><span class="nc">ActorSystem</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">spray.routing.</span><span class="o">&lt;</span><span class="n">em</span><span class="o">&gt;</span>
+<span class="k">import</span> <span class="nn">akka.util.Timeout</span>
+<span class="k">import</span> <span class="nn">scala.concurrent.duration.</span><span class="o">&lt;/</span><span class="n">em</span><span class="o">&gt;</span>
+<span class="k">import</span> <span class="nn">scala.util.</span><span class="o">{</span><span class="nc">Failure</span><span class="o">,</span> <span class="nc">Success</span><span class="o">}&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
 
-<p>object HttpServer extends App with SimpleRoutingApp {</p>
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">object</span> <span class="nc">HttpServer</span> <span class="k">extends</span> <span class="nc">App</span> <span class="k">with</span> <span class="nc">SimpleRoutingApp</span> <span class="o">{&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
 
-<p>  implicit val actorSystem = ActorSystem()
-  implicit val timeout = Timeout(1.second)
-  import actorSystem.dispatcher</p>
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="k">implicit</span> <span class="k">val</span> <span class="n">actorSystem</span> <span class="k">=</span> <span class="nc">ActorSystem</span><span class="o">()</span>
+  <span class="k">implicit</span> <span class="k">val</span> <span class="n">timeout</span> <span class="k">=</span> <span class="nc">Timeout</span><span class="o">(</span><span class="mf">1.</span><span class="n">second</span><span class="o">)</span>
+  <span class="k">import</span> <span class="nn">actorSystem.dispatcher</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
 
-<p>  startServer(interface = &ldquo;localhost&rdquo;, port = 8080) {</p>
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="n">startServer</span><span class="o">(</span><span class="n">interface</span> <span class="k">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">localhost</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;,</span> <span class="n">port</span> <span class="k">=</span> <span class="mi">8080</span><span class="o">)</span> <span class="o">{&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
 
-<pre><code>// GET /welcome --&gt; "Welcome!" response
-get {
-  path("welcome") {
-    complete {
-      &lt;html&gt;
-        &lt;h1&gt;"Welcome!&lt;/h1&gt;
-        &lt;p&gt;&lt;a href="http://vibneiro.github.io/terminate?method=post"&gt;Stop the server&lt;/a&gt;&lt;/p&gt;
-      &lt;/html&gt;
-    }
-  }
-} ~
-  // POST /terminate --&gt; "The server is stopping" response
-  (post | parameter('method ! "post")) {
-    path("terminate") {
-      complete {
-        actorSystem.scheduler.scheduleOnce(1.second)(actorSystem.shutdown())(actorSystem.dispatcher)
-        "The server is stopping"
-      }
-    }
-  }
-</code></pre>
+<span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;//</span> <span class="nc">GET</span> <span class="o">/</span><span class="n">welcome</span> <span class="o">--&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="s">&quot;Welcome!&quot;</span> <span class="n">response</span>
+<span class="n">get</span> <span class="o">{</span>
+  <span class="n">path</span><span class="o">(</span><span class="s">&quot;welcome&quot;</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">complete</span> <span class="o">{</span>
+      <span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="n">html</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span>
+        <span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="n">h1</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span><span class="s">&quot;Welcome!&amp;lt;/h1&amp;gt;</span>
+<span class="s">        &amp;lt;p&amp;gt;&amp;lt;a href=&quot;</span><span class="n">http</span><span class="o">://</span><span class="n">vibneiro</span><span class="o">.</span><span class="n">github</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">terminate</span><span class="o">?</span><span class="n">method</span><span class="k">=</span><span class="n">post</span><span class="s">&quot;&amp;gt;Stop the server&amp;lt;/a&amp;gt;&amp;lt;/p&amp;gt;</span>
+<span class="s">      &amp;lt;/html&amp;gt;</span>
+<span class="s">    }</span>
+<span class="s">  }</span>
+<span class="s">} ~</span>
+<span class="s">  // POST /terminate --&amp;gt; &quot;</span><span class="nc">The</span> <span class="n">server</span> <span class="n">is</span> <span class="n">stopping</span><span class="s">&quot; response</span>
+<span class="s">  (post | parameter(&#39;method ! &quot;</span><span class="n">post</span><span class="s">&quot;)) {</span>
+<span class="s">    path(&quot;</span><span class="n">terminate</span><span class="s">&quot;) {</span>
+<span class="s">      complete {</span>
+<span class="s">        actorSystem.scheduler.scheduleOnce(1.second)(actorSystem.shutdown())(actorSystem.dispatcher)</span>
+<span class="s">        &quot;</span><span class="nc">The</span> <span class="n">server</span> <span class="n">is</span> <span class="n">stopping</span><span class="err">&quot;</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
 
-<p>  }
-    .onComplete {
-    case Success(b) =>
-      println(&ldquo;Successfully started&rdquo;)
-    case Failure(ex) =>
-      println(ex.getMessage)
-      actorSystem.shutdown()
-  }
-}
-[/code]</p>
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="o">}</span>
+    <span class="o">.</span><span class="n">onComplete</span> <span class="o">{</span>
+    <span class="k">case</span> <span class="nc">Success</span><span class="o">(</span><span class="n">b</span><span class="o">)</span> <span class="k">=&gt;</span>
+      <span class="n">println</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="nc">Successfully</span> <span class="n">started</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;)</span>
+    <span class="k">case</span> <span class="nc">Failure</span><span class="o">(</span><span class="n">ex</span><span class="o">)</span> <span class="k">=&gt;</span>
+      <span class="n">println</span><span class="o">(</span><span class="n">ex</span><span class="o">.</span><span class="n">getMessage</span><span class="o">)</span>
+      <span class="n">actorSystem</span><span class="o">.</span><span class="n">shutdown</span><span class="o">()</span>
+  <span class="o">}</span>
+<span class="o">}</span></code></pre></div></p>
 
 <p>The REST API is as follows:</p>
 
@@ -90,9 +88,7 @@ get {
 
 <p>Let&rsquo;s run it and check:</p>
 
-<p>[code language=&ldquo;bash&rdquo;]
-curl <a href="http://localhost:8080/welcome">http://localhost:8080/welcome</a>
-[/code]</p>
+<p><div class="highlight"><pre><code class="language-bash" data-lang="bash">curl &lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;http://localhost:8080/welcome&quot;</span>&gt;http://localhost:8080/welcome&lt;/a&gt;</code></pre></div></p>
 
 <h3>Dockerizing the server</h3>
 

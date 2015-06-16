@@ -458,53 +458,50 @@ If &lt;code&gt;N&lt;/code&gt; is odd and you can't fill at least two rows with
 
 <p>Ok, let&rsquo;s get started.</p>
 
-<p>[code language=&ldquo;scala&rdquo;]
-import akka.actor.{ActorSystem}
-import spray.routing.<em>
-import akka.util.Timeout
-import scala.concurrent.duration.</em>
-import scala.util.{Failure, Success}</p>
+<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">import</span> <span class="nn">akka.actor.</span><span class="o">{</span><span class="nc">ActorSystem</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">spray.routing._</span>
+<span class="k">import</span> <span class="nn">akka.util.Timeout</span>
+<span class="k">import</span> <span class="nn">scala.concurrent.duration._</span>
+<span class="k">import</span> <span class="nn">scala.util.</span><span class="o">{</span><span class="nc">Failure</span><span class="o">,</span> <span class="nc">Success</span><span class="o">}</span>
 
-<p>object HttpServer extends App with SimpleRoutingApp {</p>
+<span class="k">object</span> <span class="nc">HttpServer</span> <span class="k">extends</span> <span class="nc">App</span> <span class="k">with</span> <span class="nc">SimpleRoutingApp</span> <span class="o">{</span>
 
-<p>  implicit val actorSystem = ActorSystem()
-  implicit val timeout = Timeout(1.second)
-  import actorSystem.dispatcher</p>
+  <span class="k">implicit</span> <span class="k">val</span> <span class="n">actorSystem</span> <span class="k">=</span> <span class="nc">ActorSystem</span><span class="o">()</span>
+  <span class="k">implicit</span> <span class="k">val</span> <span class="n">timeout</span> <span class="k">=</span> <span class="nc">Timeout</span><span class="o">(</span><span class="mf">1.</span><span class="n">second</span><span class="o">)</span>
+  <span class="k">import</span> <span class="nn">actorSystem.dispatcher</span>
 
-<p>  startServer(interface = &ldquo;localhost&rdquo;, port = 8080) {</p>
+  <span class="n">startServer</span><span class="o">(</span><span class="n">interface</span> <span class="k">=</span> <span class="s">&quot;localhost&quot;</span><span class="o">,</span> <span class="n">port</span> <span class="k">=</span> <span class="mi">8080</span><span class="o">)</span> <span class="o">{</span>
 
-<pre><code>// GET /welcome --&gt; "Welcome!" response
-get {
-  path("welcome") {
-    complete {
-      &lt;html&gt;
-        &lt;h1&gt;"Welcome!&lt;/h1&gt;
-        &lt;p&gt;&lt;a href="/terminate?method=post"&gt;Stop the server&lt;/a&gt;&lt;/p&gt;
-      &lt;/html&gt;
-    }
-  }
-} ~
-  // POST /terminate --&gt; "The server is stopping" response
-  (post | parameter('method ! "post")) {
-    path("terminate") {
-      complete {
-        actorSystem.scheduler.scheduleOnce(1.second)(actorSystem.shutdown())(actorSystem.dispatcher)
-        "The server is stopping"
-      }
-    }
-  }
-</code></pre>
+    <span class="c1">// GET /welcome --&gt; &quot;Welcome!&quot; response</span>
+    <span class="n">get</span> <span class="o">{</span>
+      <span class="n">path</span><span class="o">(</span><span class="s">&quot;welcome&quot;</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">complete</span> <span class="o">{</span>
+          <span class="o">&lt;</span><span class="n">html</span><span class="o">&gt;</span>
+            <span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="s">&quot;Welcome!&lt;/h1&gt;</span>
+<span class="s">            &lt;p&gt;&lt;a href=&quot;</span><span class="o">/</span><span class="n">terminate</span><span class="o">?</span><span class="n">method</span><span class="k">=</span><span class="n">post</span><span class="s">&quot;&gt;Stop the server&lt;/a&gt;&lt;/p&gt;</span>
+<span class="s">          &lt;/html&gt;</span>
+<span class="s">        }</span>
+<span class="s">      }</span>
+<span class="s">    } ~</span>
+<span class="s">      // POST /terminate --&gt; &quot;</span><span class="nc">The</span> <span class="n">server</span> <span class="n">is</span> <span class="n">stopping</span><span class="s">&quot; response</span>
+<span class="s">      (post | parameter(&#39;method ! &quot;</span><span class="n">post</span><span class="s">&quot;)) {</span>
+<span class="s">        path(&quot;</span><span class="n">terminate</span><span class="s">&quot;) {</span>
+<span class="s">          complete {</span>
+<span class="s">            actorSystem.scheduler.scheduleOnce(1.second)(actorSystem.shutdown())(actorSystem.dispatcher)</span>
+<span class="s">            &quot;</span><span class="nc">The</span> <span class="n">server</span> <span class="n">is</span> <span class="n">stopping</span><span class="s">&quot;</span>
+<span class="s">          }</span>
+<span class="s">        }</span>
+<span class="s">      }</span>
+<span class="s">  }</span>
+<span class="s">    .onComplete {</span>
+<span class="s">    case Success(b) =&gt;</span>
+<span class="s">      println(&quot;</span><span class="nc">Successfully</span> <span class="n">started</span><span class="err">&quot;</span><span class="o">)</span>
+    <span class="k">case</span> <span class="nc">Failure</span><span class="o">(</span><span class="n">ex</span><span class="o">)</span> <span class="k">=&gt;</span>
+      <span class="n">println</span><span class="o">(</span><span class="n">ex</span><span class="o">.</span><span class="n">getMessage</span><span class="o">)</span>
+      <span class="n">actorSystem</span><span class="o">.</span><span class="n">shutdown</span><span class="o">()</span>
+  <span class="o">}</span>
+<span class="o">}</span></code></pre></div>
 
-<p>  }
-    .onComplete {
-    case Success(b) =>
-      println(&ldquo;Successfully started&rdquo;)
-    case Failure(ex) =>
-      println(ex.getMessage)
-      actorSystem.shutdown()
-  }
-}
-[/code]</p>
 
 <p>The REST API is as follows:</p>
 
@@ -520,9 +517,8 @@ get {
 
 <p>Let&rsquo;s run it and check:</p>
 
-<p>[code language=&ldquo;bash&rdquo;]
-curl <a href="http://localhost:8080/welcome">http://localhost:8080/welcome</a>
-[/code]</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">curl http://localhost:8080/welcome</code></pre></div>
+
 
 <h3>Dockerizing the server</h3>
 
