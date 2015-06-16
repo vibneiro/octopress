@@ -146,15 +146,15 @@ This leads, as per the above model, to the stall of some threads which is very i
 
 <p>Let&rsquo;s apply a chained CompletableFuture<task> as a FIFO-queuing mechanism kept in a value of ConcurrentMap&lt;dispatchId, CompletableFuture>. CompletableFuture object can have a reference to the next future for completion, thereby holding a FIFO property. This is like a linked list that forms an execution pipeline.</p>
 
-<p>So, all the work happens in a ConcurrentHashMap which is a cache of tasks for completion. A bit later, I&rsquo;ll show how to integrate this cache with a Dispatcher responsible for scheduling and running tasks from it. For now let&rsquo;s see, how the cache can be efficiently manage eviction of its entries.</p>
+<p>So, all the work happens in a ConcurrentHashMap which is a cache of tasks for completion. A bit later, I&rsquo;ll show how to integrate this cache with a Dispatcher responsible for scheduling and running tasks from it. For now let&rsquo;s see, how we can efficiently manage eviction of cache&rsquo;s entries.</p>
 
 <p><img src="https://ivoroshilin.files.wordpress.com/2014/10/wsdispatcher.png" alt="" /></p>
 
 <h2><strong>Prunning the cache</strong></h2>
 
-<p>In some usecases, each Runnable task has a unique dispatchId (e.g. just a global counter). E.g. adding a new task to a dispatcher for execution generates a corresponding number for it as a key of the cache (yes, it is a dispatchId).</p>
+<p>In some usecases, each Runnable task has a unique dispatchId (a global counter might be a good example). Adding a new task to a dispatcher for execution generates a corresponding key for the cache (yes, it is a dispatchId).</p>
 
-<p>If a dispatcher schedules a huge number of incoming tasks, we need to prune the cache (our ConcurrentMap), to avoid OutOfMemory, as there are already completed tasks and their entries can be evicted from the cache.</p>
+<p>If a dispatcher schedules a huge number of incoming tasks, we need to prune the cache (our ConcurrentMap), to avoid OutOfMemory, as there are already completed tasks and their entries can be evicted from it.</p>
 
 <p>WeakReference values can automatically evict CompletabeFuture, based on the observation that the execution chain provides the strong reference and completed futures become a garbage. Why value, but not a key? The key isn&rsquo;t appropriate because it doesn&rsquo;t tells us when its chained CompletedFuture is done. Weak-reference values do! The value has a strong reference through the executor chaining down to the last enqueued future. When the last future completes and is idle, it becomes eligible for garbage collection and the map may evict the entry.</p>
 
@@ -198,17 +198,25 @@ The idea is to treat external submitters in a similar way as workers — using r
 <p>I&rsquo;ve attached here 2 graphs for comparison of performance of JDK 7 and JDK 8 algorithms, respectively, based on random dispatchIds over a finite set.
 For more thorough analysis, see <a href="https://github.com/vibneiro/dispatching/blob/master/README.md">the Dispatch Benchmarks on Github</a>. The trends don&rsquo;t differ much from test to test within a single Java-version, which proves eviction overhead (Bounded caching) of Weak-values to be neglible for these tests.</p>
 
-<p>Test details:
- 1. A single dispatch-queue: putting new tasks always to the same dispatchId.
- 2. Counting dispatchId: one-off queue of size = 1 per task, since dispatchId is always incremented by 1.
- 3. Randomly filled set of queues with a size = 32768. TODO: try 1024</p>
+<p>Benchmark tests:</p>
 
-<p>Benchmark details:
- - Measuring a throughput (ops/s)
- - 32 user threads for all 3 tests;
-    Purpose: analyze contention impact on concurrent data-structures.
- - 2 types of ExecutorService { ThreadPoolExecutor, ForkJoinPool };
-   Purpose: analyze the impact of 2 different executors on throughput.</p>
+<ol>
+<li>A single dispatch-queue: putting new tasks always to the same dispatchId.</li>
+<li>Counting dispatchId: one-off queue of size = 1 per task, since dispatchId is always incremented by 1.</li>
+<li>Randomly filled set of queues with a size = 32768. TODO: try 1024</li>
+</ol>
+
+
+<p>Benchmark details:</p>
+
+<ul>
+<li>Measuring a throughput (ops/s)</li>
+<li>32 user threads for all 3 tests;
+ Purpose: analyze contention impact on concurrent data-structures.</li>
+<li>2 types of ExecutorService { ThreadPoolExecutor, ForkJoinPool };
+Purpose: analyze the impact of 2 different executors on throughput.</li>
+</ul>
+
 
 <p>JDK 8: 1.8.0_45
 <img src="https://cloud.githubusercontent.com/assets/3040823/8034389/e25c08fc-0def-11e5-84dd-b95140376a46.png" alt="1. Java Version: 1.8.0_45" /></p>
