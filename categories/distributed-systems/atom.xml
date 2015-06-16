@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Distributed Systems | Ivan Voroshilin's Blog.]]></title>
   <link href="http://vibneiro.github.io/categories/distributed-systems/atom.xml" rel="self"/>
   <link href="http://vibneiro.github.io/"/>
-  <updated>2015-06-17T01:24:09+03:00</updated>
+  <updated>2015-06-17T01:29:59+03:00</updated>
   <id>http://vibneiro.github.io/</id>
   <author>
     <name><![CDATA[Ivan Voroshilin]]></name>
@@ -94,11 +94,9 @@
 
 <p>Because the Docker Engine uses Linux-specific kernel features, I&rsquo;m going to use <a href="https://docs.docker.com/installation/mac/">lightweight virtual machine</a> to run it on OS X. If you too, just download it, install and run - easy peasy. Just make sure before dockerizing that you&rsquo;ve set the following 3 env variables for connecting your client to the VM:</p>
 
-<p>[code language=&ldquo;bash&rdquo;]
-export DOCKER_HOST=tcp://192.168.59.103:2376
-export DOCKER_CERT_PATH=/Users/ivan/.boot2docker/certs/boot2docker-vm
-export DOCKER_TLS_VERIFY=1
-[/code]</p>
+<p><div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">export </span><span class="nv">DOCKER_HOST</span><span class="o">=</span>tcp://192.168.59.103:2376
+<span class="nb">export </span><span class="nv">DOCKER_CERT_PATH</span><span class="o">=</span>/Users/ivan/.boot2docker/certs/boot2docker-vm
+<span class="nb">export </span><span class="nv">DOCKER_TLS_VERIFY</span><span class="o">=</span>1</code></pre></div></p>
 
 <p>The remaining stuff doesn&rsquo;t differ much.</p>
 
@@ -125,15 +123,11 @@ EXPOSE 8080
 
 <p>Build your project as a single jar file:</p>
 
-<p>[code language=&ldquo;bash&rdquo;]
-DockerSprayHttpServer$ sbt assembly
-[/code]</p>
+<p><div class="highlight"><pre><code class="language-bash" data-lang="bash">DockerSprayHttpServer<span class="nv">$ </span>sbt assembly</code></pre></div></p>
 
 <p>And now navigate to the project&rsquo;s folder and run:</p>
 
-<p>[code language=&ldquo;bash&rdquo;]
-DockerSprayHttpServer$ docker build .
-[/code]</p>
+<p><div class="highlight"><pre><code class="language-bash" data-lang="bash">DockerSprayHttpServer<span class="nv">$ </span>docker build .</code></pre></div></p>
 
 <p>This will send the newly created image to the Docker daemon.</p>
 
@@ -141,9 +135,7 @@ DockerSprayHttpServer$ docker build .
 
 <p>Run the following command to see available docker images :</p>
 
-<p>[code language=&ldquo;bash&rdquo;]
-DockerSprayHttpServer$ docker images
-[/code]</p>
+<p><div class="highlight"><pre><code class="language-bash" data-lang="bash">DockerSprayHttpServer<span class="nv">$ </span>docker images</code></pre></div></p>
 
 <p><a href="https://ivoroshilin.files.wordpress.com/2014/12/d181d0bdd0b8d0bcd0bed0ba-d18dd0bad180d0b0d0bdd0b0-2014-12-15-d0b2-23-48-52.png"><img src="https://ivoroshilin.files.wordpress.com/2014/12/d181d0bdd0b8d0bcd0bed0ba-d18dd0bad180d0b0d0bdd0b0-2014-12-15-d0b2-23-48-52.png" alt="Снимок экрана 2014-12-15 в 23.48.52" /></a></p>
 
@@ -151,17 +143,13 @@ DockerSprayHttpServer$ docker images
 
 <p>First run the 1-st instance:</p>
 
-<p>[code language=&ldquo;bash&rdquo;]
-DockerSprayHttpServer$ docker run -d -p 10001:8080 a83cda03f529
-[/code]</p>
+<p><div class="highlight"><pre><code class="language-bash" data-lang="bash">DockerSprayHttpServer<span class="nv">$ </span>docker run -d -p 10001:8080 a83cda03f529</code></pre></div></p>
 
 <p>Note, that we have mapped our 8080&ndash;>10001 port.</p>
 
 <p>Now, let&rsquo;s verify the container is running:</p>
 
-<p>[code language=&ldquo;bash&rdquo;]
-DockerSprayHttpServer$ docker ps
-[/code]</p>
+<p><div class="highlight"><pre><code class="language-bash" data-lang="bash">DockerSprayHttpServer<span class="nv">$ </span>docker ps</code></pre></div></p>
 
 <p><a href="https://ivoroshilin.files.wordpress.com/2014/12/d181d0bdd0b8d0bcd0bed0ba-d18dd0bad180d0b0d0bdd0b0-2014-12-16-d0b2-0-58-12.png"><img src="https://ivoroshilin.files.wordpress.com/2014/12/d181d0bdd0b8d0bcd0bed0ba-d18dd0bad180d0b0d0bdd0b0-2014-12-16-d0b2-0-58-12.png" alt="Снимок экрана 2014-12-16 в 0.58.12" /></a></p>
 
@@ -169,17 +157,13 @@ DockerSprayHttpServer$ docker ps
 
 <p>You can actually check this IP as follows:</p>
 
-<p>[code language=&ldquo;bash&rdquo;]
-DockerSprayHttpServer$ boot2docker ip
-[/code]</p>
+<p><div class="highlight"><pre><code class="language-bash" data-lang="bash">DockerSprayHttpServer<span class="nv">$ </span>boot2docker ip</code></pre></div></p>
 
 <p>We need to use this IP address (for OS X, as we are not on Linux).</p>
 
 <p>Let&rsquo;s test it:</p>
 
-<p>[code language=&ldquo;bash&rdquo;]
-DockerSprayHttpServer$ curl $(boot2docker ip):10001/welcome
-[/code]</p>
+<p><div class="highlight"><pre><code class="language-bash" data-lang="bash">DockerSprayHttpServer<span class="nv">$ </span>curl <span class="k">$(</span>boot2docker ip<span class="k">)</span>:10001/welcome</code></pre></div></p>
 
 <p>Great!</p>
 
