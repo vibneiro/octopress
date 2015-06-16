@@ -223,14 +223,19 @@ For more thorough analysis, see <a href="https://github.com/vibneiro/dispatching
 
 <p>   Purpose: analyze the impact of 2 different executors on throughput.</p>
 
-<p>JDK 8: 1.8.0_45
-<img src="https://cloud.githubusercontent.com/assets/3040823/8034389/e25c08fc-0def-11e5-84dd-b95140376a46.png" alt="1. Java Version: 1.8.0_45" /></p>
+<p><strong>JDK 8: 1.8.0_45</strong></p>
 
-<p>JDK 7: 1.7.0._71
-<img src="https://cloud.githubusercontent.com/assets/3040823/8080802/2c58486a-0f78-11e5-9e69-cb505e8df29d.png" alt="2. Java Version: 1.7.0_71" />
-Note: A Caffeine works with JDK 8+, so there&rsquo;s no this benchmark here.</p>
+<p><img src="https://cloud.githubusercontent.com/assets/3040823/8034389/e25c08fc-0def-11e5-84dd-b95140376a46.png" alt="1. Java Version: 1.8.0_45" /></p>
 
-<p>Important note: As can be seen, after introducing significant <a href="http://openjdk.java.net/jeps/155">updates</a> to Java 8, ForkJoinPool is a way more scalable, including ConcurrentHashMap changes compared to JDK 7.</p>
+<p><strong>JDK 7: 1.7.0._71</strong></p>
+
+<p><img src="https://cloud.githubusercontent.com/assets/3040823/8080802/2c58486a-0f78-11e5-9e69-cb505e8df29d.png" alt="2. Java Version: 1.7.0_71" /></p>
+
+<p>Note: A Caffeine works with JDK 8+, so there&rsquo;s no its benchmark here.</p>
+
+<p><strong>Results: </strong></p>
+
+<p>As can be seen, after introducing significant <a href="http://openjdk.java.net/jeps/155">updates</a> to Java 8, ForkJoinPool is a way more scalable, including ConcurrentHashMap changes compared to JDK 7.</p>
 
 <h2>Conclusion</h2>
 
