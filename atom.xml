@@ -4,7 +4,7 @@
   <title><![CDATA[Ivan Voroshilin's Blog.]]></title>
   <link href="http://vibneiro.github.io/atom.xml" rel="self"/>
   <link href="http://vibneiro.github.io/"/>
-  <updated>2015-06-12T02:30:55+03:00</updated>
+  <updated>2015-06-17T00:07:09+03:00</updated>
   <id>http://vibneiro.github.io/</id>
   <author>
     <name><![CDATA[Ivan Voroshilin]]></name>
@@ -29,15 +29,15 @@
 
 
 <p>Ok, let&rsquo;s catch up.. I’ve been wrestling with concurrent algorithms and scalability lately.
-E.g. last month, I was researching design of <a href="https://github.com/akka/akka/tree/master/akka-actor/src/main/scala/akka/dispiatch">Akka Dispatchers</a>,
-advanced caching in java (in particular, a java 8 rewrite of Guava&rsquo;s <a href="https://code.google.com/p/concurrentlinkedhashmap/">ConcurrentLinkedHashMap</a> - <a href="https://github.com/ben-manes/caffeine">«Caffeine»</a>, kudos to <a href="https://github.com/ben-manesO%20for%20his%20constant%20help%20with%20a%20lot%20of%20questions%20from%20me.%20He%20designed%20both%20of%20them%20btw">Ben Maine</a>, did some <a href="https://github.com/vibneiro/dispatching/tree/master/benchmarks-java-8">JMH benchmarks</a>.</p>
+E.g. last month, I was researching design of <a href="https://github.com/akka/akka/blob/master/akka-actor/src/main/scala/akka/dispatch/">Akka Dispatchers</a>,
+ advanced caching in java (in particular, a java 8 rewrite of Guava&rsquo;s <a href="https://code.google.com/p/concurrentlinkedhashmap/">ConcurrentLinkedHashMap</a> - <a href="https://github.com/ben-manes/caffeine">«Caffeine»</a>, kudos to Ben Maine for his constant help, he designed both of them btw), did some <a href="https://github.com/vibneiro/dispatching/tree/master/benchmarks-java-8">microbenchmarks</a>.</p>
 
 <h2><strong>TL;DR</strong></h2>
 
-<p>My recent goal was to implement a scalable dispatcher for better throughput in a highly concurrent environment. A dispatcher should be able to schedule asychronously millions of short-living Runnable tasks, coming in from many threads simultaniously. Related tasks should get in the same FIFO submission queue (very much like Actors in Scala and their mailboxeis). FIFO property, thereby should ensure that queues&#8217; tasks get executed one-after-another, sequentially, from the same queue. Unrelated task can be executed in parallel.</p>
+<p>My recent goal was to implement a scalable dispatcher for better throughput in a highly concurrent environment. A dispatcher should be able to schedule asychronously millions of short-living Runnable tasks, coming in from many threads simultaniously. Related tasks should get in the same FIFO submission queue (very much like Actors in Scala and their mailboxes). FIFO property, thereby should ensure that queues&#8217; tasks get executed one-after-another, sequentially, from the same queue. Unrelated task are executed asynchronously.</p>
 
-<p>This post came about as a small research in dispatching, caching and performance trade-offs.
-We&rsquo;re going to touch on some caching techniques in a hashmap&lt;dispatchId, Runnable task>, in particular WeakReference-values (I&rsquo;m going to explain below the reason WeakRerefence on values, odd?), ForkJoinPool magic, ending up with performance benchmarks for both JDK 7/8 and Akka-like event dispatchers.</p>
+<p>This post came about as a small research in dispatching in tandem with caching and performance trade-offs.
+We&rsquo;re going to touch on some caching techniques in a hashmap&lt;dispatchId, Runnable task>, in particular WeakReference-values (I&rsquo;m going to explain below the reason WeakRerefence on values, odd?), ForkJoinPool magic, ending up with comparison of performance benchmarks.</p>
 
 <h3><strong>Intro</strong></h3>
 
@@ -59,32 +59,35 @@ This leads, as per the above model, to the stall of some threads which is very i
 
 <p>Some dispatchId queues may be more active than the others and unfairly balanced among workers. Thus, we need to somehow decouple a queue from its corresponding thread, but maintain the FIFO order for the same dispatchId. By separating the queue from the worker-thread, we retain FIFO property and more evenly spread out the work - a better throughput!</p>
 
-<p>Let&rsquo;s apply a chained CompletableFuture<task> (It is our FIFO-queue everywhere below in the text) as a queuing mechanism as a value of ConcurrentMap&lt;dispatchId, CompletableFuture>. CompletableFuture-object can have a reference to the next future for completion, thereby holding a FIFO property.</p>
+<p>Let&rsquo;s apply a chained CompletableFuture<task> as a FIFO-queuing mechanism kept in a value of ConcurrentMap&lt;dispatchId, CompletableFuture>. CompletableFuture object can have a reference to the next future for completion, thereby holding a FIFO property. This is like a linked list that forms an execution pipeline.</p>
+
+<p>So, all the work happens in a ConcurrentHashMap which is a cache of tasks for completion. A bit later, I&rsquo;ll show how to integrate this cache with a Dispatcher responsible for scheduling and running tasks from it. For now let&rsquo;s see, how the cache can be efficiently manage eviction of its entries.</p>
 
 <p><img src="https://ivoroshilin.files.wordpress.com/2014/10/wsdispatcher.png" alt="" /></p>
 
 <h2><strong>Prunning the cache</strong></h2>
 
-<p>In some usecases, each Runnable task has a truly unique dispatchId (e.g. just a global counter).
-If a dispatcher always executes a huge number of incoming tasks, eventually we need to prune the cache(our ConcurrentMap), to avoid OutOfMemory.</p>
+<p>In some usecases, each Runnable task has a unique dispatchId (e.g. just a global counter). E.g. adding a new task to a dispatcher for execution generates a corresponding number for it as a key of the cache (yes, it is a dispatchId).</p>
+
+<p>If a dispatcher schedules a huge number of incoming tasks, we need to prune the cache (our ConcurrentMap), to avoid OutOfMemory, as there are already completed tasks and their entries can be evicted from the cache.</p>
 
 <p>WeakReference values can automatically evict CompletabeFuture, based on the observation that the execution chain provides the strong reference and completed futures become a garbage. Why value, but not a key? The key isn&rsquo;t appropriate because it doesn&rsquo;t tells us when its chained CompletedFuture is done. Weak-reference values do! The value has a strong reference through the executor chaining down to the last enqueued future. When the last future completes and is idle, it becomes eligible for garbage collection and the map may evict the entry.</p>
 
-<p>I derived the idea from Guava to prune the map in a separate thread, right after a cache capacity was reached. This is done with an exclusive tryLock, so shat we don&rsquo;t want to block progress of other threads – neat! A thread not being able to capture the lock immediately jumps over to do another work. This amortizes the total cost of cache maintenance during dispatching.</p>
+<p>I derived the idea from Guava of prunning the map in a separate thread, right after a cache capacity was reached. This is done with an exclusive tryLock, so that we don&rsquo;t want to block progress of other threads – neat! A thread not being able to capture the lock immediately jumps over to do another work. This reduces the total cost of cache maintenance during dispatching.</p>
 
 <p><img src="https://ivoroshilin.files.wordpress.com/2014/12/weakvaluecorrect.png" alt="" /></p>
 
 <h2>On the cost of Weak-References</h2>
 
-<p>Object allcation is very cheap ~10 cycles compared to ~30 cycles for malloc and reclaiming short-lived objects is very cheap.</p>
+<p>Object allcation is very cheap ~10 cycles compared to ~30 cycles for malloc on most of modern hardware and reclaiming short-lived objects is very cheap.</p>
 
-<p>A lifespan of tasks have an ephemeral nature, so this shouldn&rsquo;t be an issue, as they die in the young space, not being promoted to the old space. The proof for this is that GC only visits live objects.</p>
+<p>A lifespan of tasks have an ephemeral nature, so this shouldn&rsquo;t be an issue, as they die in the young space, not being promoted to the old space. The reason behing cheapness is that GC only visits live objects.</p>
 
-<p>The churn rate of tasks is low in most cases, however there is a small GC penalty by delegating the tracking to WeakReference, but can be performed in a minor GC (yes, copying young GC) and aggressively cleared. Because, for most of the applications, the length of the pauses is negligible latency-wise, this is true if most of the objects in Eden can be considered garbage and are never copied to Survivor/Old spaces. If the opposite is true and most of the newborn objects are not eligible for GC, Minor GC pauses start taking considerably more time. In this case, tune you GC appropriately.</p>
+<p>The churn rate of tasks is low in most cases, however there is a small GC penalty by delegating the tracking to WeakReference, but can be performed in a minor GC (yes, copying young GC) and aggressively cleared. Because, for most of the applications, the length of the minor GC-pauses is negligible, this is true if most of the objects in Eden can be considered garbage and are never copied to Survivor/Old spaces. If the opposite is true and most of the newborn objects are not eligible for GC, Minor GC pauses start taking considerably more time. In this case, tune you GC appropriately.</p>
 
 <h2>Soft-References - be careful</h2>
 
-<p>Why not SoftReferene values? <a href="http://jeremymanson.blogspot.ru/2009/07/how-hotspot-decides-to-clear_07.html">Soft references require two major GCs</a> in order to be collected, are costly to track, and if abused can fill up the heap to cause GC thrashing.</p>
+<p>Why not SoftReferene values? <a href="http://jeremymanson.blogspot.ru/2009/07/how-hotspot-decides-to-clear_07.html">Soft references require two major GCs</a> in order to be collected, are costly to track, and if abused can fill up the heap to cause GC thrashing. So, they are not appropriate for dispatching.</p>
 
 <h2><strong>Thread Pool - a big deal</strong></h2>
 
@@ -93,19 +96,17 @@ Fork/Join is the default parallel computation framework since Java 8. For short 
 JMH benchmarks depict this <a href="https://github.com/vibneiro/dispatching">very clearly</a>. Tasks are already small and needn&rsquo;t a recursive decomposition. Work-stealing works (read the design of ForkJoinPool, if confused), regardless whether it is a big or small task - tasks can be grabbed by another free worker from the Deque&rsquo;s tail of a busy worker, reducing contention drastically.</p>
 
 <p>Don&rsquo;t be surprised that in the graphs below for JDK 7/8 results are very different. <a href="http://openjdk.java.net/jeps/155">These are the changes</a> targetted at JDK 8, thus the difference. Both improvements for ForkJoinPool (up to 60x speedup!) and cache-oriented enhancements to the ConcurrentHashMap made this possible.
-The idea is to treat external submitters in a similar way as workers — using randomized queuing and stealing. This also greatly improves throughput when all tasks are async and submitted to the pool rather than forked, which becomes a reasonable way to structure actor frameworks, as well as many plain services that you might otherwise use ThreadPoolExecutor for. This was not true in JDK 8, where I observed a lot of overhead in many cases with FJ.</p>
+The idea is to treat external submitters in a similar way as workers — using randomized queuing and stealing. This also greatly improves throughput when all tasks are async and submitted to the pool rather than forked, which becomes a reasonable way to structure actor frameworks, as well as many plain services that you might otherwise use ThreadPoolExecutor for. This was not true in JDK 7, where I observed a lot of overhead in many cases with FJ.</p>
 
 <p>As a result, ForkJoinPool matches dispatcher&rsquo;s requirements perfrectly, being able of accepting asynchronous tasks returning you a Future object. Moreover <a href="https://jcp.org/en/jsr/detail?id=166">JSR-166</a> says that new features include support for completion-based designs that are often most appropriate for IO-bound usages, among others. But, I didn&rsquo;t check with the I/O..</p>
 
-<h2><strong>Actor-like dispatchers</strong></h2>
+<h2><strong>Actor-like dispatching</strong></h2>
 
-<p>The Caffeine has already <a href="https://github.com/ben-manes/caffeine/blob/master/jcache/src/main/java/com/github/benmanes/caffeine/jcache/event/EventDispatcher.java">one</a>.</p>
-
-<p>By the way! Here&rsquo;s <a href="https://github.com/vibneiro/dispatching/blob/master/dispatch-java-7/src/main/java/vibneiro/dispatchers/WorkStealingDispatcher.java">a backport of the java 8 Dispatcher to JDK 7</a> translated with Guava&rsquo;s ListenableFuture into Java 7 code.</p>
+<p>The Caffeine has already <a href="https://github.com/ben-manes/caffeine/blob/master/jcache/src/main/java/com/github/benmanes/caffeine/jcache/event/EventDispatcher.java">one</a>. The idea is register up front a set of dispatchers representing actors. Each one can subscribe for particular message types and schedule them via a dispatcher.</p>
 
 <h2><strong>A few words about Caffeine</strong></h2>
 
-<p>I studied some parts of Caffeine&rsquo;s cache design under the hood. There are advanced techniques (e.g. eventually-consistent multithreaded datastructures, Stripe64 and full rewrite of ConcurrentHashMap proves to be very efficient)! It was fun to make some research, I believe it definetely deserves another post or more&hellip; Ben made the cache a way more scalable!</p>
+<p>I studied some parts of Caffeine&rsquo;s cache design under the hood. There are advanced techniques (e.g. eventually-consistent multithreaded datastructures, Stripe64 and full rewrite of ConcurrentHashMap proves to be very efficient)! It was fun to make some research, I believe it definetely deserves another post or even more&hellip; Ben made the cache a way more scalable!</p>
 
 <h2><strong>At last, the benchmarks</strong></h2>
 
@@ -128,20 +129,21 @@ For more thorough analysis, see <a href="https://github.com/vibneiro/dispatching
 <img src="https://cloud.githubusercontent.com/assets/3040823/8034389/e25c08fc-0def-11e5-84dd-b95140376a46.png" alt="1. Java Version: 1.8.0_45" /></p>
 
 <p>JDK 7: 1.7.0._71
-<img src="https://cloud.githubusercontent.com/assets/3040823/8080802/2c58486a-0f78-11e5-9e69-cb505e8df29d.png" alt="2. Java Version: 1.7.0_71" /></p>
-
-<p>In JDK 7, no Caffeine, it worsk since java 1.8.</p>
+<img src="https://cloud.githubusercontent.com/assets/3040823/8080802/2c58486a-0f78-11e5-9e69-cb505e8df29d.png" alt="2. Java Version: 1.7.0_71" />
+Note: A Caffeine works with JDK 8+, so there&rsquo;s no this benchmark here.</p>
 
 <p>Important note: As can be seen, after introducing significant <a href="http://openjdk.java.net/jeps/155">updates</a> to Java 8, ForkJoinPool is a way more scalable, including ConcurrentHashMap changes compared to JDK 7.</p>
 
 <h2>Conclusion</h2>
 
-<p>Later, I decided to use the Caffeine in my Dispatcher, because it yielded very good results on the majority of <a href="https://github.com/vibneiro/dispatching">JMH performance benchmarks</a> compared to my implementations under similar parameters, considering working weak-values.
+<p>I studied some parts of Caffeine&rsquo;s cache design under the hood. There are advanced techniques (e.g. eventually-consistent multithreaded datastructures, Stripe64 and full rewrite of ConcurrentHashMap proves to be very efficient)! It was fun to make some research, I believe it definetely deserves another post or even more&hellip; Ben made the cache a way more scalable!</p>
+
+<p>It showed very good results on the majority of <a href="https://github.com/vibneiro/dispatching">JMH performance benchmarks</a> compared to my implementations under similar parameters, considering working weak-values.
 I decided not to remove <a href="https://github.com/vibneiro/dispatching/blob/master/dispatch-java-8/src/main/java/vibneiro/dispatchers/ThreadBoundHashDispatcher.java">ThreadBoundHashDispatcher</a> from the code though, as one might potentially have some benefits for some rare cases.</p>
 
 <p>See <a href="https://github.com/vibneiro/dispatching">the code on Github</a> for more research, if interested.</p>
 
-<p>I wish JDK implementors would add this feature to the ForkJoinPool: submission-queue cooperation with CompletableFuture and FIFO stuff. As a result, dispatching would more performant! For now, we have to use intermidiate caching as shown in this post. If you have some clever ideas, don&rsquo;t hesitate to contact me.</p>
+<p>By the way! Here&rsquo;s <a href="https://github.com/vibneiro/dispatching/blob/master/dispatch-java-7/src/main/java/vibneiro/dispatchers/WorkStealingDispatcher.java">a backport of Dispatcher to JDK 7</a> translated with Guava&rsquo;s ListenableFuture. I needed it for my project, despite that JDK 7 is not supported officialy anymore.</p>
 
 <p>Hope this helps,</p>
 
