@@ -215,10 +215,14 @@ The idea is to treat external submitters in a similar way as workers — using r
 
 <p>Akka&rsquo;s MessageDispatcher is responsible also for some other functions that intersect with this one.</p>
 
-<p>However, there are more differences in the &ldquo;dispatch&rdquo; library:
-  - We don&rsquo;t take into account a concept of explicit actors and mailboxes;
-  - Caching techniques described here is just another requirement that is absent in the Akka-framework;
-  - FIFO-queue looks like an actor mailbox but it sits in a shared queue;</p>
+<p>However, there are more differences in the &ldquo;dispatch&rdquo; library:</p>
+
+<ul>
+<li>We don&rsquo;t take into account a concept of explicit actors and mailboxes;</li>
+<li>Caching techniques described here is just another requirement that is absent in the Akka-framework;</li>
+<li>FIFO-queue looks like an actor mailbox but it sits in a shared queue;</li>
+</ul>
+
 
 <p>Their PinnedDispatcher is like our ThreadBoundHashDispatcher again in the concept, but design differs. :-)
 It dedicates a single unique thread for each actor passed in as reference.</p>
