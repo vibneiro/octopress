@@ -4,7 +4,7 @@
   <title><![CDATA[Ivan Voroshilin's Blog.]]></title>
   <link href="http://vibneiro.github.io/atom.xml" rel="self"/>
   <link href="http://vibneiro.github.io/"/>
-  <updated>2015-06-17T01:29:59+03:00</updated>
+  <updated>2015-06-18T01:31:41+03:00</updated>
   <id>http://vibneiro.github.io/</id>
   <author>
     <name><![CDATA[Ivan Voroshilin]]></name>
@@ -79,7 +79,7 @@ This leads, as per the above model, to the stall of some threads which is very i
 
 <h2>On the cost of Weak-References</h2>
 
-<p>Object allcation is very cheap ~10 cycles compared to ~30 cycles for malloc on most of modern hardware and reclaiming short-lived objects is very cheap.</p>
+<p>Object allocation is very cheap ~10 cycles compared to ~30 cycles for malloc on most of modern hardware and reclaiming short-lived objects is very cheap.</p>
 
 <p>A lifespan of tasks have an ephemeral nature, so this shouldn&rsquo;t be an issue, as they die in the young space, not being promoted to the old space. The reason behing cheapness is that GC only visits live objects.</p>
 
@@ -113,13 +113,27 @@ The idea is to treat external submitters in a similar way as workers — using r
 
 <p>As a result, ForkJoinPool matches dispatcher&rsquo;s requirements perfrectly, being able of accepting asynchronous tasks returning you a Future object. Moreover <a href="https://jcp.org/en/jsr/detail?id=166">JSR-166</a> says that new features include support for completion-based designs that are often most appropriate for IO-bound usages, among others. But, I didn&rsquo;t check with the I/O..</p>
 
-<h2><strong>Actor-like dispatching</strong></h2>
+<h2><strong>Akka Actors and dispatching: similarities and differences in the design approach</strong></h2>
 
-<p>The Caffeine has already <a href="https://github.com/ben-manes/caffeine/blob/master/jcache/src/main/java/com/github/benmanes/caffeine/jcache/event/EventDispatcher.java">one</a>. The idea is register up front a set of dispatchers representing actors. Each one can subscribe for particular message types and schedule them via a dispatcher.</p>
+<p>There are <a href="http://doc.akka.io/docs/akka/2.3.7/scala/dispatchers.html">4 different dispatchers</a> in the Akka framework.</p>
 
-<h2><strong>A few words about Caffeine</strong></h2>
+<p>Our WorkStealingDispatcher is similar to an <a href="https://github.com/akka/akka/blob/master/akka-actor/src/main/scala/akka/dispatch/BalancingDispatcher.scala">Akka BalancingDispatcher</a> by:</p>
 
-<p>I studied some parts of Caffeine&rsquo;s cache design under the hood. There are advanced techniques (e.g. eventually-consistent multithreaded datastructures, Stripe64 and full rewrite of ConcurrentHashMap proves to be very efficient)! It was fun to make some research, I believe it definetely deserves another post or even more&hellip; Ben made the cache a way more scalable!</p>
+<ul>
+<li>A shared queue (the cache);</li>
+<li>A concept of dispatching.</li>
+</ul>
+
+
+<p>Akka&rsquo;s MessageDispatcher is responsible also for some other functions that intersect with this one.</p>
+
+<p>However, there are more differences in the &ldquo;dispatch&rdquo; library:
+  - We don&rsquo;t take into account a concept of explicit actors and mailboxes;
+  - Caching techniques described here is just another requirement that is absent in the Akka-framework;
+  - FIFO-queue looks like an actor mailbox but it sits in a shared queue;</p>
+
+<p>Their PinnedDispatcher is like our ThreadBoundHashDispatcher again in the concept, but design differs. :-)
+It dedicates a single unique thread for each actor passed in as reference.</p>
 
 <h2><strong>At last, the microbenchmarks</strong></h2>
 
@@ -156,6 +170,9 @@ For more thorough analysis, see <a href="https://github.com/vibneiro/dispatching
 </ul>
 
 
+<p><strong>Caffeine</strong>
+JDK 8 benchmarks have an additional test with Caffeinated cache which is a robust data structure that won my benchmarking tests, and can be used in the dispatching as well.</p>
+
 <p><strong>JDK 8: 1.8.0_45</strong></p>
 
 <p><img src="https://cloud.githubusercontent.com/assets/3040823/8034389/e25c08fc-0def-11e5-84dd-b95140376a46.png" alt="1. Java Version: 1.8.0_45" /></p>
@@ -172,7 +189,7 @@ For more thorough analysis, see <a href="https://github.com/vibneiro/dispatching
 
 <h2>Conclusion</h2>
 
-<p>I studied some parts of Caffeine&rsquo;s cache design under the hood. There are advanced techniques (e.g. eventually-consistent multithreaded datastructures, Stripe64 and full rewrite of ConcurrentHashMap proves to be very efficient)! It was fun to make some research, I believe it definetely deserves another post or even more&hellip; Ben made the cache a way more scalable!</p>
+<p>I studied some parts of Caffeine&rsquo;s cache design under the hood. There are advanced techniques (e.g. eventually-consistent multithreaded datastructures, Stripe64 and full rewrite of ConcurrentHashMap proves to be very efficient)! It was fun to make some research, I believe it definetely deserves another post.</p>
 
 <p>It showed very good results on the majority of <a href="https://github.com/vibneiro/dispatching">JMH performance benchmarks</a> compared to my implementations under similar parameters, considering working weak-values.
 I decided not to remove <a href="https://github.com/vibneiro/dispatching/blob/master/dispatch-java-8/src/main/java/vibneiro/dispatchers/ThreadBoundHashDispatcher.java">ThreadBoundHashDispatcher</a> from the code though, as one might potentially have some benefits for some rare cases.</p>
