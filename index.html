@@ -252,8 +252,8 @@ It dedicates a single unique thread for each actor passed in as reference.</p>
 
 <ul>
 <li> WorkStealingDispatcher: CHM hash-bucket locks and volatile reads ensure safe publication and happens-before guarantees;</li>
-<li> ThreadBoundHashDispatcher: ConcurrentLinkedHashMap locks ensure safe publication and happens-before guarantees;</li>
-<li>The dispatchId subsequent processing rule: processing of one message happens before processing of the next message by the same dispatchID.</li>
+<li><p> ThreadBoundHashDispatcher: ConcurrentLinkedHashMap locks ensure safe publication and happens-before guarantees;</p></li>
+<li><p>The dispatchId subsequent processing rule: processing of one message happens before processing of the next message by the same dispatchID.</p></li>
 </ul>
 
 
