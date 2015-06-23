@@ -198,31 +198,43 @@ The idea is to treat external submitters in a similar way as workers — using r
 
 <p>As a result, ForkJoinPool matches dispatcher&rsquo;s requirements perfrectly, being able of accepting asynchronous tasks returning you a Future object. Moreover <a href="https://jcp.org/en/jsr/detail?id=166">JSR-166</a> says that new features include support for completion-based designs that are often most appropriate for IO-bound usages, among others. But, I didn&rsquo;t check with the I/O..</p>
 
-<h2><strong>Akka Actors and dispatching: similarities and differences in the design approach</strong></h2>
+<h2><strong>Akka Actors and dispatching framework : Differences in the design approach</strong></h2>
 
 <p>There are <a href="http://doc.akka.io/docs/akka/2.3.7/scala/dispatchers.html">4 different dispatchers</a> in the Akka framework.</p>
 
 <p>Our WorkStealingDispatcher is similar to an <a href="https://github.com/akka/akka/blob/master/akka-actor/src/main/scala/akka/dispatch/BalancingDispatcher.scala">Akka BalancingDispatcher</a> by:</p>
 
 <ul>
-<li>A shared queue (the cache);</li>
-<li>A concept of dispatching.</li>
+<li>A shared queue (caching CHM, bear in mind though Akka&rsquo;s queue has a different data structure)</li>
+<li>A concept of work-stealing.</li>
 </ul>
 
 
-<p>Akka&rsquo;s MessageDispatcher is responsible also for some other functions that intersect with this one.</p>
+<p>But there is a difference. My framework doesn&rsquo;t know anything about actors (thus no concept of mailboxes and other related stuff). Moreover,
+caching techniques described here is just another requirement that is absent in the standard Akka implementation for clear reasons.</p>
 
-<p>However, there are more differences in the &ldquo;dispatch&rdquo; library:</p>
+<p>Akka invariant:
+ - All actors can process all messages that have been sent to one of the actors via &ldquo;work stealing&rdquo; (to be more specific &ldquo;work donating&rdquo;).</p>
 
-<ul>
-<li>We don&rsquo;t take into account a concept of explicit actors and mailboxes;</li>
-<li>Caching techniques described here is just another requirement that is absent in the Akka-framework;</li>
-<li>FIFO-queue looks like an actor mailbox but it sits in a shared queue;</li>
-</ul>
-
+<p>Our invariant:
+ - All threads can process all messages that have been sent to one of the dispatchId via &ldquo;work stealing&rdquo;.</p>
 
 <p>Their PinnedDispatcher is like our ThreadBoundHashDispatcher again in the concept, but design differs. :-)
 It dedicates a single unique thread for each actor passed in as reference.</p>
+
+<p>To prevent visibility and reordering problems on actors, Akka guarantees the following two &ldquo;happens before&rdquo; rules:
+ 1. The actor send rule: the send of the message to an actor happens before the receive of that message by the same actor.
+ 2. The actor subsequent processing rule: processing of one message happens before processing of the next message by the same actor.</p>
+
+<p>My framework makes these guarantess too.
+ 1. The dispatchId send rule: the send of the message to a dispatchId happens before the receive of that message by the same dispatchId.
+ Proof:
+   - WorkStealingDispatcher: CHM hash-bucket locks and volatile reads ensure safe publication and happens-before guarantees;
+   - ThreadBoundHashDispatcher: ConcurrentLinkedHashMap locks ensure safe publication and happens-before guarantees;
+ 2. The dispatchId subsequent processing rule: processing of one message happens before processing of the next message by the same dispatchID.
+ Proof:
+   - WorkStealingDispatcher: ConcurrentHashMap.compute is atomic by the contract and CompletableFuture&rsquo;s ordered chain ensures this;
+   - ThreadBoundHashDispatcher: Java&rsquo;s ConcurrentLinkedHashMap ensures this;</p>
 
 <h2><strong>At last, the microbenchmarks</strong></h2>
 
