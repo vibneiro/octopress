@@ -241,25 +241,15 @@ It dedicates a single unique thread for each actor passed in as reference.</p>
 <p>My framework makes these guarantess too.</p>
 
 <ol>
-<li>The dispatchId send rule: the send of the message to a dispatchId happens before the receive of that message by the same dispatchId.</li>
-</ol>
-
-
-<p> Proof:</p>
-
-<ul>
+<li>The dispatchId send rule: the send of the message to a dispatchId happens before the receive of that message by the same dispatchId.
+Proof:</li>
 <li> WorkStealingDispatcher: CHM hash-bucket locks and volatile reads ensure safe publication and happens-before guarantees;</li>
-<li><p> ThreadBoundHashDispatcher: ConcurrentLinkedHashMap locks ensure safe publication and happens-before guarantees;</p></li>
-<li><p>The dispatchId subsequent processing rule: processing of one message happens before processing of the next message by the same dispatchID.</p></li>
-</ul>
-
-
-<p> Proof:</p>
-
-<ul>
+<li> ThreadBoundHashDispatcher: ConcurrentLinkedHashMap locks ensure safe publication and happens-before guarantees;</li>
+<li>The dispatchId subsequent processing rule: processing of one message happens before processing of the next message by the same dispatchID.
+Proof:</li>
 <li> WorkStealingDispatcher: ConcurrentHashMap.compute is atomic by the contract and CompletableFuture&rsquo;s ordered chain ensures this;</li>
 <li> ThreadBoundHashDispatcher: Java&rsquo;s ConcurrentLinkedHashMap ensures this;</li>
-</ul>
+</ol>
 
 
 <h2><strong>At last, the microbenchmarks</strong></h2>
