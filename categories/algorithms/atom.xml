@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Algorithms | Ivan Voroshilin's Blog.]]></title>
   <link href="http://vibneiro.github.io/categories/algorithms/atom.xml" rel="self"/>
   <link href="http://vibneiro.github.io/"/>
-  <updated>2015-06-23T23:43:06+03:00</updated>
+  <updated>2015-06-23T23:47:25+03:00</updated>
   <id>http://vibneiro.github.io/</id>
   <author>
     <name><![CDATA[Ivan Voroshilin]]></name>
@@ -127,28 +127,54 @@ The idea is to treat external submitters in a similar way as workers — using r
 <p>But there is a difference. My framework doesn&rsquo;t know anything about actors (thus no concept of mailboxes and other related stuff). Moreover,
 caching techniques described here is just another requirement that is absent in the standard Akka implementation for clear reasons.</p>
 
-<p>Akka invariant:
- - All actors can process all messages that have been sent to one of the actors via &ldquo;work stealing&rdquo; (to be more specific &ldquo;work donating&rdquo;).</p>
+<p>Akka invariant:</p>
 
-<p>Our invariant:
- - All threads can process all messages that have been sent to one of the dispatchId via &ldquo;work stealing&rdquo;.</p>
+<ul>
+<li>All actors can process all messages that have been sent to one of the actors via &ldquo;work stealing&rdquo; (to be more specific &ldquo;work donating&rdquo;).</li>
+</ul>
+
+
+<p>Our invariant:</p>
+
+<ul>
+<li>All threads can process all messages that have been sent to one of the dispatchId via &ldquo;work stealing&rdquo;.</li>
+</ul>
+
 
 <p>Their PinnedDispatcher is like our ThreadBoundHashDispatcher again in the concept, but design differs. :-)
 It dedicates a single unique thread for each actor passed in as reference.</p>
 
-<p>To prevent visibility and reordering problems on actors, Akka guarantees the following two &ldquo;happens before&rdquo; rules:
- 1. The actor send rule: the send of the message to an actor happens before the receive of that message by the same actor.
- 2. The actor subsequent processing rule: processing of one message happens before processing of the next message by the same actor.</p>
+<p>To prevent visibility and reordering problems on actors, Akka guarantees the following two &ldquo;happens before&rdquo; rules:</p>
 
-<p>My framework makes these guarantess too.
- 1. The dispatchId send rule: the send of the message to a dispatchId happens before the receive of that message by the same dispatchId.
- Proof:
-   - WorkStealingDispatcher: CHM hash-bucket locks and volatile reads ensure safe publication and happens-before guarantees;
-   - ThreadBoundHashDispatcher: ConcurrentLinkedHashMap locks ensure safe publication and happens-before guarantees;
- 2. The dispatchId subsequent processing rule: processing of one message happens before processing of the next message by the same dispatchID.
- Proof:
-   - WorkStealingDispatcher: ConcurrentHashMap.compute is atomic by the contract and CompletableFuture&rsquo;s ordered chain ensures this;
-   - ThreadBoundHashDispatcher: Java&rsquo;s ConcurrentLinkedHashMap ensures this;</p>
+<ol>
+<li>The actor send rule: the send of the message to an actor happens before the receive of that message by the same actor.</li>
+<li>The actor subsequent processing rule: processing of one message happens before processing of the next message by the same actor.</li>
+</ol>
+
+
+<p>My framework makes these guarantess too.</p>
+
+<ol>
+<li>The dispatchId send rule: the send of the message to a dispatchId happens before the receive of that message by the same dispatchId.</li>
+</ol>
+
+
+<p> Proof:</p>
+
+<ul>
+<li> WorkStealingDispatcher: CHM hash-bucket locks and volatile reads ensure safe publication and happens-before guarantees;</li>
+<li> ThreadBoundHashDispatcher: ConcurrentLinkedHashMap locks ensure safe publication and happens-before guarantees;</li>
+<li>The dispatchId subsequent processing rule: processing of one message happens before processing of the next message by the same dispatchID.</li>
+</ul>
+
+
+<p> Proof:</p>
+
+<ul>
+<li> WorkStealingDispatcher: ConcurrentHashMap.compute is atomic by the contract and CompletableFuture&rsquo;s ordered chain ensures this;</li>
+<li> ThreadBoundHashDispatcher: Java&rsquo;s ConcurrentLinkedHashMap ensures this;</li>
+</ul>
+
 
 <h2><strong>At last, the microbenchmarks</strong></h2>
 
