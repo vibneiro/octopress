@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Algorithms | Ivan Voroshilin's Blog.]]></title>
   <link href="http://vibneiro.github.io/categories/algorithms/atom.xml" rel="self"/>
   <link href="http://vibneiro.github.io/"/>
-  <updated>2015-06-23T23:53:09+03:00</updated>
+  <updated>2015-06-26T00:02:33+03:00</updated>
   <id>http://vibneiro.github.io/</id>
   <author>
     <name><![CDATA[Ivan Voroshilin]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Concurrent Work Scheduling in Java 8: From Naive to Akka-like Dispatching]]></title>
+    <title type="html"><![CDATA[Concurrent Work Scheduling in Java 8: ForkJoinPool, Dispatching and Caching - All in 1 Bottle]]></title>
     <link href="http://vibneiro.github.io/2015/06/08/researching-work-execution-with-dispatchers-in-java-8-from-naive-to-akka-like-design/"/>
     <updated>2015-06-08T22:39:12+03:00</updated>
     <id>http://vibneiro.github.io/2015/06/08/researching-work-execution-with-dispatchers-in-java-8-from-naive-to-akka-like-design</id>
