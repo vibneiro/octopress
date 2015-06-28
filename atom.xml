@@ -4,7 +4,7 @@
   <title><![CDATA[Ivan Voroshilin's Blog.]]></title>
   <link href="http://vibneiro.github.io/atom.xml" rel="self"/>
   <link href="http://vibneiro.github.io/"/>
-  <updated>2015-06-26T00:02:33+03:00</updated>
+  <updated>2015-06-28T23:32:49+03:00</updated>
   <id>http://vibneiro.github.io/</id>
   <author>
     <name><![CDATA[Ivan Voroshilin]]></name>
@@ -153,17 +153,14 @@ It dedicates a single unique thread for each actor passed in as reference.</p>
 </ol>
 
 
-<p>My framework makes these guarantess too.</p>
+<p>My framework holds these guarantess too:</p>
 
 <ol>
 <li>The dispatchId send rule: the send of the message to a dispatchId happens before the receive of that message by the same dispatchId.
-Proof:</li>
-<li> WorkStealingDispatcher: CHM hash-bucket locks and volatile reads ensure safe publication and happens-before guarantees;</li>
-<li> ThreadBoundHashDispatcher: ConcurrentLinkedHashMap locks ensure safe publication and happens-before guarantees;</li>
+Proof: In WorkStealingDispatcher, CHM hash-bucket locks and volatile reads ensure safe publication and happens-before guarantees;
+In ThreadBoundHashDispatcher, ConcurrentLinkedHashMap locks ensure safe publication and happens-before guarantees;</li>
 <li>The dispatchId subsequent processing rule: processing of one message happens before processing of the next message by the same dispatchID.
-Proof:</li>
-<li> WorkStealingDispatcher: ConcurrentHashMap.compute is atomic by the contract and CompletableFuture&rsquo;s ordered chain ensures this;</li>
-<li> ThreadBoundHashDispatcher: Java&rsquo;s ConcurrentLinkedHashMap ensures this;</li>
+Proof: In WorkStealingDispatcher, ConcurrentHashMap.compute is atomic by the contract and CompletableFuture&rsquo;s ordered chain ensures this;  ThreadBoundHashDispatcher: Java&rsquo;s ConcurrentLinkedHashMap ensures this;</li>
 </ol>
 
 
@@ -187,7 +184,7 @@ For more thorough analysis, see <a href="https://github.com/vibneiro/dispatching
 
 <ul>
 <li> Measuring a throughput (ops/s)</li>
-<li> 32 user threads for all 3 tests;
+<li> 4 user threads for all 3 tests;
 
 <ul>
 <li>Purpose: analyze contention impact on concurrent data-structures.</li>
@@ -217,7 +214,7 @@ JDK 8 benchmarks have an additional test with Caffeinated cache which is a robus
 
 <p><strong>Results: </strong></p>
 
-<p>As can be seen, after introducing significant <a href="http://openjdk.java.net/jeps/155">updates</a> to Java 8, ForkJoinPool is a way more scalable, including ConcurrentHashMap changes compared to JDK 7.</p>
+<p>As can be seen, after introducing significant <a href="http://openjdk.java.net/jeps/155">updates</a> to Java 8, ForkJoinPool is a way more scalable, including ConcurrentHashMap changes compared to JDK 7. In JDK 8, in addition to the main submission deque, each worker has its own one. THe thing is that, a single submission Deque was identified as the serious performance bottleneck, Doug Lea et al. striped it. Then, workers that have no work to do, can first look into the submission queue associated with a particular worker, and then wander around looking into the submission queues of others. 60x improvement comes from eliminating a single contended lock, plus good and fast random queue selection to avoid &ldquo;lockless&rdquo; contention.</p>
 
 <h2>Conclusion</h2>
 
