@@ -9,7 +9,7 @@
   <meta name="author" content="Ivan Voroshilin">
 
   
-  <meta name="description" content="Been too long since I last blogged… Since today, I am changing the format of blogging due to these 2 reasons: The blog has moved to the new platform &hellip;">
+  <meta name="description" content="[UBER] I was lucky to have attended the annual conference «UberConf» that held in beatiful Denver, Colorado from July 21-July 24 2015. [PIC] There &hellip;">
 
   
   <meta name="keywords" content="distributed, algorithm, Ivan, Voroshilin, code, google, jam, software, architecture, geek, blog, java, scala, groovy, scalability" />
@@ -81,6 +81,68 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/2015/07/28/my-trip-to-nfjs-uberconf-2015/">My Trip to NFJS UberConf 2015</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-07-28T00:06:05+03:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>28</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>12:06 am</span></time>
+        
+           | <a href="/2015/07/28/my-trip-to-nfjs-uberconf-2015/#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io/2015/07/28/my-trip-to-nfjs-uberconf-2015/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="https://ivoroshilin.files.wordpress.com/2015/07/img_7123.jpg"></a></p>
+
+<p>[UBER]</p>
+
+<p>I was lucky to have attended the annual conference «UberConf» that held in beatiful Denver, Colorado from July 21-July 24 2015.</p>
+
+<p>[PIC]</p>
+
+<p>There were 140 session in total, 10 concurrent tracks in parallel! I wish I could attend some more due to these. Speakers were from different companies including ThoughtWorks, Azul,VMWare, RedHat, Oracle, Netflix, just to name a few.. I felt, there were about 300 attendies.</p>
+
+<p>[PIC]</p>
+
+<p>Despite a great variety of topics on the session list, my primary interests were devoted to microservices, JVM and perfomance related topics, also scalability, distributed systems and architcture.</p>
+
+<p>These guys impressed me with their valuable experience they shared with us, which is difficult to find on the internet or elsewhere:</p>
+
+<p>Douglas Hawkins / Azul Systems  - from JVM under the hood to performance optimizations.</p>
+
+<p>Emad Benjamin / VMWare – on virtualization and tunning large scale java applications.</p>
+
+<p>Neil Ford  / ThoughtWorks – excellent broad speech on Microservices design and architercture considerations.</p>
+
+<p>Arun Gupta / RedHat – with his incredible speech on a switch from Monolith to Microservices with step-by-step practical demo.</p>
+
+<p>Matt Stine / Pivotal – he conducted a big list of important sessions such as Go language, Microservices in practice, Advanced topics on Docker, Advanced Data architecure patterns.</p>
+
+<p>Mark Richards – on his archticture experience, showing different trade-offs between SOA and microservice architecture and what we gain in the mix.</p>
+
+<p>I’m sure there are much more sessions passed by me and other excellent speakers are very strong too and interesting. It is amazing to meet different smart people and gain such knowldedge just within 3 days!</p>
+
+<p>I hope to catch up on other topics, I wasn’t able to attend.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -470,195 +532,6 @@ If &lt;code&gt;N&lt;/code&gt; is odd and you can't fill at least two rows with
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/2014/12/16/docker-creating-and-testing-httprest-server-on-top-of-akkaspray/">Dockerizing Spray HTTP Server</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2014-12-16T01:22:04+03:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>16</span><span class='date-suffix'>th</span>, <span class='date-year'>2014</span></span> <span class='time'>1:22 am</span></time>
-        
-           | <a href="/2014/12/16/docker-creating-and-testing-httprest-server-on-top-of-akkaspray/#disqus_thread"
-             data-disqus-identifier="http://vibneiro.github.io/2014/12/16/docker-creating-and-testing-httprest-server-on-top-of-akkaspray/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><a href="https://ivoroshilin.files.wordpress.com/2014/10/docker.png"><img src="https://ivoroshilin.files.wordpress.com/2014/10/docker.png" alt="docker" /></a><a href="https://ivoroshilin.files.wordpress.com/2014/12/spray.png"><img src="https://ivoroshilin.files.wordpress.com/2014/12/spray.png" alt="spray" /></a></p>
-
-<p>This is the continuation of the <a href="http://ivoroshilin.com/2014/10/30/docker-a-birds-eye-view/">previous article</a>. This series shows how simple it is to create a lightweight HTTP-server based on <a href="http://spray.io">Spray</a> framework, put it into a <a href="https://docs.docker.com">Docker</a>-image and run multiple instances on any single machine requiring no dependencies.</p>
-
-<h3>Implementing a lightweight RESTful HTTP Service</h3>
-
-<p>The whole project can be found on <a href="https://github.com/vibneiro/DockerSprayHttpServer">GitHub</a>. For impatient, git pull it and jump right to the next section. We&rsquo;re going to use Scala and Akka framework along with <a href="http://www.scala-sbt.org">SBT</a> build tool. From Spray framework we will use a <a href="http://spray.io/documentation/1.1-SNAPSHOT/spray-routing/">spray-routing</a> module which has a simple routing DSL for elegantly defining RESTful web services and it works on top of a <a href="http://spray.io/documentation/1.1-SNAPSHOT/spray-can/#spray-can">spray-can HTTP Server</a><em>.</em></p>
-
-<p>Ok, let&rsquo;s get started.</p>
-
-<div class="highlight"><pre><code class="language-scala" data-lang="scala"><span class="k">import</span> <span class="nn">akka.actor.</span><span class="o">{</span><span class="nc">ActorSystem</span><span class="o">}</span>
-<span class="k">import</span> <span class="nn">spray.routing._</span>
-<span class="k">import</span> <span class="nn">akka.util.Timeout</span>
-<span class="k">import</span> <span class="nn">scala.concurrent.duration._</span>
-<span class="k">import</span> <span class="nn">scala.util.</span><span class="o">{</span><span class="nc">Failure</span><span class="o">,</span> <span class="nc">Success</span><span class="o">}</span>
-
-<span class="k">object</span> <span class="nc">HttpServer</span> <span class="k">extends</span> <span class="nc">App</span> <span class="k">with</span> <span class="nc">SimpleRoutingApp</span> <span class="o">{</span>
-
-  <span class="k">implicit</span> <span class="k">val</span> <span class="n">actorSystem</span> <span class="k">=</span> <span class="nc">ActorSystem</span><span class="o">()</span>
-  <span class="k">implicit</span> <span class="k">val</span> <span class="n">timeout</span> <span class="k">=</span> <span class="nc">Timeout</span><span class="o">(</span><span class="mf">1.</span><span class="n">second</span><span class="o">)</span>
-  <span class="k">import</span> <span class="nn">actorSystem.dispatcher</span>
-
-  <span class="n">startServer</span><span class="o">(</span><span class="n">interface</span> <span class="k">=</span> <span class="s">&quot;localhost&quot;</span><span class="o">,</span> <span class="n">port</span> <span class="k">=</span> <span class="mi">8080</span><span class="o">)</span> <span class="o">{</span>
-
-    <span class="c1">// GET /welcome --&gt; &quot;Welcome!&quot; response</span>
-    <span class="n">get</span> <span class="o">{</span>
-      <span class="n">path</span><span class="o">(</span><span class="s">&quot;welcome&quot;</span><span class="o">)</span> <span class="o">{</span>
-        <span class="n">complete</span> <span class="o">{</span>
-          <span class="o">&lt;</span><span class="n">html</span><span class="o">&gt;</span>
-            <span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="s">&quot;Welcome!&lt;/h1&gt;</span>
-<span class="s">            &lt;p&gt;&lt;a href=&quot;</span><span class="o">/</span><span class="n">terminate</span><span class="o">?</span><span class="n">method</span><span class="k">=</span><span class="n">post</span><span class="s">&quot;&gt;Stop the server&lt;/a&gt;&lt;/p&gt;</span>
-<span class="s">          &lt;/html&gt;</span>
-<span class="s">        }</span>
-<span class="s">      }</span>
-<span class="s">    } ~</span>
-<span class="s">      // POST /terminate --&gt; &quot;</span><span class="nc">The</span> <span class="n">server</span> <span class="n">is</span> <span class="n">stopping</span><span class="s">&quot; response</span>
-<span class="s">      (post | parameter(&#39;method ! &quot;</span><span class="n">post</span><span class="s">&quot;)) {</span>
-<span class="s">        path(&quot;</span><span class="n">terminate</span><span class="s">&quot;) {</span>
-<span class="s">          complete {</span>
-<span class="s">            actorSystem.scheduler.scheduleOnce(1.second)(actorSystem.shutdown())(actorSystem.dispatcher)</span>
-<span class="s">            &quot;</span><span class="nc">The</span> <span class="n">server</span> <span class="n">is</span> <span class="n">stopping</span><span class="s">&quot;</span>
-<span class="s">          }</span>
-<span class="s">        }</span>
-<span class="s">      }</span>
-<span class="s">  }</span>
-<span class="s">    .onComplete {</span>
-<span class="s">    case Success(b) =&gt;</span>
-<span class="s">      println(&quot;</span><span class="nc">Successfully</span> <span class="n">started</span><span class="err">&quot;</span><span class="o">)</span>
-    <span class="k">case</span> <span class="nc">Failure</span><span class="o">(</span><span class="n">ex</span><span class="o">)</span> <span class="k">=&gt;</span>
-      <span class="n">println</span><span class="o">(</span><span class="n">ex</span><span class="o">.</span><span class="n">getMessage</span><span class="o">)</span>
-      <span class="n">actorSystem</span><span class="o">.</span><span class="n">shutdown</span><span class="o">()</span>
-  <span class="o">}</span>
-<span class="o">}</span></code></pre></div>
-
-
-<p>The REST API is as follows:</p>
-
-<ul>
-<li><p>GET/welcome &ndash;> responds with a &ldquo;Welcome&rdquo; and Post-hyperlink.</p></li>
-<li><p>POST/terminate &ndash;> will stop the server.</p></li>
-</ul>
-
-
-<p>DSL describing this API is inside of a method <strong>startServer.  </strong>And that&rsquo;s it!</p>
-
-<p>I didn&rsquo;t want to show the full power of Spray because this article is solely about Docker.</p>
-
-<p>Let&rsquo;s run it and check:</p>
-
-<div class="highlight"><pre><code class="language-bash" data-lang="bash">curl http://localhost:8080/welcome</code></pre></div>
-
-
-<h3>Dockerizing the server</h3>
-
-<p>Because the Docker Engine uses Linux-specific kernel features, I&rsquo;m going to use <a href="https://docs.docker.com/installation/mac/">lightweight virtual machine</a> to run it on OS X. If you too, just download it, install and run - easy peasy. Just make sure before dockerizing that you&rsquo;ve set the following 3 env variables for connecting your client to the VM:</p>
-
-<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">export </span><span class="nv">DOCKER_HOST</span><span class="o">=</span>tcp://192.168.59.103:2376
-<span class="nb">export </span><span class="nv">DOCKER_CERT_PATH</span><span class="o">=</span>/Users/ivan/.boot2docker/certs/boot2docker-vm
-<span class="nb">export </span><span class="nv">DOCKER_TLS_VERIFY</span><span class="o">=</span>1</code></pre></div>
-
-
-<p>The remaining stuff doesn&rsquo;t differ much.</p>
-
-<p>We use a <a href="https://registry.hub.docker.com/u/dockerfile/java/">trusted automated java build</a> (OpenJDK Java 7 JRE Dockerfile) as a base of our image.</p>
-
-<p>First, you will need to create a Dockerfile for the image in your project:</p>
-
-<pre><code># Our base image
-FROM dockerfile/java
-
-WORKDIR /
-
-USER daemon
-
-# Here the stuff that we're going to place into the image
-ADD target/scala-2.11/docker-spray-http-server-assembly-1.0.jar /app/server.jar
-
-# entry jar to be run in a container
-ENTRYPOINT [ "java", "-jar", "/app/server.jar" ]
-
-# HTTP port
-EXPOSE 8080
-</code></pre>
-
-<p>Build your project as a single jar file:</p>
-
-<div class="highlight"><pre><code class="language-bash" data-lang="bash">DockerSprayHttpServer<span class="nv">$ </span>sbt assembly</code></pre></div>
-
-
-<p>And now navigate to the project&rsquo;s folder and run:</p>
-
-<div class="highlight"><pre><code class="language-bash" data-lang="bash">DockerSprayHttpServer<span class="nv">$ </span>docker build .</code></pre></div>
-
-
-<p>This will send the newly created image to the Docker daemon.</p>
-
-<h3>Running multiple instances on a single machine</h3>
-
-<p>Run the following command to see available docker images :</p>
-
-<div class="highlight"><pre><code class="language-bash" data-lang="bash">DockerSprayHttpServer<span class="nv">$ </span>docker images</code></pre></div>
-
-
-<p><a href="https://ivoroshilin.files.wordpress.com/2014/12/d181d0bdd0b8d0bcd0bed0ba-d18dd0bad180d0b0d0bdd0b0-2014-12-15-d0b2-23-48-52.png"><img src="https://ivoroshilin.files.wordpress.com/2014/12/d181d0bdd0b8d0bcd0bed0ba-d18dd0bad180d0b0d0bdd0b0-2014-12-15-d0b2-23-48-52.png" alt="Снимок экрана 2014-12-15 в 23.48.52" /></a></p>
-
-<p>a83cda03f529 is not in the repo yet - what we&rsquo;ve just created. We&rsquo;re going to run multiple instances from it.</p>
-
-<p>First run the 1-st instance:</p>
-
-<div class="highlight"><pre><code class="language-bash" data-lang="bash">DockerSprayHttpServer<span class="nv">$ </span>docker run -d -p 10001:8080 a83cda03f529</code></pre></div>
-
-
-<p>Note, that we have mapped our 8080&ndash;>10001 port.</p>
-
-<p>Now, let&rsquo;s verify the container is running:</p>
-
-<div class="highlight"><pre><code class="language-bash" data-lang="bash">DockerSprayHttpServer<span class="nv">$ </span>docker ps</code></pre></div>
-
-
-<p><a href="https://ivoroshilin.files.wordpress.com/2014/12/d181d0bdd0b8d0bcd0bed0ba-d18dd0bad180d0b0d0bdd0b0-2014-12-16-d0b2-0-58-12.png"><img src="https://ivoroshilin.files.wordpress.com/2014/12/d181d0bdd0b8d0bcd0bed0ba-d18dd0bad180d0b0d0bdd0b0-2014-12-16-d0b2-0-58-12.png" alt="Снимок экрана 2014-12-16 в 0.58.12" /></a></p>
-
-<p>We exposed port 8080 for the http-server. When run in Docker-container, it maps our port onto another. On top of this I am  on OS X. Do you remember we set at the beginning 3 env vars? One of them is DOCKER_HOST.</p>
-
-<p>You can actually check this IP as follows:</p>
-
-<div class="highlight"><pre><code class="language-bash" data-lang="bash">DockerSprayHttpServer<span class="nv">$ </span>boot2docker ip</code></pre></div>
-
-
-<p>We need to use this IP address (for OS X, as we are not on Linux).</p>
-
-<p>Let&rsquo;s test it:</p>
-
-<div class="highlight"><pre><code class="language-bash" data-lang="bash">DockerSprayHttpServer<span class="nv">$ </span>curl <span class="k">$(</span>boot2docker ip<span class="k">)</span>:10001/welcome</code></pre></div>
-
-
-<p>Great!</p>
-
-<p>You can run as many containers as you want! They are completely isolated. For Scala developers, by they way, I&rsquo;ve found a<a href="https://github.com/marcuslonnberg/sbt-docker"> nice contribution</a>, you can dockerize your artifacts right from SBT.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -677,6 +550,10 @@ EXPOSE 8080
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2015/07/28/my-trip-to-nfjs-uberconf-2015/">My Trip to NFJS UberConf 2015</a>
+      </li>
     
       <li class="post">
         <a href="/2015/06/08/researching-work-execution-with-dispatchers-in-java-8-from-naive-to-akka-like-design/">Concurrent Work Scheduling in Java 8: ForkJoinPool, Dispatching and Caching - All in 1 Bottle</a>
@@ -712,10 +589,6 @@ EXPOSE 8080
     
       <li class="post">
         <a href="/2014/03/18/distributed-transactions-and-scalability-issues-in-large-scale-distributed-systems/">Distributed Transactions and Scalability Issues in Large-scale Distributed Systems</a>
-      </li>
-    
-      <li class="post">
-        <a href="/2014/02/17/service-discovery-in-distributed-systems/">Service Discovery in Distributed Systems</a>
       </li>
     
   </ul>

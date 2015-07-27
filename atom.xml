@@ -4,7 +4,7 @@
   <title><![CDATA[Ivan Voroshilin's Blog.]]></title>
   <link href="http://vibneiro.github.io/atom.xml" rel="self"/>
   <link href="http://vibneiro.github.io/"/>
-  <updated>2015-06-28T23:32:49+03:00</updated>
+  <updated>2015-07-28T00:26:19+03:00</updated>
   <id>http://vibneiro.github.io/</id>
   <author>
     <name><![CDATA[Ivan Voroshilin]]></name>
@@ -12,6 +12,45 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[My Trip to NFJS UberConf 2015]]></title>
+    <link href="http://vibneiro.github.io/2015/07/28/my-trip-to-nfjs-uberconf-2015/"/>
+    <updated>2015-07-28T00:06:05+03:00</updated>
+    <id>http://vibneiro.github.io/2015/07/28/my-trip-to-nfjs-uberconf-2015</id>
+    <content type="html"><![CDATA[<p><a href="https://ivoroshilin.files.wordpress.com/2015/07/img_7123.jpg"></a></p>
+
+<p>[UBER]</p>
+
+<p>I was lucky to have attended the annual conference «UberConf» that held in beatiful Denver, Colorado from July 21-July 24 2015.</p>
+
+<p>[PIC]</p>
+
+<p>There were 140 session in total, 10 concurrent tracks in parallel! I wish I could attend some more due to these. Speakers were from different companies including ThoughtWorks, Azul,VMWare, RedHat, Oracle, Netflix, just to name a few.. I felt, there were about 300 attendies.</p>
+
+<p>[PIC]</p>
+
+<p>Despite a great variety of topics on the session list, my primary interests were devoted to microservices, JVM and perfomance related topics, also scalability, distributed systems and architcture.</p>
+
+<p>These guys impressed me with their valuable experience they shared with us, which is difficult to find on the internet or elsewhere:</p>
+
+<p>Douglas Hawkins / Azul Systems  - from JVM under the hood to performance optimizations.</p>
+
+<p>Emad Benjamin / VMWare – on virtualization and tunning large scale java applications.</p>
+
+<p>Neil Ford  / ThoughtWorks – excellent broad speech on Microservices design and architercture considerations.</p>
+
+<p>Arun Gupta / RedHat – with his incredible speech on a switch from Monolith to Microservices with step-by-step practical demo.</p>
+
+<p>Matt Stine / Pivotal – he conducted a big list of important sessions such as Go language, Microservices in practice, Advanced topics on Docker, Advanced Data architecure patterns.</p>
+
+<p>Mark Richards – on his archticture experience, showing different trade-offs between SOA and microservice architecture and what we gain in the mix.</p>
+
+<p>I’m sure there are much more sessions passed by me and other excellent speakers are very strong too and interesting. It is amazing to meet different smart people and gain such knowldedge just within 3 days!</p>
+
+<p>I hope to catch up on other topics, I wasn’t able to attend.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Concurrent Work Scheduling in Java 8: ForkJoinPool, Dispatching and Caching - All in 1 Bottle]]></title>

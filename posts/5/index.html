@@ -9,7 +9,7 @@
   <meta name="author" content="Ivan Voroshilin">
 
   
-  <meta name="description" content="  Introduction In the previous post we briefly described what might stand beyond asymptotic analysis of algorithms and data structures when it comes &hellip;">
+  <meta name="description" content="As many of you know, it&rsquo;s been 10 hours since qualification round finished at Google code jam contest: http://code.google.com/codejam/ Appx. &hellip;">
 
   
   <meta name="keywords" content="distributed, algorithm, Ivan, Voroshilin, code, google, jam, software, architecture, geek, blog, java, scala, groovy, scalability" />
@@ -81,6 +81,379 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/2013/04/14/google-code-jam-2013-qualification-round-i-have-posted-my-solutions/">Google Code Jam 2013 - Qualification Round Finished</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2013-04-14T13:09:16+04:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>14</span><span class='date-suffix'>th</span>, <span class='date-year'>2013</span></span> <span class='time'>1:09 pm</span></time>
+        
+           | <a href="/2013/04/14/google-code-jam-2013-qualification-round-i-have-posted-my-solutions/#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io/2013/04/14/google-code-jam-2013-qualification-round-i-have-posted-my-solutions/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>As many of you know, it&rsquo;s been 10 hours since qualification round finished at Google code jam contest: <a href="http://code.google.com/codejam/">http://code.google.com/codejam/</a></p>
+
+<p>Appx. <strong>21000</strong> participants took part around the world with 25h time available for the round.</p>
+
+<p><a href="http://ivoroshilin.files.wordpress.com/2013/04/codejam_pic.jpg"><img src="http://ivoroshilin.files.wordpress.com/2013/04/codejam_pic.jpg" alt="codejam_pic" /></a></p>
+
+<p>Here are my solutions to 3 problems given out of 4:</p>
+
+<p><a href="https://github.com/vibneiro/googleJam2013">https://github.com/vibneiro/googleJam2013</a></p>
+
+<p>So, here&rsquo;s the analysis:</p>
+
+<h2>1. Problem A: Tic-Tac-Toe-Tomek</h2>
+
+<p>Works on small and large sets. Just a simple algorithm to implement. The point is to comply with all the conditions. The goal is to find a winner. If there&rsquo;s no winner, it should be draw, otherwise if we have empty cells the game is not completed.</p>
+
+<p>[sourcecode language=&ldquo;java&rdquo;]
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.util.Scanner;</p>
+
+<p>/<em>*
+  @Author: Ivan Voroshilin
+  @Date: April 13 2013
+  Problem A
+  Small and large inputs
+ </em>/
+public class TicTacToeTomek {</p>
+
+<pre><code>private final static char XPLAYER = 'X';
+private final static char OPLAYER = 'O';
+private final static char T = 'T';
+private final static char EMPTY = '.';
+
+private final static String X_WON = "X won";
+private final static String O_WON = "O won";
+private final static String DRAW = "Draw";
+private final static String NOT_COMPLETED = "Game has not completed";
+
+private void solve(Scanner sc, PrintWriter pw) {
+
+    char[][] array = { sc.next().toCharArray(), sc.next().toCharArray(), sc.next().toCharArray(), sc.next().toCharArray() };
+
+    int xXCount = 0;
+    int yXCount = 0;
+    int xOCount = 0;
+    int yOCount = 0;
+
+    int dForwardXCount = 0;
+    int dBackwardXCount = 0;
+    int dForwardOCount = 0;
+    int dBackwardOCount = 0;
+    boolean hasEmptyCells = false;
+    boolean hasWinner = false;
+
+    for(int x = 0; x &lt; array.length; x++) { // 4
+
+        for(int y = 0; y &lt; array.length; y++) { // 4
+
+            //x-X
+            if(array[x][y] == XPLAYER || array[x][y] == T) {
+                xXCount++;
+            }
+
+            //y-X
+            if(array[y][x] == XPLAYER || array[x][y] == T) {
+                yXCount++;
+            }
+
+            //x-O
+            if(array[x][y] == OPLAYER || array[x][y] == T) {
+                xOCount++;
+            }
+
+            //y-O
+            if(array[y][x] == OPLAYER || array[x][y] == T) {
+                yOCount++;
+            }
+
+            if(array[x][y] == EMPTY) {
+                hasEmptyCells = true;
+            }
+        }
+
+        if(!hasWinner &amp;&amp; (xXCount == array.length || yXCount == array.length)) {
+            System.out.println(X_WON);
+            pw.println(X_WON);
+            hasWinner = true;
+        }
+
+        if(!hasWinner &amp;&amp; (xOCount == array.length || yOCount == array.length)) {
+            System.out.println(O_WON);
+            pw.println(O_WON);
+            hasWinner = true;
+        }
+
+        xXCount = yXCount = xOCount = yOCount = 0;
+
+        if(array[x][x] == XPLAYER || array[x][x] == T) {
+            dForwardXCount++;
+        }
+
+        if(array[(array.length - 1 - x)][x] == XPLAYER || array[(array.length - 1 - x)][x] == T) {
+            dBackwardXCount++;
+        }
+
+        if(array[x][x] == OPLAYER || array[x][x] == T) {
+            dForwardOCount++;
+        }
+
+        if(array[(array.length - 1 - x)][x] == OPLAYER || array[(array.length - 1 - x)][x] == T) {
+            dBackwardOCount++;
+        }
+
+    }
+
+    if(!hasWinner &amp;&amp; (dForwardXCount == array.length || dBackwardXCount == array.length)) {
+        System.out.println(X_WON);
+        pw.println(X_WON);
+        hasWinner = true;
+    } else
+    if(!hasWinner &amp;&amp; (dForwardOCount == array.length || dBackwardOCount == array.length)) {
+        System.out.println(O_WON);
+        pw.println(O_WON);
+        hasWinner = true;
+    }
+
+    if(!hasWinner) {
+        if(hasEmptyCells) {
+            System.out.println(NOT_COMPLETED);
+            pw.println(NOT_COMPLETED);
+        } else {
+            System.out.println(DRAW);
+            pw.println(DRAW);
+        }
+    }
+
+}
+
+public static void main(String[] args) throws Exception {
+
+    Scanner sc = new Scanner(new FileReader("A-large.in.txt"));
+    PrintWriter pw = new PrintWriter(new FileWriter("output.txt"));
+
+    int caseCnt = sc.nextInt();
+    sc.nextLine();
+    for (int caseNum = 0; caseNum &lt; caseCnt; caseNum++) {
+        System.out.println("Processing test case " + (caseNum + 1));
+        pw.print("Case #" + (caseNum + 1) + ": ");
+        new TicTacToeTomek().solve(sc, pw);
+
+    }
+
+    pw.flush();
+    pw.close();
+    sc.close();
+}
+</code></pre>
+
+<p>}</p>
+
+<p>[/sourcecode]</p>
+
+<h2>3. Problem C: Fair and Square</h2>
+
+<h3>Small Data Sets</h3>
+
+<p>On small data sets it is a piece of cake - a classical algorithmic task which took me about 10 mins to write the code:</p>
+
+<p>[sourcecode language=&ldquo;java&rdquo;]
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.util.Scanner;</p>
+
+<p>/<em>*
+ @Author: Ivan Voroshilin
+ @Date: April 13 2013
+ Problem C
+ Small inputs
+ </em>/
+public class FairNSquare {</p>
+
+<pre><code>private boolean isPalindrome(long num) {
+    long reversed = 0;
+    long n = num;
+
+    while (n &gt; 0) {
+        reversed = reversed * 10 + n % 10;
+        n /= 10;
+    }
+
+    return num == reversed;
+}
+
+private void solve(Scanner sc, PrintWriter pw) {
+
+    sc.nextLong();
+
+    long a = sc.nextLong();
+    long b = sc.nextLong();
+
+    System.out.println(a);
+    System.out.println(b);
+
+    long number = a;
+    long count = 0;
+
+    while(number &lt;= b) {
+        if(isPalindrome(number)) {
+            double d = Math.sqrt(number);
+            if((d % 1) == 0 &amp;&amp; isPalindrome((long)d)) {
+                count++;
+            }
+        }
+        number++;
+    }
+
+    pw.println(count);
+}
+
+public static void main(String[] args) throws Exception {
+
+    Scanner sc = new Scanner(new FileReader("C-small-attempt0.in.txt"));
+    PrintWriter pw = new PrintWriter(new FileWriter("output.txt"));
+
+    int caseCnt = sc.nextInt();
+    sc.nextLine();
+    for (int caseNum = 0; caseNum &lt; caseCnt; caseNum++) {
+        System.out.println("Processing test case " + (caseNum + 1));
+        pw.print("Case #" + (caseNum + 1) + ": ");
+        new FairNSquare().solve(sc, pw);
+    }
+
+    pw.flush();
+    pw.close();
+    sc.close();
+}
+</code></pre>
+
+<p>}
+[/sourcecode]</p>
+
+<h3>Large Data Sets</h3>
+
+<p>I tried to come up with a solution on large data sets, wrote the code which works using standard Bisection method based on a binary search but struggled to optimize time complexity of square root on BigInteger and palindrome checking on large ranges, I vaguely remember from Euler&rsquo;s project there were some mathematical proofs regarding number 11 and palindromic numbers. There might be some very important facts which would allow to optimize for better performance however I decided not to waste time on it and moved to another problem.</p>
+
+<p>Ok, here&rsquo;s my solution which as been said didn&rsquo;t pass time requirement.</p>
+
+<p>[sourcecode language=&ldquo;java&rdquo;]
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.math.BigInteger;
+import java.util.Scanner;</p>
+
+<p>/<em>*
+ @Author: Ivan Voroshilin
+ @Date: April 13 2013
+ Problem C
+ Large inputs
+ Comment: Poor time complexity
+ </em>/
+public class FairNSquareLarge {</p>
+
+<pre><code>private static boolean isPalindrome(BigInteger num) {
+    BigInteger reversed = BigInteger.ZERO;
+    BigInteger n = num;
+
+    while (n.compareTo(BigInteger.ZERO) &gt; 0) {
+        reversed = reversed.multiply(BigInteger.valueOf(10)).add(n.mod(BigInteger.valueOf(10)));
+        n = n.divide(BigInteger.valueOf(10));
+    }
+
+    return num.compareTo(reversed) == 0;
+}
+
+private static BigInteger sqrt(BigInteger n) {
+    BigInteger a = BigInteger.ONE;
+    BigInteger b = new BigInteger(n.shiftRight(5).add(new BigInteger("8")).toString());
+    while(b.compareTo(a) &gt;= 0) {
+        BigInteger mid = new BigInteger(a.add(b).shiftRight(1).toString());
+        if(mid.multiply(mid).compareTo(n) &gt; 0) b = mid.subtract(BigInteger.ONE);
+        else a = mid.add(BigInteger.ONE);
+    }
+    return a.subtract(BigInteger.ONE);
+}
+
+private void solve(Scanner sc, PrintWriter pw) {
+
+    BigInteger a = sc.nextBigInteger();
+    BigInteger b = sc.nextBigInteger();
+
+    BigInteger number = a;
+    long count = 0;
+
+    while(number.compareTo(b) &lt;= 0) {
+        if(isPalindrome(number)) {
+
+            BigInteger d = sqrt(number);
+
+            if(d.multiply(d).compareTo(number) == 0 &amp;&amp; isPalindrome(d)) {
+                count++;
+            }
+        }
+        number = number.add(BigInteger.ONE);
+        System.out.println(number.toString());
+    }
+
+    pw.println(count);
+}
+
+public static void main(String[] args) throws Exception {
+
+    Scanner sc = new Scanner(new FileReader("C-large-1.in.txt"));
+    PrintWriter pw = new PrintWriter(new FileWriter("output.txt"));
+
+    int caseCnt = sc.nextInt();
+    sc.nextLine();
+    for (int caseNum = 0; caseNum &lt; caseCnt; caseNum++) {
+        System.out.println("Processing test case " + (caseNum + 1));
+        pw.print("Case #" + (caseNum + 1) + ": ");
+        new FairNSquareLarge().solve(sc, pw);
+    }
+
+    pw.flush();
+    pw.close();
+    sc.close();
+}
+</code></pre>
+
+<p>}
+[/sourcecode]</p>
+
+<h2>4. Problem D: Treasure</h2>
+
+<h3>Small Data Sets</h3>
+
+<p>I first did a straightforward BFS with checking for deadlocks and then realized from conditions that there might be several paths to open all chests and the goal is to select minimal path from all sorted lexicographically. Sure, we could make a simple systematic backtracking using all permutations of paths which has a terrible complexity O(n!) and doesn&rsquo;t meet time requirements even on small sets, e.g. N=20 chests where we have 20! distinct permutations (ouch!).</p>
+
+<p>I had time pressure (1h until the end of round) and nixed that idea to proceed but this problem is really challenging. Sorry!</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -398,6 +771,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/2015/07/28/my-trip-to-nfjs-uberconf-2015/">My Trip to NFJS UberConf 2015</a>
+      </li>
+    
+      <li class="post">
         <a href="/2015/06/08/researching-work-execution-with-dispatchers-in-java-8-from-naive-to-akka-like-design/">Concurrent Work Scheduling in Java 8: ForkJoinPool, Dispatching and Caching - All in 1 Bottle</a>
       </li>
     
@@ -431,10 +808,6 @@
     
       <li class="post">
         <a href="/2014/03/18/distributed-transactions-and-scalability-issues-in-large-scale-distributed-systems/">Distributed Transactions and Scalability Issues in Large-scale Distributed Systems</a>
-      </li>
-    
-      <li class="post">
-        <a href="/2014/02/17/service-discovery-in-distributed-systems/">Service Discovery in Distributed Systems</a>
       </li>
     
   </ul>

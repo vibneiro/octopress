@@ -9,7 +9,7 @@
   <meta name="author" content="Ivan Voroshilin">
 
   
-  <meta name="description" content="This was the problem I wasn&rsquo;t able to optimise with given time constraint in April.  Later I killed half a day to complete it thinking of &hellip;">
+  <meta name="description" content="MinHash is a technique from Locality Sensitive Hashing allowing to find similarities among 2 sets. This is a  buzzword frequently met in Data Mining &hellip;">
 
   
   <meta name="keywords" content="distributed, algorithm, Ivan, Voroshilin, code, google, jam, software, architecture, geek, blog, java, scala, groovy, scalability" />
@@ -81,6 +81,216 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/2013/10/07/minhash-algorithm-or-how-to-quickly-find-similarities-among-2-documents/">MinHash Algorithm or How to Quickly Find Similarities Among 2 Documents</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2013-10-07T02:57:48+04:00'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>7</span><span class='date-suffix'>th</span>, <span class='date-year'>2013</span></span> <span class='time'>2:57 am</span></time>
+        
+           | <a href="/2013/10/07/minhash-algorithm-or-how-to-quickly-find-similarities-among-2-documents/#disqus_thread"
+             data-disqus-identifier="http://vibneiro.github.io/2013/10/07/minhash-algorithm-or-how-to-quickly-find-similarities-among-2-documents/">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>MinHash is a technique from <a href="http://en.wikipedia.org/wiki/Locality_sensitive_hashing">Locality Sensitive Hashing</a> allowing to find similarities among 2 sets. This is a  buzzword frequently met in Data Mining  and Data Science fields of CS. What surprising is that this method was invented in 1997 and used in <a href="http://en.wikipedia.org/wiki/AltaVista">AltaVista</a> web-search engine back in the 90s to find similarities among web-documents and it also can be used to:</p>
+
+<ul>
+<li><p>Find duplicates</p></li>
+<li><p>Near duplicate image detection</p></li>
+<li><p>Near neighbor search</p></li>
+</ul>
+
+
+<p>Basically the algorithm can be applied to anything that can be presented by numbers.</p>
+
+<p>Let&rsquo;s start with a bit of math from theory of probability and statistics.</p>
+
+<p>Define a formula of two sets <em>A</em> and <em>B:</em></p>
+
+<p><img src="http://upload.wikimedia.org/math/1/8/6/186c7f4e83da32e889d606140fae25a0.png" alt=" J(A,B) = |A \cap B|\over|A \cup B|." /></p>
+
+<p>This is so-called  a <a href="http://en.wikipedia.org/wiki/Jaccard_index">Jaccard coefficient</a>.</p>
+
+<p>Where: J ∈ [0..1]</p>
+
+<p>j = 0 - if <em><em><em>A</em> ∩ </em>B = 0, that is 2 sets are disjoint meaning there are no similarities</em></p>
+
+<p><em>j = 1 - if __A</em> ∩ <em>B</em> = A = <em>B, that is 2 sets are identical.</em>
+__</p>
+
+<p>A, B are more similar when their <strong>Jaccard coefficient</strong> is closer to 1.</p>
+
+<p>This simple formula is cumbersome if the sets are quite large, e.g. 2 web-documents of more than 1MB in size. Ouch, that&rsquo;s too much. 1MB of text-data is <strong>1,048,576 characters </strong>provided that 1 ASCII char = 8 bits (of course for unicode charset it is greater).</p>
+
+<p>Now that we understand a bit of theory let&rsquo;s try to apply hashing to Jaccard coefficient. Everywhere I hear hashing it always leads to randomized algorithms.</p>
+
+<p>Ok, let&rsquo;s move on. The main idea is that similar objects hash to the same bucket. This follows from the fact that <strong>probability of collision higher for similar objects</strong>.</p>
+
+<p>Here we give an example for 2 sets A and B but the algorithm can be applied to any number of sets.</p>
+
+<ol>
+<li><p>Essentially, we need to construct a set of independent hash functions &lt;h1,h2,h3,&hellip;hk> <strong>randomly</strong>.  <em>k</em> = O(1/ε2), ε > 0 such that the expected error of the estimate is at most ε. For example, 400 hashes would be required to estimate <em>J</em>(<em>A</em>,<em>B</em>) with an expected error less than or equal to .05. So, k can be varied to increase/decrease the likelihood of false negatives.</p></li>
+<li><p>Next we initialize for each set A and B the <img src="http://www.toao.com/equations/49e83e4884bd478aecc7fb7e0a7e9477.png" alt="" /> value to infinity.</p></li>
+<li><p>For each element s in both sets A and B we compute the element&rsquo;s hash:</p></li>
+</ol>
+
+
+<p><img src="http://www.toao.com/equations/8664800335406d60ca14c723421d994c.png" alt="" /> such as: If <img src="http://www.toao.com/equations/d3d634b0636790f7fd707ad50b85b0a5.png" alt="" /> then <img src="http://www.toao.com/equations/f08914f853c4fcd405dafd052d100c5a.png" alt="" />.</p>
+
+<p>Eventually we should have <img src="http://www.toao.com/equations/49e83e4884bd478aecc7fb7e0a7e9477.png" alt="" /> for both sets A and B.</p>
+
+<ol>
+<li><p>If 2 sets A and B are similar then the probability P(  <img src="http://www.toao.com/equations/49e83e4884bd478aecc7fb7e0a7e9477.png" alt="" />A =  <img src="http://www.toao.com/equations/49e83e4884bd478aecc7fb7e0a7e9477.png" alt="" />B) = |<em>A</em> ∩ <em>B</em>| / |A U B|- is high and <strong>it</strong> <strong>is the actual Jaccard coefficient!</strong></p></li>
+<li><p>We calculated  <img src="http://www.toao.com/equations/49e83e4884bd478aecc7fb7e0a7e9477.png" alt="" /> statistics to estimate how similar are these 2 sets. General formula is: Similarity = identical <img src="http://www.toao.com/equations/49e83e4884bd478aecc7fb7e0a7e9477.png" alt="" />s / k</p></li>
+</ol>
+
+
+<p>In real world this requires considering more thoroughly different parameters, hash-functions etc. However, to demonstrate the algorithm I wrote a simple java code:</p>
+
+<p>[sourcecode language=&ldquo;java&rdquo;]
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;</p>
+
+<p>public class LSHMinHash<T> {</p>
+
+<pre><code>private final int hashes[];
+private final int numOfHashes;
+private final int numOfSets;
+private final Set&lt;T&gt; setA;
+private final Set&lt;T&gt; setB;
+private final Map&lt;T, boolean[]&gt; matrix;
+private final int[][] minHashes;
+
+public LSHMinHash(double e, Set&lt;T&gt; setA, Set&lt;T&gt; setB){
+    this.numOfHashes = (int)(1 / (e * e));
+    this.numOfSets = 2;
+    this.setA = setA;
+    this.setB = setB;
+    matrix = buildSetMatrix(setA, setB);
+    minHashes = initMinHashes(numOfSets, numOfHashes);
+    hashes = computeHashes(numOfHashes);
+}
+
+private Map&lt;T,boolean[]&gt; buildSetMatrix(Set&lt;T&gt; setA, Set&lt;T&gt; setB) {
+
+    Map&lt;T,boolean[]&gt; matrix = new HashMap&lt;T,boolean[]&gt;();
+
+    for(T element : setA){
+        matrix.put(element, new boolean[] { true, false } );
+    }
+
+    for(T element : setB){
+        if(matrix.containsKey(element)){
+            matrix.put(element, new boolean[] { true, true } );
+        }else if(!matrix.containsKey(element)){
+            matrix.put(element, new boolean[] { false, true } );
+        }
+    }
+
+    return matrix;
+}
+
+private int[][] initMinHashes(int numOfSets, int numOfHashes) {
+    int[][] minHashes = new int[numOfSets][numOfHashes];
+
+    for (int i = 0; i &lt; numOfSets; i++) {
+        for (int j = 0; j &lt; numOfHashes; j++) {
+            minHashes[i][j] = Integer.MAX_VALUE;
+        }
+    }
+    return minHashes;
+}
+
+private int[] computeHashes(int numOfHashes) {
+    int[] hashes = new int[numOfHashes];
+    Random r = new Random(31);
+
+    for (int i = 0; i &lt; numOfHashes; i++){
+        int a = (int)r.nextInt();
+        int b = (int)r.nextInt();
+        int c = (int)r.nextInt();
+        hashes[i] = (int)((a * (a * b * c &gt;&gt; 4) + a * a * b * c + c) &amp; 0xFFFFFFFF);
+    }
+    return hashes;
+}
+
+private void computeMinHashForSet(Set&lt;T&gt; set, int setIndex){
+    int hashIndex = 0;
+
+    for(T element : matrix.keySet()) {
+        for (int i = 0; i &lt; numOfHashes; i++) {
+            if(set.contains(element)) {
+                int hashValue = hashes[hashIndex];
+                if (hashValue &lt; minHashes[setIndex][hashIndex]) {
+                    minHashes[setIndex][hashIndex] = hashValue;
+                }
+            }
+        }
+        hashIndex++;
+    }
+}
+
+private double computeMinHash(int[][] minHashes, int numOfHashes) {
+    int identicalMinHashes = 0;
+    for (int i = 0; i &lt; numOfHashes; i++){
+        if (minHashes[0][i] == minHashes[1][i]) {
+            identicalMinHashes++;
+        }
+    }
+    return (1.0 * identicalMinHashes) / numOfHashes;
+}
+
+public double findSimilarities() {
+    computeMinHashForSet(setA, 0);
+    computeMinHashForSet(setB, 1);
+    return computeMinHash(minHashes, numOfHashes);
+}
+
+public static void main(String[] args){
+    Set&lt;String&gt; setA = new HashSet&lt;String&gt;();
+    setA.add("THIS");
+    setA.add("IS ");
+    setA.add("THE");
+    setA.add("CASE");
+
+    Set&lt;String&gt; setB = new HashSet&lt;String&gt;();
+    setB.add("THAT");
+    setB.add("IS ");
+    setB.add("THE");
+    setB.add("CASE");
+
+    double errorFactor = 0.001;
+
+    LSHMinHash&lt;String&gt; minHash = new LSHMinHash&lt;String&gt;(errorFactor, setA, setB);
+    System.out.println(minHash.findSimilarities());
+}
+</code></pre>
+
+<p>}
+[/sourcecode]</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -393,379 +603,6 @@ private static class MD5Hash {
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/2013/04/14/google-code-jam-2013-qualification-round-i-have-posted-my-solutions/">Google Code Jam 2013 - Qualification Round Finished</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2013-04-14T13:09:16+04:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>14</span><span class='date-suffix'>th</span>, <span class='date-year'>2013</span></span> <span class='time'>1:09 pm</span></time>
-        
-           | <a href="/2013/04/14/google-code-jam-2013-qualification-round-i-have-posted-my-solutions/#disqus_thread"
-             data-disqus-identifier="http://vibneiro.github.io/2013/04/14/google-code-jam-2013-qualification-round-i-have-posted-my-solutions/">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>As many of you know, it&rsquo;s been 10 hours since qualification round finished at Google code jam contest: <a href="http://code.google.com/codejam/">http://code.google.com/codejam/</a></p>
-
-<p>Appx. <strong>21000</strong> participants took part around the world with 25h time available for the round.</p>
-
-<p><a href="http://ivoroshilin.files.wordpress.com/2013/04/codejam_pic.jpg"><img src="http://ivoroshilin.files.wordpress.com/2013/04/codejam_pic.jpg" alt="codejam_pic" /></a></p>
-
-<p>Here are my solutions to 3 problems given out of 4:</p>
-
-<p><a href="https://github.com/vibneiro/googleJam2013">https://github.com/vibneiro/googleJam2013</a></p>
-
-<p>So, here&rsquo;s the analysis:</p>
-
-<h2>1. Problem A: Tic-Tac-Toe-Tomek</h2>
-
-<p>Works on small and large sets. Just a simple algorithm to implement. The point is to comply with all the conditions. The goal is to find a winner. If there&rsquo;s no winner, it should be draw, otherwise if we have empty cells the game is not completed.</p>
-
-<p>[sourcecode language=&ldquo;java&rdquo;]
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.PrintWriter;
-import java.util.Scanner;</p>
-
-<p>/<em>*
-  @Author: Ivan Voroshilin
-  @Date: April 13 2013
-  Problem A
-  Small and large inputs
- </em>/
-public class TicTacToeTomek {</p>
-
-<pre><code>private final static char XPLAYER = 'X';
-private final static char OPLAYER = 'O';
-private final static char T = 'T';
-private final static char EMPTY = '.';
-
-private final static String X_WON = "X won";
-private final static String O_WON = "O won";
-private final static String DRAW = "Draw";
-private final static String NOT_COMPLETED = "Game has not completed";
-
-private void solve(Scanner sc, PrintWriter pw) {
-
-    char[][] array = { sc.next().toCharArray(), sc.next().toCharArray(), sc.next().toCharArray(), sc.next().toCharArray() };
-
-    int xXCount = 0;
-    int yXCount = 0;
-    int xOCount = 0;
-    int yOCount = 0;
-
-    int dForwardXCount = 0;
-    int dBackwardXCount = 0;
-    int dForwardOCount = 0;
-    int dBackwardOCount = 0;
-    boolean hasEmptyCells = false;
-    boolean hasWinner = false;
-
-    for(int x = 0; x &lt; array.length; x++) { // 4
-
-        for(int y = 0; y &lt; array.length; y++) { // 4
-
-            //x-X
-            if(array[x][y] == XPLAYER || array[x][y] == T) {
-                xXCount++;
-            }
-
-            //y-X
-            if(array[y][x] == XPLAYER || array[x][y] == T) {
-                yXCount++;
-            }
-
-            //x-O
-            if(array[x][y] == OPLAYER || array[x][y] == T) {
-                xOCount++;
-            }
-
-            //y-O
-            if(array[y][x] == OPLAYER || array[x][y] == T) {
-                yOCount++;
-            }
-
-            if(array[x][y] == EMPTY) {
-                hasEmptyCells = true;
-            }
-        }
-
-        if(!hasWinner &amp;&amp; (xXCount == array.length || yXCount == array.length)) {
-            System.out.println(X_WON);
-            pw.println(X_WON);
-            hasWinner = true;
-        }
-
-        if(!hasWinner &amp;&amp; (xOCount == array.length || yOCount == array.length)) {
-            System.out.println(O_WON);
-            pw.println(O_WON);
-            hasWinner = true;
-        }
-
-        xXCount = yXCount = xOCount = yOCount = 0;
-
-        if(array[x][x] == XPLAYER || array[x][x] == T) {
-            dForwardXCount++;
-        }
-
-        if(array[(array.length - 1 - x)][x] == XPLAYER || array[(array.length - 1 - x)][x] == T) {
-            dBackwardXCount++;
-        }
-
-        if(array[x][x] == OPLAYER || array[x][x] == T) {
-            dForwardOCount++;
-        }
-
-        if(array[(array.length - 1 - x)][x] == OPLAYER || array[(array.length - 1 - x)][x] == T) {
-            dBackwardOCount++;
-        }
-
-    }
-
-    if(!hasWinner &amp;&amp; (dForwardXCount == array.length || dBackwardXCount == array.length)) {
-        System.out.println(X_WON);
-        pw.println(X_WON);
-        hasWinner = true;
-    } else
-    if(!hasWinner &amp;&amp; (dForwardOCount == array.length || dBackwardOCount == array.length)) {
-        System.out.println(O_WON);
-        pw.println(O_WON);
-        hasWinner = true;
-    }
-
-    if(!hasWinner) {
-        if(hasEmptyCells) {
-            System.out.println(NOT_COMPLETED);
-            pw.println(NOT_COMPLETED);
-        } else {
-            System.out.println(DRAW);
-            pw.println(DRAW);
-        }
-    }
-
-}
-
-public static void main(String[] args) throws Exception {
-
-    Scanner sc = new Scanner(new FileReader("A-large.in.txt"));
-    PrintWriter pw = new PrintWriter(new FileWriter("output.txt"));
-
-    int caseCnt = sc.nextInt();
-    sc.nextLine();
-    for (int caseNum = 0; caseNum &lt; caseCnt; caseNum++) {
-        System.out.println("Processing test case " + (caseNum + 1));
-        pw.print("Case #" + (caseNum + 1) + ": ");
-        new TicTacToeTomek().solve(sc, pw);
-
-    }
-
-    pw.flush();
-    pw.close();
-    sc.close();
-}
-</code></pre>
-
-<p>}</p>
-
-<p>[/sourcecode]</p>
-
-<h2>3. Problem C: Fair and Square</h2>
-
-<h3>Small Data Sets</h3>
-
-<p>On small data sets it is a piece of cake - a classical algorithmic task which took me about 10 mins to write the code:</p>
-
-<p>[sourcecode language=&ldquo;java&rdquo;]
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.PrintWriter;
-import java.util.Scanner;</p>
-
-<p>/<em>*
- @Author: Ivan Voroshilin
- @Date: April 13 2013
- Problem C
- Small inputs
- </em>/
-public class FairNSquare {</p>
-
-<pre><code>private boolean isPalindrome(long num) {
-    long reversed = 0;
-    long n = num;
-
-    while (n &gt; 0) {
-        reversed = reversed * 10 + n % 10;
-        n /= 10;
-    }
-
-    return num == reversed;
-}
-
-private void solve(Scanner sc, PrintWriter pw) {
-
-    sc.nextLong();
-
-    long a = sc.nextLong();
-    long b = sc.nextLong();
-
-    System.out.println(a);
-    System.out.println(b);
-
-    long number = a;
-    long count = 0;
-
-    while(number &lt;= b) {
-        if(isPalindrome(number)) {
-            double d = Math.sqrt(number);
-            if((d % 1) == 0 &amp;&amp; isPalindrome((long)d)) {
-                count++;
-            }
-        }
-        number++;
-    }
-
-    pw.println(count);
-}
-
-public static void main(String[] args) throws Exception {
-
-    Scanner sc = new Scanner(new FileReader("C-small-attempt0.in.txt"));
-    PrintWriter pw = new PrintWriter(new FileWriter("output.txt"));
-
-    int caseCnt = sc.nextInt();
-    sc.nextLine();
-    for (int caseNum = 0; caseNum &lt; caseCnt; caseNum++) {
-        System.out.println("Processing test case " + (caseNum + 1));
-        pw.print("Case #" + (caseNum + 1) + ": ");
-        new FairNSquare().solve(sc, pw);
-    }
-
-    pw.flush();
-    pw.close();
-    sc.close();
-}
-</code></pre>
-
-<p>}
-[/sourcecode]</p>
-
-<h3>Large Data Sets</h3>
-
-<p>I tried to come up with a solution on large data sets, wrote the code which works using standard Bisection method based on a binary search but struggled to optimize time complexity of square root on BigInteger and palindrome checking on large ranges, I vaguely remember from Euler&rsquo;s project there were some mathematical proofs regarding number 11 and palindromic numbers. There might be some very important facts which would allow to optimize for better performance however I decided not to waste time on it and moved to another problem.</p>
-
-<p>Ok, here&rsquo;s my solution which as been said didn&rsquo;t pass time requirement.</p>
-
-<p>[sourcecode language=&ldquo;java&rdquo;]
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.PrintWriter;
-import java.math.BigInteger;
-import java.util.Scanner;</p>
-
-<p>/<em>*
- @Author: Ivan Voroshilin
- @Date: April 13 2013
- Problem C
- Large inputs
- Comment: Poor time complexity
- </em>/
-public class FairNSquareLarge {</p>
-
-<pre><code>private static boolean isPalindrome(BigInteger num) {
-    BigInteger reversed = BigInteger.ZERO;
-    BigInteger n = num;
-
-    while (n.compareTo(BigInteger.ZERO) &gt; 0) {
-        reversed = reversed.multiply(BigInteger.valueOf(10)).add(n.mod(BigInteger.valueOf(10)));
-        n = n.divide(BigInteger.valueOf(10));
-    }
-
-    return num.compareTo(reversed) == 0;
-}
-
-private static BigInteger sqrt(BigInteger n) {
-    BigInteger a = BigInteger.ONE;
-    BigInteger b = new BigInteger(n.shiftRight(5).add(new BigInteger("8")).toString());
-    while(b.compareTo(a) &gt;= 0) {
-        BigInteger mid = new BigInteger(a.add(b).shiftRight(1).toString());
-        if(mid.multiply(mid).compareTo(n) &gt; 0) b = mid.subtract(BigInteger.ONE);
-        else a = mid.add(BigInteger.ONE);
-    }
-    return a.subtract(BigInteger.ONE);
-}
-
-private void solve(Scanner sc, PrintWriter pw) {
-
-    BigInteger a = sc.nextBigInteger();
-    BigInteger b = sc.nextBigInteger();
-
-    BigInteger number = a;
-    long count = 0;
-
-    while(number.compareTo(b) &lt;= 0) {
-        if(isPalindrome(number)) {
-
-            BigInteger d = sqrt(number);
-
-            if(d.multiply(d).compareTo(number) == 0 &amp;&amp; isPalindrome(d)) {
-                count++;
-            }
-        }
-        number = number.add(BigInteger.ONE);
-        System.out.println(number.toString());
-    }
-
-    pw.println(count);
-}
-
-public static void main(String[] args) throws Exception {
-
-    Scanner sc = new Scanner(new FileReader("C-large-1.in.txt"));
-    PrintWriter pw = new PrintWriter(new FileWriter("output.txt"));
-
-    int caseCnt = sc.nextInt();
-    sc.nextLine();
-    for (int caseNum = 0; caseNum &lt; caseCnt; caseNum++) {
-        System.out.println("Processing test case " + (caseNum + 1));
-        pw.print("Case #" + (caseNum + 1) + ": ");
-        new FairNSquareLarge().solve(sc, pw);
-    }
-
-    pw.flush();
-    pw.close();
-    sc.close();
-}
-</code></pre>
-
-<p>}
-[/sourcecode]</p>
-
-<h2>4. Problem D: Treasure</h2>
-
-<h3>Small Data Sets</h3>
-
-<p>I first did a straightforward BFS with checking for deadlocks and then realized from conditions that there might be several paths to open all chests and the goal is to select minimal path from all sorted lexicographically. Sure, we could make a simple systematic backtracking using all permutations of paths which has a terrible complexity O(n!) and doesn&rsquo;t meet time requirements even on small sets, e.g. N=20 chests where we have 20! distinct permutations (ouch!).</p>
-
-<p>I had time pressure (1h until the end of round) and nixed that idea to proceed but this problem is really challenging. Sorry!</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/5">&larr; Older</a>
@@ -786,6 +623,10 @@ public static void main(String[] args) throws Exception {
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2015/07/28/my-trip-to-nfjs-uberconf-2015/">My Trip to NFJS UberConf 2015</a>
+      </li>
     
       <li class="post">
         <a href="/2015/06/08/researching-work-execution-with-dispatchers-in-java-8-from-naive-to-akka-like-design/">Concurrent Work Scheduling in Java 8: ForkJoinPool, Dispatching and Caching - All in 1 Bottle</a>
@@ -821,10 +662,6 @@ public static void main(String[] args) throws Exception {
     
       <li class="post">
         <a href="/2014/03/18/distributed-transactions-and-scalability-issues-in-large-scale-distributed-systems/">Distributed Transactions and Scalability Issues in Large-scale Distributed Systems</a>
-      </li>
-    
-      <li class="post">
-        <a href="/2014/02/17/service-discovery-in-distributed-systems/">Service Discovery in Distributed Systems</a>
       </li>
     
   </ul>
